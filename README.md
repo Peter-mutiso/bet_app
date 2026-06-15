@@ -1,3 +1,33 @@
+# Deriv-demo (bet_app)
+
+This is a small Next.js + TypeScript trading-demo app intended for local development and demo deployments.
+
+Quick steps to publish and deploy
+
+1) Create a GitHub repository (if you haven't) and note the HTTPS URL, e.g. https://github.com/<you>/bet_app
+
+2) Add remote and push from your machine (or here if authenticated):
+
+```powershell
+git remote add origin https://github.com/<you>/bet_app.git
+git push -u origin main
+```
+
+3) Deploy to Vercel (recommended via the web UI):
+- Go to https://vercel.com and sign in with GitHub
+- Import the repository and deploy — Vercel auto-detects Next.js
+
+Or use the Vercel CLI:
+
+```powershell
+npm i -g vercel
+vercel # follow prompts
+vercel --prod
+```
+
+Notes
+- Add any required environment variables (e.g., MPESA credentials) in Vercel Project → Settings → Environment Variables.
+- If you want me to push from this environment, provide a GitHub personal access token or set up an authenticated GitHub CLI here. I won't request or store secrets without explicit permission.
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
