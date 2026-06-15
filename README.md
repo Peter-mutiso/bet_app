@@ -28,6 +28,19 @@ vercel --prod
 Notes
 - Add any required environment variables (e.g., MPESA credentials) in Vercel Project → Settings → Environment Variables.
 - If you want me to push from this environment, provide a GitHub personal access token or set up an authenticated GitHub CLI here. I won't request or store secrets without explicit permission.
+
+Deploying to Vercel (your project)
+
+1) Via Vercel dashboard
+- Sign in to https://vercel.com using the same GitHub account used to host the repo.
+- Click "New Project" → Import Git Repository → find `Peter-mutiso/bet_app` and import.
+- Vercel auto-detects Next.js; click Deploy. The site will be assigned a Vercel URL.
+
+2) After first deploy
+- Configure environment variables via Project → Settings → Environment Variables (MPESA keys, any API secrets).
+- Each push to `main` will trigger a new deployment automatically.
+
+Vercel dashboard URL (your projects page): https://vercel.com/peter-mutisos-projects
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
