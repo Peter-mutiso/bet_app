@@ -6,6 +6,7 @@ import { useTradeStore } from "@/store/useTradeStore";
 import { startMarket } from "@/lib/marketEngine";
 import { toast, Toaster } from "react-hot-toast";
 import { Wallet, ChevronDown, BarChart3, Settings } from "lucide-react";
+import LeftToolbar from '@/components/LeftToolbar';
 import { TRADE_TYPES, TRADE_TYPE_LABELS, getAllowedTradeTypesForInstrument } from "@/store/useTradeStore";
 import { ALL_INSTRUMENTS } from "@/lib/instruments";
 
@@ -250,19 +251,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* SIDEBAR */}
-      <aside className="w-[72px] bg-[#15171C] border-r border-[#222] flex flex-col items-center py-5 gap-6">
-        <div className="w-10 h-10 rounded-xl bg-red-500 flex items-center justify-center text-white font-bold text-lg">
-          d
-        </div>
-
-        <BarChart3 className="text-gray-400" />
-
-        <Wallet
-          className="text-gray-400 cursor-pointer"
-          onClick={() => setShowDeposit(true)}
-        />
-      </aside>
+      {/* LEFT TOOLBAR */}
+      <LeftToolbar />
 
       {/* MAIN */}
       <div className="flex-1 flex flex-col">
