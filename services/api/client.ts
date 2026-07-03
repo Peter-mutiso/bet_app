@@ -71,11 +71,22 @@ export class ApiClient {
       });
 
       const text = await response.text();
-      const data = text ? JSON.parse(text) : null;
+
+let data: unknown = null;
+
+const contentType = response.headers.get("content-type");
+
+if (text) {
+  if (contentType?.includes("application/json")) {
+    data = JSON.parse(text);
+  } else {
+    data = text;
+  }
+}
       const apiResponse: ApiResponse<TResponse> = {
         status: response.status,
         success: response.ok,
-        data,
+        data: data as TResponse,
       };
 
       if (response.ok) {

@@ -47,7 +47,9 @@ export interface BetMetrics {
 }
 
 export class BetService {
+
   private active: Bet[] = [];
+
   private readonly metrics: BetMetrics = {
     placed: 0,
     cancelled: 0,
@@ -61,7 +63,33 @@ export class BetService {
     private readonly configuration: BetConfiguration
   ) {}
 
+  private getStoredBets(): Bet[] {
+
+    if (typeof window === "undefined") {
+      return [];
+    }
+
+    return JSON.parse(
+      localStorage.getItem("demoBets") || "[]"
+    );
+
+  }
+
+  private saveStoredBets(bets: Bet[]) {
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    localStorage.setItem(
+      "demoBets",
+      JSON.stringify(bets)
+    );
+
+  }
+
   public validateStake(stake: number) {
+
     if (!this.configuration.validateStake) {
       return;
     }
@@ -74,140 +102,165 @@ export class BetService {
       throw new Error("Stake exceeds the maximum allowed.");
     }
 
-    if (this.wallet.hasWallet() && stake > this.wallet.availableBalance()) {
+    if (
+      this.wallet.hasWallet() &&
+      stake > this.wallet.availableBalance()
+    ) {
       throw new Error("Insufficient wallet balance.");
     }
-  }
 
-  public async place(request: PlaceBetRequest) {
+  }
+    public async place(request: PlaceBetRequest) {
+
     this.validateStake(request.stake);
-    const response = await this.api.post<Bet, PlaceBetRequest>("/bets", request);
-    this.active.push(response.data);
+
+    const bet: Bet = {
+
+      id: crypto.randomUUID(),
+
+      marketId: request.marketId,
+
+      selectionId: request.selectionId,
+
+      stake: request.stake,
+
+      odds: 2.0,
+
+      potentialPayout: request.stake * 2,
+
+      status: BetStatus.OPEN,
+
+      createdAt: new Date().toISOString(),
+
+    };
+
+    const bets = this.getStoredBets();
+
+    bets.unshift(bet);
+
+    this.saveStoredBets(bets);
+
+    this.active = bets.filter(
+      bet =>
+        bet.status === BetStatus.OPEN ||
+        bet.status === BetStatus.PENDING
+    );
+
     this.metrics.placed++;
 
     if (this.wallet.hasWallet()) {
+
       await this.wallet.refresh();
+
     }
 
-    return response.data;
+    return bet;
+
   }
 
   public async loadActive() {
-    const response = await this.api.get<Bet[]>("/bets/active");
-    this.active = [...response.data];
-    this.metrics.loaded += response.data.length;
+
+    const bets = this.getStoredBets();
+
+    this.active = bets.filter(
+      bet =>
+        bet.status === BetStatus.OPEN ||
+        bet.status === BetStatus.PENDING
+    );
+
+    this.metrics.loaded += this.active.length;
+
     return this.active;
+
   }
 
   public async history() {
-    const response = await this.api.get<Bet[]>("/bets/history");
-    return response.data;
-  }
 
-  public async cancel(betId: string) {
-    const response = await this.api.post<Bet, Record<string, never>>(`/bets/${betId}/cancel`, {});
-    this.remove(betId);
+    return this.getStoredBets();
+
+  }
+    public async cancel(betId: string) {
+
+    const bets = this.getStoredBets();
+
+    const index = bets.findIndex(
+      bet => bet.id === betId
+    );
+
+    if (index === -1) {
+      throw new Error("Bet not found.");
+    }
+
+    const updated: Bet = {
+      ...bets[index],
+      status: BetStatus.CANCELLED,
+      settledAt: new Date().toISOString(),
+    };
+
+    bets[index] = updated;
+
+    this.saveStoredBets(bets);
+
+    this.active = bets.filter(
+      bet =>
+        bet.status === BetStatus.OPEN ||
+        bet.status === BetStatus.PENDING
+    );
+
     this.metrics.cancelled++;
 
     if (this.wallet.hasWallet()) {
       await this.wallet.refresh();
     }
 
-    return response.data;
+    return updated;
+
   }
 
-  public async cashOut(betId: string) {
-    const response = await this.api.post<CashOutResponse, Record<string, never>>(
-      `/bets/${betId}/cashout`,
-      {}
+  public async cashOut(
+    betId: string
+  ): Promise<CashOutResponse> {
+
+    const bets = this.getStoredBets();
+
+    const index = bets.findIndex(
+      bet => bet.id === betId
     );
-    this.remove(betId);
+
+    if (index === -1) {
+      throw new Error("Bet not found.");
+    }
+
+    const original = bets[index];
+
+    const amount =
+      original.stake * 0.85;
+
+    const updated: Bet = {
+      ...original,
+      status: BetStatus.CASHED_OUT,
+      settledAt: new Date().toISOString(),
+    };
+
+    bets[index] = updated;
+
+    this.saveStoredBets(bets);
+
+    this.active = bets.filter(
+      bet =>
+        bet.status === BetStatus.OPEN ||
+        bet.status === BetStatus.PENDING
+    );
+
     this.metrics.cashedOut++;
 
     if (this.wallet.hasWallet()) {
       await this.wallet.refresh();
     }
 
-    return response.data;
+    return {
+      bet: updated,
+      amount,
+    };
+
   }
-
-  public activeBets(): readonly Bet[] {
-    return Object.freeze([...this.active]);
-  }
-
-  public find(betId: string) {
-    return this.active.find((bet) => bet.id === betId);
-  }
-
-  public byStatus(status: BetStatus) {
-    return this.active.filter((bet) => bet.status === status);
-  }
-
-  public openBets() {
-    return this.byStatus(BetStatus.OPEN);
-  }
-
-  public pendingBets() {
-    return this.byStatus(BetStatus.PENDING);
-  }
-
-  public update(bet: Bet) {
-    const index = this.active.findIndex((current) => current.id === bet.id);
-
-    if (index >= 0) {
-      this.active[index] = bet;
-    } else {
-      this.active.push(bet);
-    }
-  }
-
-  public remove(betId: string) {
-    this.active = this.active.filter((bet) => bet.id !== betId);
-  }
-
-  public statistics(): Readonly<BetMetrics> {
-    return Object.freeze({ ...this.metrics });
-  }
-
-  public settings(): Readonly<BetConfiguration> {
-    return Object.freeze({ ...this.configuration });
-  }
-
-  public healthy() {
-    return true;
-  }
-
-  public information(): Readonly<Record<string, unknown>> {
-    return Object.freeze({
-      activeBets: this.active.length,
-      openBets: this.openBets().length,
-      pendingBets: this.pendingBets().length,
-      walletLoaded: this.wallet.hasWallet(),
-      metrics: this.statistics(),
-    });
-  }
-
-  public diagnostics() {
-    return Object.freeze({ healthy: this.healthy(), information: this.information() });
-  }
-
-  public reset() {
-    this.active = [];
-    this.metrics.placed = 0;
-    this.metrics.cancelled = 0;
-    this.metrics.cashedOut = 0;
-    this.metrics.loaded = 0;
-  }
-
-  public destroy() {
-    this.reset();
-  }
-}
-
-export function createBetService(
-  api: ApiClient,
-  wallet: WalletService,
-  configuration: BetConfiguration
-) {
-  return new BetService(api, wallet, configuration);
-}
