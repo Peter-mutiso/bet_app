@@ -264,3 +264,128 @@ export class BetService {
     };
 
   }
+    public activeBets(): readonly Bet[] {
+    return Object.freeze([...this.active]);
+  }
+
+  public find(betId: string) {
+    return this.active.find((bet) => bet.id === betId);
+  }
+
+  public byStatus(status: BetStatus) {
+    return this.active.filter((bet) => bet.status === status);
+  }
+
+  public openBets() {
+    return this.byStatus(BetStatus.OPEN);
+  }
+
+  public pendingBets() {
+    return this.byStatus(BetStatus.PENDING);
+  }
+
+  public update(bet: Bet) {
+
+    const bets = this.getStoredBets();
+
+    const index = bets.findIndex(
+      current => current.id === bet.id
+    );
+
+    if (index >= 0) {
+      bets[index] = bet;
+    } else {
+      bets.push(bet);
+    }
+
+    this.saveStoredBets(bets);
+
+    this.active = bets.filter(
+      item =>
+        item.status === BetStatus.OPEN ||
+        item.status === BetStatus.PENDING
+    );
+
+  }
+
+  public remove(betId: string) {
+
+    const bets = this.getStoredBets().filter(
+      bet => bet.id !== betId
+    );
+
+    this.saveStoredBets(bets);
+
+    this.active = bets.filter(
+      bet =>
+        bet.status === BetStatus.OPEN ||
+        bet.status === BetStatus.PENDING
+    );
+
+  }
+
+  public statistics(): Readonly<BetMetrics> {
+    return Object.freeze({
+      ...this.metrics,
+    });
+  }
+
+  public settings(): Readonly<BetConfiguration> {
+    return Object.freeze({
+      ...this.configuration,
+    });
+  }
+
+  public healthy() {
+    return true;
+  }
+
+  public information(): Readonly<Record<string, unknown>> {
+    return Object.freeze({
+      activeBets: this.active.length,
+      openBets: this.openBets().length,
+      pendingBets: this.pendingBets().length,
+      walletLoaded: this.wallet.hasWallet(),
+      metrics: this.statistics(),
+    });
+  }
+
+  public diagnostics() {
+    return Object.freeze({
+      healthy: this.healthy(),
+      information: this.information(),
+    });
+  }
+
+  public reset() {
+
+    this.active = [];
+
+    this.metrics.placed = 0;
+    this.metrics.cancelled = 0;
+    this.metrics.cashedOut = 0;
+    this.metrics.loaded = 0;
+
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("demoBets");
+    }
+
+  }
+
+  public destroy() {
+    this.reset();
+  }
+
+}
+
+export function createBetService(
+  api: ApiClient,
+  wallet: WalletService,
+  configuration: BetConfiguration
+) {
+  return new BetService(
+    api,
+    wallet,
+    configuration
+  );
+}
