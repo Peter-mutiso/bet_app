@@ -8,7 +8,7 @@
 
 import { TradingProvider } from "../../services/trading/provider";
 import { useTradingChart } from "../../hooks/useTradingChart";
-import { useTradeStore } from "../../store/trade-store";
+import { useTradeStore } from "@/store/useTradeStore";
 
 import ChartToolbar from "./ChartToolbar";
 import ChartCanvas from "./ChartCanvas";

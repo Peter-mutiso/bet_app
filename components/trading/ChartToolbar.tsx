@@ -1,8 +1,8 @@
 "use client";
 
-import { useTradeStore } from "../store/trade-store";
+import { useTradeStore } from "@/store/useTradeStore";
 
-export default function ChartToolbar () {
+export default function ChartToolbar() {
     const timeframe = useTradeStore((state) => state.timeframe);
     const chartType = useTradeStore((state) => state.chartType);
     const fullscreen = useTradeStore((state) => state.fullscreen);
