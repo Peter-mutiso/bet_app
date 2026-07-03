@@ -356,9 +356,42 @@ export class AuthService {
   public authenticated(){ return !!this.currentUser; }
   public hasRole(role:string){ return this.currentUser?.roles.includes(role)??false; }
   public hasAnyRole(...roles:string[]){ return roles.some(r=>this.hasRole(r)); }
-  public forgotPassword(){ return Promise.resolve(); }
-  public resetPassword(){ return Promise.resolve(); }
-  public verifyEmail(){ return Promise.resolve(); }
+ public async forgotPassword(email: string): Promise<void> {
+    const user = this.users().find(
+        u => u.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (!user) {
+        throw new Error("No account found with that email address.");
+    }
+
+    // Demo implementation
+    console.log(`Password reset requested for ${email}`);
+
+    return Promise.resolve();
+}
+
+public async resetPassword(
+    token: string,
+    newPassword: string
+): Promise<void> {
+
+    // Demo implementation
+    console.log("Reset token:", token);
+    console.log("New password:", newPassword);
+
+    return Promise.resolve();
+}
+
+public async verifyEmail(
+    token: string
+): Promise<void> {
+
+    // Demo implementation
+    console.log("Verify email token:", token);
+
+    return Promise.resolve();
+}
   public healthy(){ return true; }
   public information(){ return {}; }
   public diagnostics(){ return {}; }
