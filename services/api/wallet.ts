@@ -81,32 +81,26 @@ export class WalletService {
     return this.load();
   }
 
-  public async deposit(request: DepositRequest) {
+ public async deposit(request: DepositRequest) {
   if (!this.wallet) await this.load();
 
   this.wallet!.balance += request.amount;
   this.wallet!.availableBalance += request.amount;
   this.wallet!.updatedAt = new Date().toISOString();
+
   this.saveTransaction({
-  id: crypto.randomUUID(),
-  type: "withdraw",
-  amount: -request.amount,
-  balance: this.wallet!.balance,
-  description: `Withdrawal to ${request.destination}`,
-  createdAt: new Date().toISOString(),
-});
-  this.saveTransaction({
-  id: crypto.randomUUID(),
-  type: "deposit",
-  amount: request.amount,
-  balance: this.wallet!.balance,
-  description: `Deposit via ${request.paymentMethod}`,
-  createdAt: new Date().toISOString(),
-});
+    id: crypto.randomUUID(),
+    type: "deposit",
+    amount: request.amount,
+    balance: this.wallet!.balance,
+    description: `Deposit via ${request.paymentMethod}`,
+    createdAt: new Date().toISOString(),
+  });
 
   localStorage.setItem("demoWallet", JSON.stringify(this.wallet));
 
   this.metrics.deposits++;
+
   return this.wallet!;
 }
 
@@ -121,9 +115,19 @@ export class WalletService {
   this.wallet!.availableBalance -= request.amount;
   this.wallet!.updatedAt = new Date().toISOString();
 
+  this.saveTransaction({
+    id: crypto.randomUUID(),
+    type: "withdraw",
+    amount: -request.amount,
+    balance: this.wallet!.balance,
+    description: `Withdrawal to ${request.destination}`,
+    createdAt: new Date().toISOString(),
+  });
+
   localStorage.setItem("demoWallet", JSON.stringify(this.wallet));
 
   this.metrics.withdrawals++;
+
   return this.wallet!;
 }
 
