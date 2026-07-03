@@ -14,7 +14,10 @@
  * ============================================================================
  */
 
-import { Timeframe, Theme } from "../common";
+import { Timeframe, ThemeMode } from "../common/enums";
+
+// Alias Theme to ThemeMode from common enums to provide a consistent type name
+export type Theme = ThemeMode;
 import { Candle } from "./candle";
 import { Instrument } from "./market";
 
@@ -895,7 +898,7 @@ export const DEFAULT_CHART_CONFIGURATION: ChartConfiguration = {
 
     timeframe: Timeframe.M1,
 
-    theme: Theme.DARK,
+    theme: ThemeMode.DARK,
 
     dimensions: DEFAULT_CHART_DIMENSIONS,
 

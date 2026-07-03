@@ -14,8 +14,28 @@
  * ============================================================================
  */
 
-import { Timeframe } from "../common";
 import { Instrument } from "../market/market";
+
+export enum Timeframe {
+
+    M1 = "M1",
+
+    M5 = "M5",
+
+    M15 = "M15",
+
+    M30 = "M30",
+
+    H1 = "H1",
+
+    H4 = "H4",
+
+    D1 = "D1",
+
+    W1 = "W1",
+
+    MN1 = "MN1"
+}
 
 /* -------------------------------------------------------------------------- */
 /*                             ENUMS                                          */
@@ -701,6 +721,58 @@ export interface UpdateTradeOptions {
     quantity?: number;
 
     notes?: string;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                       TRADE EXECUTION                                      */
+/* -------------------------------------------------------------------------- */
+
+export interface TradeExecution {
+
+    id: string;
+
+    tradeId: string;
+
+    orderId?: string;
+
+    executedPrice: number;
+
+    executedQuantity: number;
+
+    executionTime: Date;
+
+    status: TradeStatus;
+
+    type: TradeType;
+
+    fees?: TradeFees;
+
+    notes?: string;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                         TRADE SIGNAL                                       */
+/* -------------------------------------------------------------------------- */
+
+export interface TradeSignal {
+
+    id: string;
+
+    instrument: Instrument;
+
+    timeframe: Timeframe;
+
+    direction: TradeDirection;
+
+    strength?: number;
+
+    generatedAt: Date;
+
+    source: TradeSource;
+
+    description?: string;
+
+    metadata?: TradeMetadata;
 }
 
 /* -------------------------------------------------------------------------- */

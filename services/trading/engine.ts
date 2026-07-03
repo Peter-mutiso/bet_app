@@ -2,401 +2,337 @@
  * ============================================================================
  * TRADING ENGINE
  * ============================================================================
- * Central orchestrator for the automated trading platform.
+ *
+ * Central coordinator for the Trading subsystem.
+ * Responsible for:
+ *  - Trade execution
+ *  - Risk validation
+ *  - Portfolio management
+ *  - Store synchronization
  * ============================================================================
  */
 
-import { EventEmitter } from "events";
+import { useTradeStore } from "@/store/useTradeStore";
 
-import { Strategy } from "./strategy";
 import { RiskManager } from "./risk-manager";
-import { ExecutionService } from "./execution";
 import { PortfolioManager } from "./portfolio-manager";
-import { TradingSession } from "./session";
-import { TradingScheduler } from "./scheduler";
+import { TradeExecution } from "./execution";
 
-import { TradingSignal } from "./signal";
+import type { TradeRequest } from "../../types";
 
-/* -------------------------------------------------------------------------- */
-/*                         CONFIGURATION                                      */
-/* -------------------------------------------------------------------------- */
+import {
 
-export interface TradingEngineConfiguration {
+    tradingScheduler
 
-    readonly enabled: boolean;
+} from "./scheduler";
+export class TradingEngine {
 
-    readonly automaticTrading: boolean;
+    private static instance: TradingEngine | null = null;
 
-}
+    private readonly portfolio =
 
-/* -------------------------------------------------------------------------- */
-/*                           METRICS                                          */
-/* -------------------------------------------------------------------------- */
+        new PortfolioManager();
 
-export interface TradingEngineMetrics {
+    private readonly execution =
 
-    cycles: number;
+        new TradeExecution();
 
-    executedTrades: number;
+    private risk?: RiskManager;
 
-    rejectedSignals: number;
+    private constructor() {}
 
-    lastCycle?: Date;
+    /* ---------------------------------------------------------------------- */
+    /* SINGLETON                                                              */
+    /* ---------------------------------------------------------------------- */
 
-}
-
-/* -------------------------------------------------------------------------- */
-/*                        TRADING ENGINE                                      */
-/* -------------------------------------------------------------------------- */
-
-export class TradingEngine
-
-extends EventEmitter {
-
-    private readonly metrics:
-
-    TradingEngineMetrics = {
-
-        cycles: 0,
-
-        executedTrades: 0,
-
-        rejectedSignals: 0
-
-    };
-
-    constructor(
-
-        private readonly configuration:
-
-        TradingEngineConfiguration,
-
-        private readonly strategy: Strategy,
-
-        private readonly riskManager: RiskManager,
-
-        private readonly execution: ExecutionService,
-
-        private readonly portfolio: PortfolioManager,
-
-        private readonly session: TradingSession,
-
-        private readonly scheduler: TradingScheduler
-
-    ) {
-
-        super();
-
-    }
-
-    public enabled():
-
-    boolean {
-
-        return this.configuration.enabled;
-
-    }
-
-    public statistics():
-
-    Readonly<TradingEngineMetrics> {
-
-        return Object.freeze({
-
-            ...this.metrics
-
-        });
-
-    }
-
-}
-/* -------------------------------------------------------------------------- */
-/*                             START                                          */
-/* -------------------------------------------------------------------------- */
-
-    public async start():
-
-    Promise<void> {
+    public static getInstance(): TradingEngine {
 
         if (
 
-            !this.enabled()
+            !TradingEngine.instance
 
         ) {
 
-            return;
+            TradingEngine.instance =
+
+                new TradingEngine();
 
         }
 
-        await this.session.start();
-
-        this.scheduler.start();
-
-        this.emit(
-
-            "started"
-
-        );
+        return TradingEngine.instance;
 
     }
 
-/* -------------------------------------------------------------------------- */
-/*                              STOP                                          */
-/* -------------------------------------------------------------------------- */
+    /* ---------------------------------------------------------------------- */
+    /* RISK                                                                    */
+    /* ---------------------------------------------------------------------- */
 
-    public async stop():
+    public attachRiskManager(
 
-    Promise<void> {
+        manager: RiskManager
 
-        this.scheduler.stop();
+    ): void {
 
-        await this.session.stop();
-
-        this.emit(
-
-            "stopped"
-
-        );
+        this.risk = manager;
 
     }
 
-/* -------------------------------------------------------------------------- */
-/*                         TRADING CYCLE                                      */
-/* -------------------------------------------------------------------------- */
+    /* ---------------------------------------------------------------------- */
+/* CONTRACT EXPIRY                                                        */
+/* ---------------------------------------------------------------------- */
 
-    public async executeCycle(
+public scheduleContractExpiry(
 
-    ): Promise<void> {
+    tradeId: string,
 
-        this.metrics.cycles++;
+    durationMs: number
 
-        this.metrics.lastCycle =
+): void {
 
-            new Date();
+    tradingScheduler.scheduleTimeout(
 
-        const signal =
+        tradeId,
 
-            await this.strategy.evaluate({
+        durationMs,
 
-                positions:
+        () => {
 
-                    this.portfolio.positions(),
+            this.closeTrade(
 
-                balance:
-
-                    this.portfolio.currentBalance()
-
-            });
-
-        if (
-
-            signal === null
-
-        ) {
-
-            return;
-
-        }
-
-        await this.processSignal(
-
-            signal
-
-        );
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                        SIGNAL PIPELINE                                     */
-/* -------------------------------------------------------------------------- */
-
-    protected async processSignal(
-
-        signal: TradingSignal
-
-    ): Promise<void> {
-
-        const decision =
-
-            await this.riskManager.evaluate({
-
-                signal,
-
-                balance:
-
-                    this.portfolio.currentBalance()!,
-
-                positions:
-
-                    this.portfolio.positions(),
-
-                dailyLoss: 0
-
-            });
-
-        if (
-
-            !decision.approved
-
-        ) {
-
-            this.metrics.rejectedSignals++;
-
-            this.emit(
-
-                "signalRejected",
-
-                decision
+                tradeId
 
             );
 
-            return;
-
         }
-
-        const execution =
-
-            await this.execution.execute(
-
-                signal
-
-            );
-
-        if (
-
-            execution.success
-
-        ) {
-
-            this.metrics.executedTrades++;
-
-        }
-
-        this.emit(
-
-            "signalExecuted",
-
-            execution
-
-        );
-
-    }
-    /* -------------------------------------------------------------------------- */
-/*                           HEALTH                                           */
-/* -------------------------------------------------------------------------- */
-
-    public healthy(): boolean {
-
-        return (
-
-            this.enabled() &&
-
-            this.session.healthy() &&
-
-            this.scheduler
-
-            /* -------------------------------------------------------------------------- */
-/*                         STATE HELPERS                                      */
-/* -------------------------------------------------------------------------- */
-
-    public isRunning(): boolean {
-
-        return this.session.isRunning();
-
-    }
-
-    public isStopped(): boolean {
-
-        return this.session.isStopped();
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                             RESET                                          */
-/* -------------------------------------------------------------------------- */
-
-    public reset(): void {
-
-        this.metrics.cycles = 0;
-
-        this.metrics.executedTrades = 0;
-
-        this.metrics.rejectedSignals = 0;
-
-        this.metrics.lastCycle = undefined;
-
-        this.execution.reset();
-
-        this.portfolio.reset();
-
-        this.scheduler.reset();
-
-        this.session.reset();
-
-        this.emit(
-
-            "reset"
-
-        );
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                           CLEANUP                                          */
-/* -------------------------------------------------------------------------- */
-
-    public async destroy():
-
-    Promise<void> {
-
-        await this.stop();
-
-        this.reset();
-
-        this.removeAllListeners();
-
-    }
-
-}
-
-/* -------------------------------------------------------------------------- */
-/*                             FACTORY                                        */
-/* -------------------------------------------------------------------------- */
-
-export function createTradingEngine(
-
-    configuration: TradingEngineConfiguration,
-
-    strategy: Strategy,
-
-    riskManager: RiskManager,
-
-    execution: ExecutionService,
-
-    portfolio: PortfolioManager,
-
-    session: TradingSession,
-
-    scheduler: TradingScheduler
-
-): TradingEngine {
-
-    return new TradingEngine(
-
-        configuration,
-
-        strategy,
-
-        riskManager,
-
-        execution,
-
-        portfolio,
-
-        session,
-
-        scheduler
 
     );
+
+}
+
+    /* ---------------------------------------------------------------------- */
+    /* EXECUTE TRADE                                                           */
+    /* ---------------------------------------------------------------------- */
+
+    public async executeTrade(
+
+        request: TradeRequest
+
+    ): Promise<void> {
+
+        const store =
+
+            useTradeStore.getState();
+
+        if (
+
+            request.stake <= 0
+
+        ) {
+
+            throw new Error(
+
+                "Stake must be greater than zero."
+
+            );
+
+        }
+
+        if (
+
+            request.stake >
+
+            store.balance
+
+        ) {
+
+            throw new Error(
+
+                "Insufficient balance."
+
+            );
+
+        }
+
+        if (
+
+            this.risk
+
+        ) {
+
+            // Risk evaluation will be connected
+            // once TradingSignal generation is completed.
+        }
+
+        store.setSelectedInstrument(
+
+            request.marketId
+
+        );
+
+        store.setCurrentTradeType(
+
+            request.contract as "PUT" | "ACCUMULATOR" | "CALL" | "DIGIT_OVER" | "DIGIT_UNDER"
+
+        );
+
+        store.setStake(
+
+            request.stake
+
+        );
+
+        const result =
+
+    await this.execution.execute(
+
+        request
+
+    );
+
+if (
+
+    !result.success
+
+) {
+
+    throw new Error(
+
+        result.message
+
+    );
+
+}
+
+store.buy();
+if(
+  result.tradeId
+){
+  this.scheduleContractExpiry(
+    result.tradeId,
+    request.duration * 1000
+  );
+}
+
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /* CLOSE TRADE                                                             */
+    /* ---------------------------------------------------------------------- */
+
+    public closeTrade(
+
+        tradeId: string
+
+    ): void {
+
+        const store =
+
+            useTradeStore.getState();
+
+        store.closeTrade(
+
+            tradeId
+
+        );
+
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /* ACTIVE POSITIONS                                                        */
+    /* ---------------------------------------------------------------------- */
+
+    public getActiveTrades() {
+
+        const store =
+
+            useTradeStore.getState();
+
+        return store.trades.filter(
+
+            trade =>
+
+                trade.status === "OPEN"
+
+        );
+
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /* TRADE HISTORY                                                           */
+    /* ---------------------------------------------------------------------- */
+
+    public getTradeHistory() {
+
+        const store =
+
+            useTradeStore.getState();
+
+        return store.trades.filter(
+
+            trade =>
+
+                trade.status === "CLOSED"
+
+        );
+
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /* BALANCE                                                                 */
+    /* ---------------------------------------------------------------------- */
+
+    public getBalance(): number {
+
+        return useTradeStore
+
+            .getState()
+
+            .balance;
+
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /* PRICE UPDATE                                                            */
+    /* ---------------------------------------------------------------------- */
+
+    public updatePrice(
+
+        price: number
+
+    ): void {
+
+        useTradeStore
+
+            .getState()
+
+            .setPrice(
+
+                price
+
+            );
+
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /* PORTFOLIO                                                               */
+    /* ---------------------------------------------------------------------- */
+
+    public getPortfolio() {
+
+        return this.portfolio;
+
+    }
+
+}
+
+/* -------------------------------------------------------------------------- */
+/* FACTORY                                                                    */
+/* -------------------------------------------------------------------------- */
+
+export function createTradingEngine():
+
+TradingEngine {
+
+    return TradingEngine.getInstance();
 
 }

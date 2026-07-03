@@ -1,44 +1,14 @@
-/**
- * ============================================================================
- * ORDER BOOK TYPES
- * ============================================================================
- * Professional Order Book Models
- *
- * Used by:
- * - Market Depth
- * - Liquidity Analysis
- * - Matching Engine
- * - AI Prediction
- * - Smart Order Routing
- * - DOM (Depth of Market)
- * ============================================================================
- */
 
-import { Timeframe } from "../common";
+import {
+    OrderSide,
+    MarketOrderType as OrderType,
+    LiquidityLevel
+} from "./enums";
 
-/* -------------------------------------------------------------------------- */
-/*                                ENUMS                                       */
-/* -------------------------------------------------------------------------- */
+import { Timeframe } from "./candle";
 
-export enum OrderSide {
+import { Instrument } from "./instrument";
 
-    BUY = "BUY",
-
-    SELL = "SELL"
-}
-
-export enum OrderType {
-
-    MARKET = "MARKET",
-
-    LIMIT = "LIMIT",
-
-    STOP = "STOP",
-
-    STOP_LIMIT = "STOP_LIMIT",
-
-    TRAILING_STOP = "TRAILING_STOP"
-}
 
 export enum OrderBookStatus {
 
@@ -51,18 +21,7 @@ export enum OrderBookStatus {
     AUCTION = "AUCTION"
 }
 
-export enum LiquidityLevel {
 
-    VERY_LOW = "VERY_LOW",
-
-    LOW = "LOW",
-
-    MEDIUM = "MEDIUM",
-
-    HIGH = "HIGH",
-
-    VERY_HIGH = "VERY_HIGH"
-}
 
 /* -------------------------------------------------------------------------- */
 /*                           ORDER BOOK LEVEL                                 */
@@ -92,6 +51,8 @@ export interface AskLevel extends OrderBookLevel {}
 export interface OrderBook {
 
     instrumentId: string;
+    instrument?: Instrument;
+
 
     bids: BidLevel[];
 
@@ -763,7 +724,7 @@ export const DEFAULT_ORDER_STATUS = OrderStatus.PENDING;
 
 export const DEFAULT_ORDERBOOK_STATUS = OrderBookStatus.OPEN;
 
-export const DEFAULT_LIQUIDITY_LEVEL = LiquidityLevel.MEDIUM;
+export const DEFAULT_LIQUIDITY_LEVEL = LiquidityLevel.NORMAL;
 
 /* -------------------------------------------------------------------------- */
 /*                     DEFAULT ORDER BOOK                                     */

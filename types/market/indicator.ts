@@ -14,8 +14,7 @@
  * ============================================================================
  */
 
-import { Timeframe } from "../common";
-import { Candle } from "./candle";
+import { Candle, Timeframe } from "./candle";
 
 /* -------------------------------------------------------------------------- */
 /*                              ENUMS                                         */
@@ -155,7 +154,7 @@ export interface IndicatorOutput {
 
 export interface IndicatorResult {
 
-    values: IndicatorOutput[];
+    values: unknown[];
 
     calculatedAt: Date;
 
@@ -278,13 +277,11 @@ export interface RSIResult extends IndicatorResult {
 /*                          MACD                                              */
 /* -------------------------------------------------------------------------- */
 
-export interface MACDOutput {
-
-    timestamp: Date;
+export interface MACDOutput extends IndicatorOutput {
 
     macd: number;
 
-    signal: number;
+    signalLine: number;
 
     histogram: number;
 
@@ -803,7 +800,7 @@ export const DEFAULT_INDICATOR: TechnicalIndicator = {
 
     category: DEFAULT_INDICATOR_CATEGORY,
 
-    timeframe: Timeframe.M1,
+    timeframe: Timeframe.ONE_MINUTE,
 
     enabled: true,
 

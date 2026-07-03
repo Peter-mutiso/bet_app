@@ -1,701 +1,371 @@
-/**
- * ============================================================================
- * AUTHENTICATION SERVICE
- * ============================================================================
- * Handles user authentication and session management.
- * ============================================================================
- */
-
-import {
-
-    ApiClient
-
-} from "./client";
-
-/* -------------------------------------------------------------------------- */
-/* USER                                                                       */
-/* -------------------------------------------------------------------------- */
+/**import { ApiClient } from "./client";
 
 export interface AuthUser {
-
-    readonly id: string;
-
-    readonly username: string;
-
-    readonly email: string;
-
-    readonly firstName: string;
-
-    readonly lastName: string;
-
-    readonly roles: readonly string[];
-
+  readonly id: string;
+  readonly username: string;
+  readonly email: string;
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly roles: readonly string[];
 }
-
-/* -------------------------------------------------------------------------- */
-/* LOGIN                                                                      */
-/* -------------------------------------------------------------------------- */
 
 export interface LoginRequest {
-
-    readonly email: string;
-
-    readonly password: string;
-
+  readonly email: string;
+  readonly password: string;
+  readonly remember?: boolean;
 }
-
-/* -------------------------------------------------------------------------- */
-/* REGISTER                                                                   */
-/* -------------------------------------------------------------------------- */
 
 export interface RegisterRequest {
-
-    readonly username: string;
-
-    readonly email: string;
-
-    readonly password: string;
-
-    readonly firstName: string;
-
-    readonly lastName: string;
-
+  readonly username: string;
+  readonly email: string;
+  readonly password: string;
+  readonly firstName: string;
+  readonly lastName: string;
 }
-
-/* -------------------------------------------------------------------------- */
-/* AUTH RESPONSE                                                              */
-/* -------------------------------------------------------------------------- */
 
 export interface AuthResponse {
-
-    readonly accessToken: string;
-
-    readonly refreshToken: string;
-
-    readonly user: AuthUser;
-
+  readonly accessToken: string;
+  readonly refreshToken: string;
+  readonly user: AuthUser;
 }
-
-/* -------------------------------------------------------------------------- */
-/* CONFIGURATION                                                              */
-/* -------------------------------------------------------------------------- */
 
 export interface AuthConfiguration {
-
-    readonly rememberSession: boolean;
-
+  readonly rememberSession: boolean;
 }
-
-/* -------------------------------------------------------------------------- */
-/* METRICS                                                                    */
-/* -------------------------------------------------------------------------- */
 
 export interface AuthMetrics {
-
-    logins: number;
-
-    logouts: number;
-
-    registrations: number;
-
-    refreshes: number;
-
+  logins: number;
+  logouts: number;
+  registrations: number;
+  refreshes: number;
 }
-
-/* -------------------------------------------------------------------------- */
-/* SERVICE                                                                    */
-/* -------------------------------------------------------------------------- */
 
 export class AuthService {
+  private currentUser?: AuthUser;
+  private accessToken?: string;
+  private refreshToken?: string;
 
-    private currentUser?:
+  private readonly metrics: AuthMetrics = {
+    logins: 0,
+    logouts: 0,
+    registrations: 0,
+    refreshes: 0,
+  };
 
-    AuthUser;
+  constructor(
+    private readonly api: ApiClient,
+    private readonly configuration: AuthConfiguration
+  ) {}
 
-    private accessToken?:
+  public async login(request: LoginRequest) {
+    const response =
+      await this.api.post<AuthResponse, LoginRequest>(
+        "/auth/login",
+        request
+      );
 
-    string;
+    this.restore(response.data);
+    this.metrics.logins++;
 
-    private refreshToken?:
+    return this.currentUser!;
+  }
 
-    string;
+  public async register(request: RegisterRequest) {
+    const response =
+      await this.api.post<AuthResponse, RegisterRequest>(
+        "/auth/register",
+        request
+      );
 
-    private readonly metrics:
+    this.restore(response.data);
+    this.metrics.registrations++;
 
-    AuthMetrics = {
+    return this.currentUser!;
+  }
 
-        logins: 0,
+  public async logout() {
+    try {
+      await this.api.post("/auth/logout", {});
+    } finally {
+      this.currentUser = undefined;
+      this.accessToken = undefined;
+      this.refreshToken = undefined;
 
-        logouts: 0,
+      this.api.clearAuthorization();
 
-        registrations: 0,
+      this.metrics.logouts++;
+    }
+  }
 
-        refreshes: 0
+  public user() {
+    return this.currentUser;
+  }
 
-    };
+  public authenticated() {
+    return (
+      this.currentUser !== undefined &&
+      this.accessToken !== undefined
+    );
+  }
 
-    constructor(
+  public token() {
+    return this.accessToken;
+  }
 
-        private readonly api:
+  public restore(response: AuthResponse) {
+    this.accessToken = response.accessToken;
+    this.refreshToken = response.refreshToken;
+    this.currentUser = response.user;
 
-        ApiClient,
+    this.api.setAuthorization(response.accessToken);
+  }
 
-        private readonly configuration:
-
-        AuthConfiguration
-
-    ) {
-
+  public async refresh() {
+    if (!this.refreshToken) {
+      throw new Error("No refresh token available.");
     }
 
-    public statistics():
+    const response =
+      await this.api.post<
+        AuthResponse,
+        { refreshToken: string }
+      >(
+        "/auth/refresh",
+        {
+          refreshToken: this.refreshToken,
+        }
+      );
 
-    Readonly<AuthMetrics> {
+    this.restore(response.data);
 
-        return Object.freeze({
+    this.metrics.refreshes++;
+  }
 
-            ...this.metrics
+  public async forgotPassword(email: string) {
+    await this.api.post<
+      void,
+      { email: string }
+    >(
+      "/auth/forgot-password",
+      {
+        email,
+      }
+    );
+  }
 
-        });
+  public async resetPassword(
+    token: string,
+    password: string
+  ) {
+    await this.api.post<
+      void,
+      {
+        token: string;
+        password: string;
+      }
+    >(
+      "/auth/reset-password",
+      {
+        token,
+        password,
+      }
+    );
+  }
 
-    }
+  public async verifyEmail(token: string) {
+    await this.api.post<
+      void,
+      { token: string }
+    >(
+      "/auth/verify-email",
+      {
+        token,
+      }
+    );
+  }
 
+  public hasRole(role: string) {
+    return this.currentUser?.roles.includes(role) ?? false;
+  }
+
+  public hasAnyRole(...roles: string[]) {
+    return roles.some(
+      (role) => this.hasRole(role)
+    );
+  }
+
+  public statistics(): Readonly<AuthMetrics> {
+    return Object.freeze({
+      ...this.metrics,
+    });
+  }
+
+  public settings(): Readonly<AuthConfiguration> {
+    return Object.freeze({
+      ...this.configuration,
+    });
+  }
+
+  public healthy() {
+    return this.authenticated();
+  }
+
+  public information(): Readonly<Record<string, unknown>> {
+    return Object.freeze({
+      authenticated: this.authenticated(),
+      user: this.currentUser,
+      hasAccessToken: this.accessToken !== undefined,
+      hasRefreshToken: this.refreshToken !== undefined,
+      rememberSession: this.configuration.rememberSession,
+      metrics: this.statistics(),
+    });
+  }
+
+  public diagnostics() {
+    return Object.freeze({
+      healthy: this.healthy(),
+      information: this.information(),
+    });
+  }
+
+  public reset() {
+    this.currentUser = undefined;
+    this.accessToken = undefined;
+    this.refreshToken = undefined;
+
+    this.api.clearAuthorization();
+
+    this.metrics.logins = 0;
+    this.metrics.logouts = 0;
+    this.metrics.registrations = 0;
+    this.metrics.refreshes = 0;
+  }
+
+  public destroy() {
+    this.reset();
+  }
 }
-/* -------------------------------------------------------------------------- */
-/*                              LOGIN                                         */
-/* -------------------------------------------------------------------------- */
-
-    public async login(
-
-        request: LoginRequest
-
-    ): Promise<AuthUser> {
-
-        const response =
-
-            await this.api.post<
-
-                AuthResponse,
-
-                LoginRequest
-
-            >(
-
-                "/auth/login",
-
-                request
-
-            );
-
-        this.accessToken =
-
-            response.data.accessToken;
-
-        this.refreshToken =
-
-            response.data.refreshToken;
-
-        this.currentUser =
-
-            response.data.user;
-
-        this.api.setAuthorization(
-
-            this.accessToken
-
-        );
-
-        this.metrics.logins++;
-
-        return this.currentUser;
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                             REGISTER                                       */
-/* -------------------------------------------------------------------------- */
-
-    public async register(
-
-        request: RegisterRequest
-
-    ): Promise<AuthUser> {
-
-        const response =
-
-            await this.api.post<
-
-                AuthResponse,
-
-                RegisterRequest
-
-            >(
-
-                "/auth/register",
-
-                request
-
-            );
-
-        this.accessToken =
-
-            response.data.accessToken;
-
-        this.refreshToken =
-
-            response.data.refreshToken;
-
-        this.currentUser =
-
-            response.data.user;
-
-        this.api.setAuthorization(
-
-            this.accessToken
-
-        );
-
-        this.metrics.registrations++;
-
-        return this.currentUser;
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                              LOGOUT                                        */
-/* -------------------------------------------------------------------------- */
-
-    public async logout():
-
-    Promise<void> {
-
-        try {
-
-            await this.api.post(
-
-                "/auth/logout",
-
-                {}
-
-            );
-
-        }
-
-        finally {
-
-            this.currentUser =
-
-                undefined;
-
-            this.accessToken =
-
-                undefined;
-
-            this.refreshToken =
-
-                undefined;
-
-            this.api.clearAuthorization();
-
-            this.metrics.logouts++;
-
-        }
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                         CURRENT USER                                       */
-/* -------------------------------------------------------------------------- */
-
-    public user():
-
-    AuthUser | undefined {
-
-        return this.currentUser;
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                         AUTHENTICATED                                      */
-/* -------------------------------------------------------------------------- */
-
-    public authenticated():
-
-    boolean {
-
-        return (
-
-            this.currentUser !==
-
-            undefined &&
-
-            this.accessToken !==
-
-            undefined
-
-        );
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                         ACCESS TOKEN                                       */
-/* -------------------------------------------------------------------------- */
-
-    public token():
-
-    string | undefined {
-
-        return this.accessToken;
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                       SESSION RESTORE                                      */
-/* -------------------------------------------------------------------------- */
-
-    public restore(
-
-        response: AuthResponse
-
-    ): void {
-
-        this.accessToken =
-
-            response.accessToken;
-
-        this.refreshToken =
-
-            response.refreshToken;
-
-        this.currentUser =
-
-            response.user;
-
-        this.api.setAuthorization(
-
-            response.accessToken
-
-        );
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                         REFRESH TOKEN                                      */
-/* -------------------------------------------------------------------------- */
-
-    public async refresh():
-
-    Promise<void> {
-
-        if (
-
-            !this.refreshToken
-
-        ) {
-
-            throw new Error(
-
-                "No refresh token available."
-
-            );
-
-        }
-
-        const response =
-
-            await this.api.post<
-
-                AuthResponse,
-
-                { refreshToken: string }
-
-            >(
-
-                "/auth/refresh",
-
-                {
-
-                    refreshToken:
-
-                        this.refreshToken
-
-                }
-
-            );
-
-        this.accessToken =
-
-            response.data.accessToken;
-
-        this.refreshToken =
-
-            response.data.refreshToken;
-
-        this.currentUser =
-
-            response.data.user;
-
-        this.api.setAuthorization(
-
-            this.accessToken
-
-        );
-
-        this.metrics.refreshes++;
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                              ROLES                                         */
-/* -------------------------------------------------------------------------- */
-
-    public hasRole(
-
-        role: string
-
-    ): boolean {
-
-        return (
-
-            this.currentUser?.roles.includes(
-
-                role
-
-            ) ?? false
-
-        );
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                           PERMISSIONS                                      */
-/* -------------------------------------------------------------------------- */
-
-    public hasAnyRole(
-
-        ...roles: string[]
-
-    ): boolean {
-
-        if (
-
-            !this.currentUser
-
-        ) {
-
-            return false;
-
-        }
-
-        return roles.some(
-
-            role =>
-
-                this.currentUser!.roles.includes(
-
-                    role
-
-                )
-
-        );
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                              HEALTH                                        */
-/* -------------------------------------------------------------------------- */
-
-    public healthy():
-
-    boolean {
-
-        return (
-
-            this.authenticated()
-
-        );
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                           INFORMATION                                      */
-/* -------------------------------------------------------------------------- */
-
-    public information():
-
-    Readonly<Record<string, unknown>> {
-
-        return Object.freeze({
-
-            authenticated:
-
-                this.authenticated(),
-
-            user:
-
-                this.currentUser,
-
-            hasAccessToken:
-
-                this.accessToken !==
-
-                undefined,
-
-            hasRefreshToken:
-
-                this.refreshToken !==
-
-                undefined,
-
-            metrics:
-
-                this.statistics()
-
-        });
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                           DIAGNOSTICS                                      */
-/* -------------------------------------------------------------------------- */
-
-    public diagnostics():
-
-    Readonly<Record<string, unknown>> {
-
-        return Object.freeze({
-
-            healthy:
-
-                this.healthy(),
-
-            information:
-
-                this.information()
-
-        });
-
-    }
-    /* -------------------------------------------------------------------------- */
-/*                              RESET                                         */
-/* -------------------------------------------------------------------------- */
-
-    public reset():
-
-    void {
-
-        this.currentUser =
-
-            undefined;
-
-        this.accessToken =
-
-            undefined;
-
-        this.refreshToken =
-
-            undefined;
-
-        this.api.clearAuthorization();
-
-        this.metrics.logins = 0;
-
-        this.metrics.logouts = 0;
-
-        this.metrics.registrations = 0;
-
-        this.metrics.refreshes = 0;
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                         STATE HELPERS                                      */
-/* -------------------------------------------------------------------------- */
-
-    public isRunning():
-
-    boolean {
-
-        return this.healthy();
-
-    }
-
-    public isStopped():
-
-    boolean {
-
-        return !this.isRunning();
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                         CONFIGURATION                                      */
-/* -------------------------------------------------------------------------- */
-
-    public settings():
-
-    Readonly<AuthConfiguration> {
-
-        return Object.freeze({
-
-            ...this.configuration
-
-        });
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                            CLEANUP                                         */
-/* -------------------------------------------------------------------------- */
-
-    public destroy():
-
-    void {
-
-        this.reset();
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                             VERSION                                        */
-/* -------------------------------------------------------------------------- */
-
-    public static readonly VERSION =
-
-        "1.0.0";
-
-/* -------------------------------------------------------------------------- */
-/*                             MODULE                                         */
-/* -------------------------------------------------------------------------- */
-
-    public static readonly MODULE =
-
-        "Authentication Service";
-
-}
-
-/* -------------------------------------------------------------------------- */
-/*                             FACTORY                                        */
-/* -------------------------------------------------------------------------- */
 
 export function createAuthService(
+  api: ApiClient,
+  configuration: AuthConfiguration
+) {
+  return new AuthService(
+    api,
+    configuration
+  );
+}**/
 
-    api:
+// services/api/auth.ts
+import { ApiClient } from "./client";
 
-    ApiClient,
+export interface AuthUser {
+  readonly id: string;
+  readonly username: string;
+  readonly email: string;
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly roles: readonly string[];
+}
 
-    configuration:
+export interface LoginRequest {
+  readonly email: string;
+  readonly password: string;
+  readonly remember?: boolean;
+}
 
-    AuthConfiguration
+export interface RegisterRequest {
+  readonly username: string;
+  readonly email: string;
+  readonly password: string;
+  readonly firstName: string;
+  readonly lastName: string;
+}
 
-): AuthService {
+export interface AuthResponse {
+  readonly accessToken: string;
+  readonly refreshToken: string;
+  readonly user: AuthUser;
+}
 
-    return new AuthService(
+interface StoredUser extends AuthUser {
+  password: string;
+}
 
-        api,
+export class AuthService {
+  private currentUser?: AuthUser;
 
-        configuration
+  constructor(
+    private readonly api: ApiClient,
+    private readonly configuration:{rememberSession:boolean}
+  ){
+    this.restoreSession();
+  }
 
-    );
+  private users():StoredUser[]{
+    if(typeof window==="undefined") return [];
+    return JSON.parse(localStorage.getItem("demoUsers")||"[]");
+  }
 
+  private saveUsers(users:StoredUser[]){
+    localStorage.setItem("demoUsers",JSON.stringify(users));
+  }
+
+  private restoreSession(){
+    if(typeof window==="undefined") return;
+    const s=localStorage.getItem("demoSession");
+    if(s) this.currentUser=JSON.parse(s);
+  }
+
+  public async register(r:RegisterRequest){
+    const users=this.users();
+    if(users.find(u=>u.email.toLowerCase()===r.email.toLowerCase())){
+      throw new Error("An account with this email already exists.");
+    }
+    const user:StoredUser={
+      id:crypto.randomUUID(),
+      username:r.username,
+      email:r.email,
+      firstName:r.firstName,
+      lastName:r.lastName,
+      roles:["user"],
+      password:r.password
+    };
+    users.push(user);
+    this.saveUsers(users);
+    return user;
+  }
+
+  public async login(r:LoginRequest){
+    const u=this.users().find(x=>x.email.toLowerCase()===r.email.toLowerCase());
+    if(!u) throw new Error("No account found. Please register first.");
+    if(u.password!==r.password) throw new Error("Incorrect email or password.");
+    const {password,...authUser}=u;
+    this.currentUser=authUser;
+    localStorage.setItem("demoSession",JSON.stringify(authUser));
+    return authUser;
+  }
+
+  public async logout(){
+    this.currentUser=undefined;
+    localStorage.removeItem("demoSession");
+  }
+
+  public async refresh(){ this.restoreSession(); }
+  public user(){ return this.currentUser; }
+  public authenticated(){ return !!this.currentUser; }
+  public hasRole(role:string){ return this.currentUser?.roles.includes(role)??false; }
+  public hasAnyRole(...roles:string[]){ return roles.some(r=>this.hasRole(r)); }
+  public forgotPassword(){ return Promise.resolve(); }
+  public resetPassword(){ return Promise.resolve(); }
+  public verifyEmail(){ return Promise.resolve(); }
+  public healthy(){ return true; }
+  public information(){ return {}; }
+  public diagnostics(){ return {}; }
+  public reset(){ this.currentUser=undefined; localStorage.removeItem("demoSession");}
+  public destroy(){ this.reset(); }
+}
+
+export function createAuthService(api:ApiClient,configuration:{rememberSession:boolean}){
+  return new AuthService(api,configuration);
 }

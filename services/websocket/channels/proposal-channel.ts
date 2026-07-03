@@ -16,7 +16,7 @@ import {
 
     Proposal
 
-} from "../../models/proposal";
+} from "../../../models/proposal";
 
 /* -------------------------------------------------------------------------- */
 /*                           CHANNEL                                          */
@@ -35,12 +35,12 @@ export class ProposalChannel extends BaseChannel<Proposal> {
     ) {
 
         super(
-
-            manager,
-
-            "proposal"
-
-        );
+    manager,
+    {
+        name: "proposal",
+        autoSubscribe: false
+    }
+);
 
         this.initialize();
 
@@ -90,62 +90,22 @@ export class ProposalChannel extends BaseChannel<Proposal> {
     /*                 SUBSCRIBE / UNSUBSCRIBE                                */
     /* ---------------------------------------------------------------------- */
 
-    public async subscribe():
+    public subscribe():
 
-    Promise<void> {
+    void{
 
         // Proposals are request-driven.
 
     }
 
-    public async unsubscribe():
+    public unsubscribe():
 
-    Promise<void> {
+    void {
 
         this.proposals.clear();
 
     }
-
     /* ---------------------------------------------------------------------- */
-    /*                  HANDLE MESSAGE                                        */
-    /* ---------------------------------------------------------------------- */
-
-    protected async handleMessage(
-
-        message: WebSocketMessage<Proposal>
-
-    ): Promise<void> {
-
-        if (
-
-            !this.canProcess()
-
-        ) {
-
-            return;
-
-        }
-
-        const proposal =
-
-            message.payload;
-
-        this.proposals.set(
-
-            proposal.id,
-
-            proposal
-
-        );
-
-        this.emitSafe(
-
-            proposal
-
-        );
-
-    }
-        /* ---------------------------------------------------------------------- */
     /*                    VALIDATION                                          */
     /* ---------------------------------------------------------------------- */
 

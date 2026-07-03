@@ -1,282 +1,41 @@
-/**
- * ============================================================================
- * APPLICATION CONTEXT
- * ============================================================================
- * Provides application services throughout React.
- * ============================================================================
- */
+"use client";
 
-import {
-
-    createContext,
-
-    ReactNode,
-
-    useContext,
-
-    useMemo
-
-} from "react";
-
-import {
-
-    ServiceProvider,
-
-    createServiceProvider
-
-} from "../services/provider";
-
-/* -------------------------------------------------------------------------- */
-/* CONFIGURATION                                                              */
-/* -------------------------------------------------------------------------- */
+import { createContext, ReactNode, useContext, useEffect, useMemo } from "react";
+import { ServiceProvider, createServiceProvider } from "../services/provider";
 
 const configuration = {
-
-    apiBaseUrl:
-
-        import.meta.env
-
-            .VITE_API_URL,
-
-    websocketUrl:
-
-        import.meta.env
-
-            .VITE_WS_URL
-
+  apiBaseUrl: process.env.NEXT_PUBLIC_API_URL ?? "",
+  websocketUrl: process.env.NEXT_PUBLIC_WS_URL ?? "",
 };
 
-/* -------------------------------------------------------------------------- */
-/* CONTEXT                                                                    */
-/* -------------------------------------------------------------------------- */
-
-const AppContext =
-
-    createContext<
-
-        ServiceProvider |
-
-        undefined
-
-    >(
-
-        undefined
-
-    );
-
-/* -------------------------------------------------------------------------- */
-/* PROPERTIES                                                                 */
-/* -------------------------------------------------------------------------- */
+const AppContext = createContext<ServiceProvider | undefined>(undefined);
 
 export interface AppProviderProps {
-
-    readonly children:
-
-    ReactNode;
-
+  readonly children: ReactNode;
 }
 
-/* -------------------------------------------------------------------------- */
-/* PROVIDER                                                                   */
-/* -------------------------------------------------------------------------- */
-
-export function AppProvider(
-
-    {
-
-        children
-
-    }:
-
-    AppProviderProps
-
-) {
-
-    const services =
-
-        useMemo(
-
-            () =>
-
-                createServiceProvider(
-
-                    configuration
-
-                ),
-
-            []
-
-        );
-
-    return (
-
-        <AppContext.Provider
-
-            value={
-
-                services
-
-            }
-
-        >
-
-            {children}
-
-        </AppContext.Provider>
-
-    );
-
-}
-import {
-
-    useEffect
-
-} from "react";
-
-/* -------------------------------------------------------------------------- */
-/* APPLICATION STARTUP                                                        */
-/* -------------------------------------------------------------------------- */
-
-export function AppProvider(
-
-    {
-
-        children
-
-    }:
-
-    AppProviderProps
-
-) {
-
-    const services =
-
-        useMemo(
-
-            () =>
-
-                createServiceProvider(
-
-                    configuration
-
-                ),
-
-            []
-
-        );
-
-    useEffect(
-
-        () => {
-
-            let mounted = true;
-
-            const start =
-
-                async () => {
-
-                    try {
-
-                        await services.start();
-
-                    }
-
-                    catch (
-
-                        error
-
-                    ) {
-
-                        console.error(
-
-                            "Application startup failed.",
-
-                            error
-
-                        );
-
-                    }
-
-                };
-
-            if (
-
-                mounted
-
-            ) {
-
-                void start();
-
-            }
-
-            return () => {
-
-                mounted = false;
-
-                void services.stop();
-
-            };
-
-        },
-
-        [
-
-            services
-
-        ]
-
-    );
-
-    return (
-
-        <AppContext.Provider
-
-            value={
-
-                services
-
-            }
-
-        >
-
-            {children}
-
-        </AppContext.Provider>
-
-    );
-
+export function AppProvider({ children }: AppProviderProps) {
+  const services = useMemo(() => createServiceProvider(configuration), []);
+
+  useEffect(() => {
+    void services.start().catch((error) => {
+      console.error("Application startup failed.", error);
+    });
+
+    return () => {
+      void services.stop();
+    };
+  }, [services]);
+
+  return <AppContext.Provider value={services}>{children}</AppContext.Provider>;
 }
 
-/* -------------------------------------------------------------------------- */
-/* HOOK                                                                       */
-/* -------------------------------------------------------------------------- */
+export function useApp() {
+  const context = useContext(AppContext);
 
-export function useApp():
+  if (!context) {
+    throw new Error("useApp() must be used inside AppProvider.");
+  }
 
-ServiceProvider {
-
-    const context =
-
-        useContext(
-
-            AppContext
-
-        );
-
-    if (
-
-        !context
-
-    ) {
-
-        throw new Error(
-
-            "useApp() must be used inside AppProvider."
-
-        );
-
-    }
-
-    return context;
-
+  return context;
 }

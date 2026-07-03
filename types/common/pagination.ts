@@ -14,7 +14,7 @@
  * ============================================================================
  */
 
-import { SortDirection } from "./enums";
+import { SortDirection, FilterOperator } from "./enums";
 
 /* -------------------------------------------------------------------------- */
 /*                               ENUMS                                        */
@@ -150,12 +150,9 @@ export interface Search {
 /* -------------------------------------------------------------------------- */
 /*                               FILTERS                                      */
 /* -------------------------------------------------------------------------- */
-
 export interface Filter {
 
     field: string;
-
-    import { FilterOperator } from "./enums";
 
     operator: FilterOperator;
 
@@ -332,8 +329,6 @@ export interface SearchResult<T> {
 
     suggestions?: SearchSuggestion[];
 }
-
-import { FilterOperator } from "./enums";
 
 /* -------------------------------------------------------------------------- */
 /*                         ADVANCED FILTERS                                   */

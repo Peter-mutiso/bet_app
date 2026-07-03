@@ -2,674 +2,267 @@
  * ============================================================================
  * CANDLE CHANNEL
  * ============================================================================
- * Handles realtime OHLC candle subscriptions.
- * ============================================================================
  */
 
-import { BaseChannel } from "./base-channel";
-import { WebSocketManager } from "../manager";
-import { WebSocketMessage } from "../types";
-import { messageFactory } from "../message";
-import { logger } from "../logger";
+import { DerivWebSocketClient } from "../client";
 
-import {
+export interface Candle {
 
-    Candle
+    open: number;
 
-} from "../../models/candle";
+    high: number;
 
-/* -------------------------------------------------------------------------- */
-/*                        CHANNEL                                             */
-/* -------------------------------------------------------------------------- */
+    low: number;
 
-export class CandleChannel extends BaseChannel<Candle> {
+    close: number;
 
-    private symbol?: string;
+    epoch: number;
 
-    private granularity?: number;
+}
+
+export type CandleHandler =
+
+    (
+
+        candle: Candle
+
+    ) => void;
+
+export class CandleChannel {
+
+    private readonly handlers =
+
+        new Map<string, Set<CandleHandler>>();
 
     constructor(
 
-        manager: WebSocketManager
+        private readonly client: DerivWebSocketClient
 
     ) {
 
-        super(
+        this.client.on(
 
-            manager,
+            "message",
 
-            "candles"
+            this.handleMessage.bind(this)
 
         );
 
-        this.initialize();
-
     }
 
-    /* ---------------------------------------------------------------------- */
-    /*                        SUBSCRIBE                                       */
-    /* ---------------------------------------------------------------------- */
-
-    public async subscribe(
+    public subscribe(
 
         symbol: string,
 
-        granularity: number
+        granularity: number,
 
-    ): Promise<void> {
+        handler: CandleHandler
 
-        this.ensureConnected();
+    ) {
 
-        this.symbol = symbol;
+        const key =
 
-        this.granularity = granularity;
-
-        const message =
-
-            messageFactory.request(
-
-                "subscribe",
-
-                {
-
-                    candles: symbol,
-
-                    granularity
-
-                },
-
-                this.name()
-
-            );
-
-        await this.subscribeInternal(
-
-            message
-
-        );
-
-        await this.onSubscribed();
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                      UNSUBSCRIBE                                       */
-    /* ---------------------------------------------------------------------- */
-
-    public async unsubscribe():
-
-    Promise<void> {
-
-        this.ensureConnected();
+            `${symbol}_${granularity}`;
 
         if (
 
-            !this.symbol ||
+            !this.handlers.has(
 
-            !this.granularity
-
-        ) {
-
-            return;
-
-        }
-
-        const message =
-
-            messageFactory.request(
-
-                "unsubscribe",
-
-                {
-
-                    candles: this.symbol,
-
-                    granularity:
-
-                        this.granularity
-
-                },
-
-                this.name()
-
-            );
-
-        await this.unsubscribeInternal(
-
-            message
-
-        );
-
-        this.symbol = undefined;
-
-        this.granularity = undefined;
-
-        await this.onUnsubscribed();
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                    HANDLE MESSAGE                                      */
-    /* ---------------------------------------------------------------------- */
-
-    protected async handleMessage(
-
-        message: WebSocketMessage<Candle>
-
-    ): Promise<void> {
-
-        if (
-
-            !this.canProcess()
-
-        ) {
-
-            return;
-
-        }
-
-        this.emitSafe(
-
-            message.payload
-
-        );
-
-    }
-        /* ---------------------------------------------------------------------- */
-    /*                     VALIDATION                                         */
-    /* ---------------------------------------------------------------------- */
-
-    private validateCandle(
-
-        candle: Candle
-
-    ): boolean {
-
-        return (
-
-            typeof candle.open === "number" &&
-
-            typeof candle.high === "number" &&
-
-            typeof candle.low === "number" &&
-
-            typeof candle.close === "number"
-
-        );
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                     CACHE                                              */
-    /* ---------------------------------------------------------------------- */
-
-    private readonly candles: Candle[] = [];
-
-    private readonly maximumCandles = 1000;
-
-    private lastCandle?: Candle;
-
-    private remember(
-
-        candle: Candle
-
-    ): void {
-
-        this.lastCandle = candle;
-
-        this.candles.push(candle);
-
-        if (
-
-            this.candles.length >
-
-            this.maximumCandles
-
-        ) {
-
-            this.candles.shift();
-
-        }
-
-    }
-
-    public latest():
-
-    Candle | undefined {
-
-        return this.lastCandle;
-
-    }
-
-    public history():
-
-    readonly Candle[] {
-
-        return [...this.candles];
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                    TIMEFRAME MANAGEMENT                                */
-    /* ---------------------------------------------------------------------- */
-
-    public currentGranularity():
-
-    number | undefined {
-
-        return this.granularity;
-
-    }
-
-    public currentSymbol():
-
-    string | undefined {
-
-        return this.symbol;
-
-    }
-
-    public async switchTimeframe(
-
-        granularity: number
-
-    ): Promise<void> {
-
-        if (
-
-            this.granularity === granularity ||
-
-            !this.symbol
-
-        ) {
-
-            return;
-
-        }
-
-        await this.unsubscribe();
-
-        await this.subscribe(
-
-            this.symbol,
-
-            granularity
-
-        );
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                    RECONNECT                                           */
-    /* ---------------------------------------------------------------------- */
-
-    public async reconnect():
-
-    Promise<void> {
-
-        if (
-
-            !this.symbol ||
-
-            !this.granularity
-
-        ) {
-
-            return;
-
-        }
-
-        logger.info(
-
-            `Restoring candle subscription for '${this.symbol}'.`
-
-        );
-
-        await this.subscribe(
-
-            this.symbol,
-
-            this.granularity
-
-        );
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                    INFORMATION                                         */
-    /* ---------------------------------------------------------------------- */
-
-    public override statistics() {
-
-        return {
-
-            ...super.statistics(),
-
-            symbol: this.symbol,
-
-            granularity: this.granularity,
-
-            cachedCandles: this.candles.length
-
-        };
-
-    }
-
-    public override healthy(): boolean {
-
-        return (
-
-            super.healthy() &&
-
-            this.symbol !== undefined &&
-
-            this.granularity !== undefined
-
-        );
-
-    }
-
-    protected override async onSubscribed():
-
-    Promise<void> {
-
-        logger.info(
-
-            `Subscribed to candles for '${this.symbol}' (${this.granularity}).`
-
-        );
-
-    }
-
-    protected override async onUnsubscribed():
-
-    Promise<void> {
-
-        logger.info(
-
-            "Candle subscription closed."
-
-        );
-
-    }
-        /* ---------------------------------------------------------------------- */
-    /*                    CACHE UPDATE                                        */
-    /* ---------------------------------------------------------------------- */
-
-    private updateCache(
-
-        candle: Candle
-
-    ): void {
-
-        const index =
-
-            this.candles.findIndex(
-
-                current =>
-
-                    current.epoch ===
-
-                    candle.epoch
-
-            );
-
-        if (
-
-            index >= 0
-
-        ) {
-
-            this.candles[index] = candle;
-
-        }
-
-        else {
-
-            this.candles.push(candle);
-
-        }
-
-        this.lastCandle = candle;
-
-        while (
-
-            this.candles.length >
-
-            this.maximumCandles
-
-        ) {
-
-            this.candles.shift();
-
-        }
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                      LOOKUP                                            */
-    /* ---------------------------------------------------------------------- */
-
-    public find(
-
-        epoch: number
-
-    ): Candle | undefined {
-
-        return this.candles.find(
-
-            candle =>
-
-                candle.epoch === epoch
-
-        );
-
-    }
-
-    public hasCandle(
-
-        epoch: number
-
-    ): boolean {
-
-        return this.find(epoch)
-
-            !== undefined;
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                    HANDLE MESSAGE                                      */
-    /* ---------------------------------------------------------------------- */
-
-    protected override async handleMessage(
-
-        message: WebSocketMessage<Candle>
-
-    ): Promise<void> {
-
-        if (
-
-            !this.canProcess()
-
-        ) {
-
-            return;
-
-        }
-
-        const candle =
-
-            message.payload;
-
-        if (
-
-            !this.validateCandle(
-
-                candle
+                key
 
             )
 
         ) {
 
-            logger.warn(
+            this.handlers.set(
 
-                "Invalid candle received."
+                key,
+
+                new Set()
 
             );
+
+            this.client.send({
+
+                ticks_history: symbol,
+
+                style: "candles",
+
+                granularity,
+
+                subscribe: 1
+
+            });
+
+        }
+
+        this.handlers.get(
+
+            key
+
+        )!.add(handler);
+
+    }
+
+    public unsubscribe(
+
+        symbol: string,
+
+        granularity: number,
+
+        handler?: CandleHandler
+
+    ) {
+
+        const key =
+
+            `${symbol}_${granularity}`;
+
+        const listeners =
+
+            this.handlers.get(
+
+                key
+
+            );
+
+        if (
+
+            !listeners
+
+        ) {
 
             return;
 
         }
 
-        this.updateCache(
+        if (
 
-            candle
+            handler
 
-        );
+        ) {
 
-        this.emitSafe(
+            listeners.delete(
 
-            candle
+                handler
 
-        );
+            );
 
-    }
+        } else {
 
-    /* ---------------------------------------------------------------------- */
-    /*                     CACHE MANAGEMENT                                   */
-    /* ---------------------------------------------------------------------- */
+            listeners.clear();
 
-    public clearHistory(): void {
+        }
 
-        this.candles.length = 0;
+        if (
 
-        this.lastCandle = undefined;
+            listeners.size === 0
 
-    }
+        ) {
 
-    public cacheSize(): number {
+            this.handlers.delete(
 
-        return this.candles.length;
+                key
 
-    }
+            );
 
-    public hasHistory(): boolean {
-
-        return this.candles.length > 0;
+        }
 
     }
 
-    /* ---------------------------------------------------------------------- */
-    /*                        RESET                                           */
-    /* ---------------------------------------------------------------------- */
+    private handleMessage(
 
-    public override reset(): void {
+        message: unknown
 
-        super.reset();
+    ) {
 
-        this.symbol = undefined;
+        if (
 
-        this.granularity = undefined;
+            !message ||
 
-        this.clearHistory();
+            typeof message !== "object" ||
 
-    }
+            !("candles" in message)
 
-    /* ---------------------------------------------------------------------- */
-    /*                    INFORMATION                                         */
-    /* ---------------------------------------------------------------------- */
+        ) {
 
-    public override information() {
+            return;
 
-        return {
+        }
 
-            ...super.information(),
+        const payload =
 
-            symbol: this.symbol,
+            message as {
 
-            granularity: this.granularity,
+                echo_req?: {
 
-            latestEpoch:
+                    ticks_history?: string;
 
-                this.lastCandle?.epoch,
+                    granularity?: number;
 
-            cachedCandles:
+                };
 
-                this.candles.length
+                candles: Candle[];
 
-        };
+            };
 
-    }
-        /* ---------------------------------------------------------------------- */
-    /*                    EXPORT HISTORY                                      */
-    /* ---------------------------------------------------------------------- */
+        const symbol =
 
-    public exportHistory():
+            payload.echo_req?.ticks_history;
 
-    readonly Candle[] {
+        const granularity =
 
-        return Object.freeze(
+            payload.echo_req?.granularity;
 
-            [...this.candles]
+        if (
 
-        );
+            !symbol ||
 
-    }
+            !granularity
 
-    /* ---------------------------------------------------------------------- */
-    /*                    PRICE HELPERS                                       */
-    /* ---------------------------------------------------------------------- */
+        ) {
 
-    public latestClose():
+            return;
 
-    number | undefined {
+        }
 
-        return this.lastCandle?.close;
+        const key =
 
-    }
+            `${symbol}_${granularity}`;
 
-    public latestOpen():
+        const listeners =
 
-    number | undefined {
+            this.handlers.get(
 
-        return this.lastCandle?.open;
+                key
 
-    }
+            );
 
-    public latestHigh():
+        if (
 
-    number | undefined {
+            !listeners
 
-        return this.lastCandle?.high;
+        ) {
 
-    }
+            return;
 
-    public latestLow():
+        }
 
-    number | undefined {
+        payload.candles.forEach(
 
-        return this.lastCandle?.low;
+            candle =>
 
-    }
+                listeners.forEach(
 
-    /* ---------------------------------------------------------------------- */
-    /*                    DESTRUCTION                                         */
-    /* ---------------------------------------------------------------------- */
+                    listener =>
 
-    public override destroy(): void {
+                        listener(
 
-        this.clearHistory();
+                            candle
 
-        this.symbol = undefined;
+                        )
 
-        this.granularity = undefined;
-
-        super.destroy();
-
-        logger.info(
-
-            "Candle channel destroyed."
+                )
 
         );
 
@@ -677,19 +270,15 @@ export class CandleChannel extends BaseChannel<Candle> {
 
 }
 
-/* -------------------------------------------------------------------------- */
-/*                     FACTORY                                                */
-/* -------------------------------------------------------------------------- */
-
 export function createCandleChannel(
 
-    manager: WebSocketManager
+    client: DerivWebSocketClient
 
-): CandleChannel {
+) {
 
     return new CandleChannel(
 
-        manager
+        client
 
     );
 

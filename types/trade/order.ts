@@ -14,7 +14,7 @@
  */
 
 import { Instrument } from "../market/market";
-import { Timeframe } from "../common";
+import { Timeframe } from "../common/enums";
 import { TradeDirection } from "./trade";
 
 /* -------------------------------------------------------------------------- */

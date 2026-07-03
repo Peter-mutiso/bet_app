@@ -1,204 +1,140 @@
-/**
- * ============================================================================
- * WEBSOCKET MANAGER
- * ============================================================================
- * Coordinates the websocket subsystem.
- * ============================================================================
- */
-
-import {
-
-    WebSocketConnection,
-    createConnection
-
-} from "./connection";
-
-import {
-
-    WebSocketMessage,
-    EventHandler,
-    MessageHandler,
-    ConnectionOptions
-
-} from "./types";
-
-import {
-
-    logger
-
-} from "./logger";
+import { DerivWebSocketClient, ConnectionState } from "./client";
 
 /* -------------------------------------------------------------------------- */
-/*                           MANAGER                                          */
+/* TYPES                                                                      */
+/* -------------------------------------------------------------------------- */
+
+export interface WebSocketManagerConfiguration {
+
+    readonly autoConnect: boolean;
+
+    readonly maxReconnectAttempts: number;
+
+    readonly reconnectDelay: number;
+
+}
+
+export type WebSocketListener = (
+
+    payload?: unknown
+
+) => void;
+
+/* -------------------------------------------------------------------------- */
+/* MANAGER                                                                    */
 /* -------------------------------------------------------------------------- */
 
 export class WebSocketManager {
 
-    private readonly connection: WebSocketConnection;
+    private readonly listeners =
 
-    private readonly eventHandlers =
-        new Map<string, Set<EventHandler>>();
+        new Map<string, Set<WebSocketListener>>();
 
-    private readonly messageHandlers =
-        new Map<string, Set<MessageHandler>>();
+    private reconnectAttempts = 0;
 
-    private readonly pendingRequests =
-        new Map<string, (message: WebSocketMessage) => void>();
+    private started = false;
 
     constructor(
 
-        options: Partial<ConnectionOptions>
+        private readonly client: DerivWebSocketClient,
+
+        private readonly configuration: WebSocketManagerConfiguration
 
     ) {
 
-        this.connection =
-
-            createConnection(options);
+        this.setupClientListeners();
 
     }
 
     /* ---------------------------------------------------------------------- */
-    /*                     CONNECTION                                         */
+    /* CLIENT EVENTS                                                          */
     /* ---------------------------------------------------------------------- */
 
-    public connect(): void {
+    private setupClientListeners(): void {
 
-        logger.info(
+        this.client.on(
 
-            "Starting websocket manager."
+            "connected",
+
+            () => {
+
+                this.reconnectAttempts = 0;
+
+                this.emit("connected");
+
+            }
 
         );
 
-        this.connection.connect();
+        this.client.on(
 
-    }
+            "disconnected",
 
-    public disconnect(): void {
+            () => {
 
-        logger.info(
+                this.emit("disconnected");
 
-            "Stopping websocket manager."
-
-        );
-
-        this.connection.disconnect();
-
-    }
-
-    public reconnect(): void {
-
-        logger.info(
-
-            "Restarting websocket connection."
+            }
 
         );
 
-        this.connection.reconnect();
+        this.client.on(
 
-    }
+            "message",
 
-    /* ---------------------------------------------------------------------- */
-    /*                     CONNECTION ACCESS                                  */
-    /* ---------------------------------------------------------------------- */
+            message => {
 
-    public getConnection():
+                this.emit(
 
-        Readonly<WebSocketConnection> {
+                    "message",
 
-        return this.connection;
+                    message
 
-    }
+                );
 
-    public isConnected(): boolean {
+            }
 
-        return this.connection.isConnected();
+        );
 
-    }
+        this.client.on(
 
-    /* ---------------------------------------------------------------------- */
-    /*                      SEND                                               */
-    /* ---------------------------------------------------------------------- */
+            "error",
 
-    public send<T>(
+            error => {
 
-        message: WebSocketMessage<T>
+                this.emit(
 
-    ): boolean {
+                    "error",
 
-        return this.connection.send(
+                    error
 
-            JSON.stringify(message)
+                );
+
+            }
 
         );
 
     }
 
     /* ---------------------------------------------------------------------- */
-    /*                     REQUEST TRACKING                                   */
-    /* ---------------------------------------------------------------------- */
-
-    public registerPendingRequest(
-
-        id: string,
-
-        callback: (
-
-            message: WebSocketMessage
-
-        ) => void
-
-    ): void {
-
-        this.pendingRequests.set(
-
-            id,
-
-            callback
-
-        );
-
-    }
-
-    public resolvePendingRequest(
-
-        id: string,
-
-        message: WebSocketMessage
-
-    ): boolean {
-
-        const callback =
-
-            this.pendingRequests.get(id);
-
-        if (!callback) {
-
-            return false;
-
-        }
-
-        callback(message);
-
-        this.pendingRequests.delete(id);
-
-        return true;
-
-    }
-        /* ---------------------------------------------------------------------- */
-    /*                     EVENT HANDLERS                                     */
+    /* EVENTS                                                                 */
     /* ---------------------------------------------------------------------- */
 
     public on(
 
         event: string,
 
-        handler: EventHandler
+        listener: WebSocketListener
 
-    ): void {
+    ): this {
 
-        if (!this.eventHandlers.has(event)) {
+        if (
 
-            this.eventHandlers.set(
+            !this.listeners.has(event)
+
+        ) {
+
+            this.listeners.set(
 
                 event,
 
@@ -208,7 +144,13 @@ export class WebSocketManager {
 
         }
 
-        this.eventHandlers.get(event)!.add(handler);
+        this.listeners
+
+            .get(event)!
+
+            .add(listener);
+
+        return this;
 
     }
 
@@ -216,272 +158,137 @@ export class WebSocketManager {
 
         event: string,
 
-        handler: EventHandler
+        listener: WebSocketListener
 
-    ): void {
+    ): this {
 
-        const handlers =
+        this.listeners
 
-            this.eventHandlers.get(event);
+            .get(event)
 
-        if (!handlers) {
+            ?.delete(listener);
 
-            return;
-
-        }
-
-        handlers.delete(handler);
-
-        if (handlers.size === 0) {
-
-            this.eventHandlers.delete(event);
-
-        }
+        return this;
 
     }
 
-    /* ---------------------------------------------------------------------- */
-    /*                    MESSAGE HANDLERS                                   */
-    /* ---------------------------------------------------------------------- */
-
-    public onMessage(
-
-        type: string,
-
-        handler: MessageHandler
-
-    ): void {
-
-        if (!this.messageHandlers.has(type)) {
-
-            this.messageHandlers.set(
-
-                type,
-
-                new Set()
-
-            );
-
-        }
-
-        this.messageHandlers.get(type)!.add(handler);
-
-    }
-
-    public offMessage(
-
-        type: string,
-
-        handler: MessageHandler
-
-    ): void {
-
-        const handlers =
-
-            this.messageHandlers.get(type);
-
-        if (!handlers) {
-
-            return;
-
-        }
-
-        handlers.delete(handler);
-
-        if (handlers.size === 0) {
-
-            this.messageHandlers.delete(type);
-
-        }
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                    EVENT DISPATCHING                                   */
-    /* ---------------------------------------------------------------------- */
-
-    public async emit(
+    private emit(
 
         event: string,
 
-        message: WebSocketMessage
-
-    ): Promise<void> {
-
-        const handlers =
-
-            this.eventHandlers.get(event);
-
-        if (!handlers) {
-
-            return;
-
-        }
-
-        for (const handler of handlers) {
-
-            try {
-
-                await handler(
-
-                    message as any
-
-                );
-
-            }
-
-            catch (error) {
-
-                logger.exception(
-
-                    error,
-
-                    {
-
-                        event
-
-                    }
-
-                );
-
-            }
-
-        }
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                    MESSAGE DISPATCHING                                 */
-    /* ---------------------------------------------------------------------- */
-
-    public async dispatch(
-
-        type: string,
-
-        message: WebSocketMessage
-
-    ): Promise<void> {
-
-        const handlers =
-
-            this.messageHandlers.get(type);
-
-        if (!handlers) {
-
-            return;
-
-        }
-
-        for (const handler of handlers) {
-
-            try {
-
-                await handler(
-
-                    message as any
-
-                );
-
-            }
-
-            catch (error) {
-
-                logger.exception(
-
-                    error,
-
-                    {
-
-                        type
-
-                    }
-
-                );
-
-            }
-
-        }
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                        BROADCAST                                       */
-    /* ---------------------------------------------------------------------- */
-
-    public async broadcast(
-
-        message: WebSocketMessage
-
-    ): Promise<void> {
-
-        for (
-
-            const type
-
-            of this.messageHandlers.keys()
-
-        ) {
-
-            await this.dispatch(
-
-                type,
-
-                message
-
-            );
-
-        }
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                       CLEAR                                             */
-    /* ---------------------------------------------------------------------- */
-
-    public clearHandlers(): void {
-
-        this.eventHandlers.clear();
-
-        this.messageHandlers.clear();
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                       INFORMATION                                       */
-    /* ---------------------------------------------------------------------- */
-
-    public eventCount(): number {
-
-        return this.eventHandlers.size;
-
-    }
-
-    public messageHandlerCount(): number {
-
-        return this.messageHandlers.size;
-
-    }
-        /* ---------------------------------------------------------------------- */
-    /*                     SUBSCRIPTIONS                                      */
-    /* ---------------------------------------------------------------------- */
-
-    private readonly subscriptions =
-
-        new Set<string>();
-
-    public subscribe(
-
-        channel: string
+        payload?: unknown
 
     ): void {
 
-        this.subscriptions.add(channel);
+        for (
 
-        logger.info(
+            const listener of
 
-            `Subscribed to '${channel}'.`
+            this.listeners.get(event) ??
 
-        );
+            []
+
+        ) {
+
+            listener(payload);
+
+        }
+
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /* CONNECTION                                                              */
+    /* ---------------------------------------------------------------------- */
+
+    public async start(): Promise<void> {
+
+        if (
+
+            this.started
+
+        ) {
+
+            return;
+
+        }
+
+        this.started = true;
+
+        await this.client.connect();
+
+    }
+
+    public stop(): void {
+
+        this.started = false;
+
+        this.client.disconnect();
+
+    }
+
+    public connected(): boolean {
+
+        return this.client.connected();
+
+    }
+
+    public connectionState(): ConnectionState {
+
+        return this.client.connectionState();
+
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /* SEND                                                                    */
+    /* ---------------------------------------------------------------------- */
+
+    public send(
+
+        message: unknown
+
+    ): boolean {
+
+        if (
+
+            !this.connected()
+
+        ) {
+
+            return false;
+
+        }
+
+        this.client.send(message);
+
+        return true;
+
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /* SUBSCRIPTIONS                                                           */
+    /* ---------------------------------------------------------------------- */
+
+    public subscribe(
+
+        channel: string,
+
+        payload?: unknown
+
+    ): boolean {
+
+        return this.send({
+
+            subscribe: channel,
+
+            ...(
+
+                payload as object ??
+
+                {}
+
+            )
+
+        });
 
     }
 
@@ -489,456 +296,125 @@ export class WebSocketManager {
 
         channel: string
 
-    ): void {
-
-        this.subscriptions.delete(channel);
-
-        logger.info(
-
-            `Unsubscribed from '${channel}'.`
-
-        );
-
-    }
-
-    public isSubscribed(
-
-        channel: string
-
     ): boolean {
 
-        return this.subscriptions.has(channel);
+        return this.send({
 
-    }
+            forget: channel
 
-    public subscriptionsList():
-
-        readonly string[] {
-
-        return [
-
-            ...this.subscriptions
-
-        ];
+        });
 
     }
 
     /* ---------------------------------------------------------------------- */
-    /*                  REQUEST TIMEOUTS                                      */
+    /* STATUS                                                                  */
     /* ---------------------------------------------------------------------- */
 
-    public registerPendingRequestWithTimeout(
+    public healthy(): boolean {
 
-        id: string,
-
-        callback: (
-
-            message: WebSocketMessage
-
-        ) => void,
-
-        timeout = 30000
-
-    ): void {
-
-        this.registerPendingRequest(
-
-            id,
-
-            callback
-
-        );
-
-        window.setTimeout(
-
-            () => {
-
-                if (
-
-                    this.pendingRequests.has(id)
-
-                ) {
-
-                    logger.warn(
-
-                        `Pending request '${id}' timed out.`
-
-                    );
-
-                    this.pendingRequests.delete(id);
-
-                }
-
-            },
-
-            timeout
-
-        );
+        return this.connected();
 
     }
-
-    /* ---------------------------------------------------------------------- */
-    /*                RESPONSE CORRELATION                                    */
-    /* ---------------------------------------------------------------------- */
-
-    public correlate(
-
-        message: WebSocketMessage
-
-    ): boolean {
-
-        const correlationId =
-
-            message.header.correlationId;
-
-        if (!correlationId) {
-
-            return false;
-
-        }
-
-        return this.resolvePendingRequest(
-
-            correlationId,
-
-            message
-
-        );
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                       MIDDLEWARE                                       */
-    /* ---------------------------------------------------------------------- */
-
-    private readonly middleware =
-
-        new Array<
-
-            (
-
-                message: WebSocketMessage
-
-            ) => WebSocketMessage
-
-        >();
-
-    public use(
-
-        middleware: (
-
-            message: WebSocketMessage
-
-        ) => WebSocketMessage
-
-    ): void {
-
-        this.middleware.push(
-
-            middleware
-
-        );
-
-    }
-
-    private applyMiddleware(
-
-        message: WebSocketMessage
-
-    ): WebSocketMessage {
-
-        return this.middleware.reduce(
-
-            (
-
-                current,
-
-                middleware
-
-            ) => middleware(current),
-
-            message
-
-        );
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                    INCOMING PIPELINE                                   */
-    /* ---------------------------------------------------------------------- */
-
-    public async processIncoming(
-
-        message: WebSocketMessage
-
-    ): Promise<void> {
-
-        const processed =
-
-            this.applyMiddleware(
-
-                message
-
-            );
-
-        if (
-
-            this.correlate(
-
-                processed
-
-            )
-
-        ) {
-
-            return;
-
-        }
-
-        await this.dispatch(
-
-            processed.header.type,
-
-            processed
-
-        );
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                        STATISTICS                                      */
-    /* ---------------------------------------------------------------------- */
 
     public statistics() {
 
         return {
 
-            subscriptions:
+            started:
 
-                this.subscriptions.size,
+                this.started,
 
-            pendingRequests:
+            reconnectAttempts:
 
-                this.pendingRequests.size,
+                this.reconnectAttempts,
 
-            middleware:
+            connected:
 
-                this.middleware.length,
-
-            eventHandlers:
-
-                this.eventHandlers.size,
-
-            messageHandlers:
-
-                this.messageHandlers.size
+                this.connected()
 
         };
 
     }
-
-    /* ---------------------------------------------------------------------- */
-    /*                     HEALTH CHECK                                       */
-    /* ---------------------------------------------------------------------- */
-
-    public healthy(): boolean {
-
-        return (
-
-            this.connection.isConnected()
-
-        );
-
-    }
-        /* ---------------------------------------------------------------------- */
-    /*                    LIFECYCLE HOOKS                                     */
-    /* ---------------------------------------------------------------------- */
-
-    public async start(): Promise<void> {
-
-        logger.info(
-
-            "Starting WebSocket manager."
-
-        );
-
-        this.connect();
-
-    }
-
-    public async stop(): Promise<void> {
-
-        logger.info(
-
-            "Stopping WebSocket manager."
-
-        );
-
-        this.disconnect();
-
-        this.clearHandlers();
-
-        this.pendingRequests.clear();
-
-        this.subscriptions.clear();
-
-        this.middleware.length = 0;
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                    DEFAULT EVENTS                                      */
-    /* ---------------------------------------------------------------------- */
-
-    public registerDefaultHandlers(): void {
-
-        this.onMessage(
-
-            "ERROR",
-
-            async message => {
-
-                logger.error(
-
-                    "WebSocket error message received.",
-
-                    {
-
-                        message
-
-                    }
-
-                );
-
-            }
-
-        );
-
-        this.onMessage(
-
-            "PING",
-
-            async () => {
-
-                logger.trace(
-
-                    "Ping received."
-
-                );
-
-            }
-
-        );
-
-        this.onMessage(
-
-            "PONG",
-
-            async () => {
-
-                logger.trace(
-
-                    "Pong received."
-
-                );
-
-            }
-
-        );
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                     RESET                                              */
-    /* ---------------------------------------------------------------------- */
-
-    public reset(): void {
-
-        logger.info(
-
-            "Resetting WebSocket manager."
-
-        );
-
-        this.clearHandlers();
-
-        this.pendingRequests.clear();
-
-        this.subscriptions.clear();
-
-        this.middleware.length = 0;
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                     DESTROY                                            */
-    /* ---------------------------------------------------------------------- */
-
-    public destroy(): void {
-
-        logger.info(
-
-            "Destroying WebSocket manager."
-
-        );
-
-        this.stop();
-
-        this.connection.dispose();
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                     INFORMATION                                        */
-    /* ---------------------------------------------------------------------- */
 
     public information() {
 
         return {
 
-            connected:
+            configuration:
 
-                this.connection.isConnected(),
-
-            healthy:
-
-                this.healthy(),
+                this.configuration,
 
             statistics:
 
                 this.statistics(),
 
-            connection:
+            client:
 
-                this.connection.statistics()
+                this.client.information()
 
         };
+
+    }
+
+    public diagnostics() {
+
+        return {
+
+            healthy:
+
+                this.healthy(),
+
+            information:
+
+                this.information()
+
+        };
+
+    }
+
+    public reset(): void {
+
+        this.reconnectAttempts = 0;
+
+    }
+
+    public destroy(): void {
+
+        this.stop();
+
+        this.listeners.clear();
+
+        this.reset();
+
+    }
+
+    /* ---------------------------------------------------------------------- */
+
+    public getClient(): DerivWebSocketClient {
+
+        return this.client;
 
     }
 
 }
 
 /* -------------------------------------------------------------------------- */
-/*                     DEFAULT MANAGER                                        */
-/* -------------------------------------------------------------------------- */
-
-export const websocketManager =
-
-    new WebSocketManager({});
-
-/* -------------------------------------------------------------------------- */
-/*                     FACTORY                                                */
+/* FACTORY                                                                    */
 /* -------------------------------------------------------------------------- */
 
 export function createWebSocketManager(
 
-    options: Partial<ConnectionOptions> = {}
+    client: DerivWebSocketClient,
+
+    configuration: WebSocketManagerConfiguration
 
 ): WebSocketManager {
 
     return new WebSocketManager(
 
-        options
+        client,
+
+        configuration
 
     );
 

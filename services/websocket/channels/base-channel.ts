@@ -1,155 +1,120 @@
-/**
- * ============================================================================
- * BASE CHANNEL
- * ============================================================================
- * Base implementation for every websocket channel.
- * ============================================================================
- */
-
-import {
-
-    WebSocketManager
-
-} from "../manager";
-
-import {
-
-    WebSocketMessage
-
-} from "../types";
-
-import {
-
-    logger
-
-} from "../logger";
+import { EventEmitter } from "events";
+import { WebSocketManager } from "../manager";
 
 /* -------------------------------------------------------------------------- */
-/*                           BASE CHANNEL                                     */
+/* CONFIGURATION                                                              */
 /* -------------------------------------------------------------------------- */
 
-export abstract class BaseChannel<TPayload> {
+export interface ChannelConfiguration {
+
+    readonly name: string;
+
+    readonly autoSubscribe?: boolean;
+
+}
+
+/* -------------------------------------------------------------------------- */
+/* BASE CHANNEL                                                               */
+/* -------------------------------------------------------------------------- */
+
+export abstract class BaseChannel<T> extends EventEmitter {
 
     protected readonly manager: WebSocketManager;
 
-    protected readonly channel: string;
+    protected readonly configuration: ChannelConfiguration;
 
     private subscribed = false;
-
-    private readonly handlers =
-
-        new Set<
-
-            (
-
-                payload: TPayload
-
-            ) => void
-
-        >();
 
     protected constructor(
 
         manager: WebSocketManager,
 
-        channel: string
+        configuration: ChannelConfiguration
 
     ) {
 
+        super();
+
         this.manager = manager;
 
-        this.channel = channel;
+        this.configuration = configuration;
 
     }
 
     /* ---------------------------------------------------------------------- */
-    /*                       SUBSCRIPTION                                     */
+    /* INITIALIZATION                                                         */
     /* ---------------------------------------------------------------------- */
 
-    public abstract subscribe():
+    protected initialize(): void {
 
-    Promise<void>;
+        this.manager.on(
 
-    public abstract unsubscribe():
+            "message",
 
-    Promise<void>;
+            (message: unknown) => {
 
-    /* ---------------------------------------------------------------------- */
-    /*                      HANDLERS                                          */
-    /* ---------------------------------------------------------------------- */
+                void this.handleMessage(message);
 
-    public on(
+            }
 
-        handler: (
+        );
 
-            payload: TPayload
+        if (
 
-        ) => void
-
-    ): void {
-
-        this.handlers.add(handler);
-
-    }
-
-    public off(
-
-        handler: (
-
-            payload: TPayload
-
-        ) => void
-
-    ): void {
-
-        this.handlers.delete(handler);
-
-    }
-
-    protected emit(
-
-        payload: TPayload
-
-    ): void {
-
-        for (
-
-            const handler
-
-            of this.handlers
+            this.configuration.autoSubscribe
 
         ) {
 
-            try {
-
-                handler(payload);
-
-            }
-
-            catch (error) {
-
-                logger.exception(
-
-                    error,
-
-                    {
-
-                        channel:
-
-                            this.channel
-
-                    }
-
-                );
-
-            }
+            this.subscribe();
 
         }
 
     }
 
     /* ---------------------------------------------------------------------- */
-    /*                      STATE                                             */
+    /* ABSTRACT METHODS                                                       */
+    /* ---------------------------------------------------------------------- */
+
+    public abstract subscribe(): void;
+
+    public abstract unsubscribe(): void;
+
+    protected abstract handleMessage(
+
+        message: unknown
+
+    ): Promise<void>;
+
+    /* ---------------------------------------------------------------------- */
+    /* CONNECTION                                                             */
+    /* ---------------------------------------------------------------------- */
+
+    protected ensureConnected(): void {
+
+        if (
+
+            !this.manager.connected()
+
+        ) {
+
+            throw new Error(
+
+                "WebSocket is not connected."
+
+            );
+
+        }
+
+    }
+
+    protected canProcess(): boolean {
+
+        return this.manager.connected();
+
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /* SUBSCRIPTION                                                           */
     /* ---------------------------------------------------------------------- */
 
     protected setSubscribed(
@@ -162,596 +127,129 @@ export abstract class BaseChannel<TPayload> {
 
     }
 
-    public isSubscribed():
-
-    boolean {
+    public isSubscribed(): boolean {
 
         return this.subscribed;
 
     }
 
-    public name():
-
-    string {
-
-        return this.channel;
-
-    }
-
-    public handlerCount():
-
-    number {
-
-        return this.handlers.size;
-
-    }
-
     /* ---------------------------------------------------------------------- */
-    /*                     MESSAGE                                            */
+    /* HELPERS                                                                */
     /* ---------------------------------------------------------------------- */
 
-    protected abstract handleMessage(
+    protected emitSafe(
 
-        message: WebSocketMessage<TPayload>
+        payload: T
 
-    ): Promise<void>;
+    ): void {
 
-}
-    /* ---------------------------------------------------------------------- */
-    /*                  MANAGER REGISTRATION                                  */
-    /* ---------------------------------------------------------------------- */
+        this.emit(
 
-    protected register(): void {
+            "message",
 
-        this.manager.onMessage(
-
-            this.channel,
-
-            this.routeMessage.bind(this)
-
-        );
-
-        logger.info(
-
-            `Registered '${this.channel}' channel.`
+            payload
 
         );
 
     }
 
-    protected unregister(): void {
+    public onMessage(
 
-        this.manager.offMessage(
+        listener: (payload: T) => void
 
-            this.channel,
+    ): this {
 
-            this.routeMessage.bind(this)
+        this.on(
 
-        );
+            "message",
 
-        logger.info(
-
-            `Unregistered '${this.channel}' channel.`
+            listener
 
         );
 
+        return this;
+
     }
 
-    /* ---------------------------------------------------------------------- */
-    /*                    MESSAGE ROUTING                                     */
-    /* ---------------------------------------------------------------------- */
+    public offMessage(
 
-    private async routeMessage(
+        listener: (payload: T) => void
 
-        message: WebSocketMessage
+    ): this {
 
-    ): Promise<void> {
+        this.off(
 
-        await this.handleMessage(
+            "message",
 
-            message as WebSocketMessage<TPayload>
+            listener
 
         );
 
+        return this;
+
     }
 
-    /* ---------------------------------------------------------------------- */
-    /*                   DEFAULT SUBSCRIBE                                    */
-    /* ---------------------------------------------------------------------- */
+    public name(): string {
 
-    protected async subscribeInternal(
-
-        message: WebSocketMessage
-
-    ): Promise<void> {
-
-        const sent =
-
-            this.manager.send(message);
-
-        if (!sent) {
-
-            throw new Error(
-
-                `Failed to subscribe to '${this.channel}'.`
-
-            );
-
-        }
-
-        this.manager.subscribe(
-
-            this.channel
-
-        );
-
-        this.setSubscribed(true);
-
-        logger.info(
-
-            `Subscribed to '${this.channel}'.`
-
-        );
+        return this.configuration.name;
 
     }
 
     /* ---------------------------------------------------------------------- */
-    /*                 DEFAULT UNSUBSCRIBE                                    */
+    /* STATUS                                                                 */
     /* ---------------------------------------------------------------------- */
 
-    protected async unsubscribeInternal(
+    public healthy(): boolean {
 
-        message: WebSocketMessage
-
-    ): Promise<void> {
-
-        const sent =
-
-            this.manager.send(message);
-
-        if (!sent) {
-
-            throw new Error(
-
-                `Failed to unsubscribe from '${this.channel}'.`
-
-            );
-
-        }
-
-        this.manager.unsubscribe(
-
-            this.channel
-
-        );
-
-        this.setSubscribed(false);
-
-        logger.info(
-
-            `Unsubscribed from '${this.channel}'.`
-
-        );
+        return this.manager.connected();
 
     }
-
-    /* ---------------------------------------------------------------------- */
-    /*                     RECONNECT                                          */
-    /* ---------------------------------------------------------------------- */
-
-    public async reconnect(
-
-        subscribeMessage: WebSocketMessage
-
-    ): Promise<void> {
-
-        if (
-
-            !this.isSubscribed()
-
-        ) {
-
-            return;
-
-        }
-
-        logger.info(
-
-            `Reconnecting '${this.channel}' channel.`
-
-        );
-
-        await this.subscribeInternal(
-
-            subscribeMessage
-
-        );
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                    LIFECYCLE                                           */
-    /* ---------------------------------------------------------------------- */
-
-    protected async onSubscribed():
-
-    Promise<void> {
-
-        // For subclasses
-
-    }
-
-    protected async onUnsubscribed():
-
-    Promise<void> {
-
-        // For subclasses
-
-    }
-
-    protected async beforeHandle(
-
-        _message: WebSocketMessage<TPayload>
-
-    ): Promise<void> {
-
-        // For subclasses
-
-    }
-
-    protected async afterHandle(
-
-        _message: WebSocketMessage<TPayload>
-
-    ): Promise<void> {
-
-        // For subclasses
-
-    }
-        /* ---------------------------------------------------------------------- */
-    /*                        ERROR HANDLING                                  */
-    /* ---------------------------------------------------------------------- */
-
-    protected async handleError(
-
-        error: unknown
-
-    ): Promise<void> {
-
-        logger.exception(
-
-            error,
-
-            {
-
-                channel: this.channel
-
-            }
-
-        );
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                          RETRY                                         */
-    /* ---------------------------------------------------------------------- */
-
-    protected async retry(
-
-        operation: () => Promise<void>,
-
-        attempts = 3
-
-    ): Promise<void> {
-
-        let lastError: unknown;
-
-        for (
-
-            let attempt = 1;
-
-            attempt <= attempts;
-
-            attempt++
-
-        ) {
-
-            try {
-
-                await operation();
-
-                return;
-
-            }
-
-            catch (error) {
-
-                lastError = error;
-
-                logger.warn(
-
-                    `Retry ${attempt}/${attempts} failed.`,
-
-                    {
-
-                        channel: this.channel
-
-                    }
-
-                );
-
-            }
-
-        }
-
-        throw lastError;
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                       STATISTICS                                       */
-    /* ---------------------------------------------------------------------- */
 
     public statistics() {
 
         return {
 
-            channel: this.channel,
+            name: this.configuration.name,
 
             subscribed: this.subscribed,
 
-            handlers: this.handlers.size
+            connected: this.manager.connected()
 
         };
 
     }
-
-    /* ---------------------------------------------------------------------- */
-    /*                       HEALTH                                           */
-    /* ---------------------------------------------------------------------- */
-
-    public healthy(): boolean {
-
-        return (
-
-            this.manager.healthy() &&
-
-            this.subscribed
-
-        );
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                        PAUSE                                           */
-    /* ---------------------------------------------------------------------- */
-
-    private paused = false;
-
-    public pause(): void {
-
-        this.paused = true;
-
-        logger.info(
-
-            `Paused '${this.channel}' channel.`
-
-        );
-
-    }
-
-    public resume(): void {
-
-        this.paused = false;
-
-        logger.info(
-
-            `Resumed '${this.channel}' channel.`
-
-        );
-
-    }
-
-    public isPaused(): boolean {
-
-        return this.paused;
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                      SAFE EMIT                                         */
-    /* ---------------------------------------------------------------------- */
-
-    protected emitSafe(
-
-        payload: TPayload
-
-    ): void {
-
-        if (
-
-            this.paused
-
-        ) {
-
-            return;
-
-        }
-
-        this.emit(payload);
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                       RESET                                            */
-    /* ---------------------------------------------------------------------- */
-
-    public reset(): void {
-
-        this.handlers.clear();
-
-        this.subscribed = false;
-
-        this.paused = false;
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                    INFORMATION                                         */
-    /* ---------------------------------------------------------------------- */
 
     public information() {
 
         return {
 
-            ...this.statistics(),
+            configuration: this.configuration,
 
-            healthy: this.healthy(),
-
-            paused: this.paused
+            statistics: this.statistics()
 
         };
 
     }
-        /* ---------------------------------------------------------------------- */
-    /*                      INITIALIZATION                                    */
+
+    /* ---------------------------------------------------------------------- */
+    /* LIFECYCLE                                                              */
     /* ---------------------------------------------------------------------- */
 
-    protected initialize(): void {
+    protected async onSubscribed(): Promise<void> {}
 
-        this.register();
+    protected async onUnsubscribed(): Promise<void> {}
 
-        logger.info(
+    public reset(): void {
 
-            `Initialized '${this.channel}' channel.`
-
-        );
+        this.subscribed = false;
 
     }
-
-    /* ---------------------------------------------------------------------- */
-    /*                      CONNECTION HELPERS                                */
-    /* ---------------------------------------------------------------------- */
-
-    protected ensureConnected(): void {
-
-        if (
-
-            !this.manager.isConnected()
-
-        ) {
-
-            throw new Error(
-
-                `WebSocket is not connected for channel '${this.channel}'.`
-
-            );
-
-        }
-
-    }
-
-    protected ensureSubscribed(): void {
-
-        if (
-
-            !this.subscribed
-
-        ) {
-
-            throw new Error(
-
-                `Channel '${this.channel}' is not subscribed.`
-
-            );
-
-        }
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                      UTILITIES                                         */
-    /* ---------------------------------------------------------------------- */
-
-    protected canProcess(): boolean {
-
-        return (
-
-            this.manager.healthy() &&
-
-            this.subscribed &&
-
-            !this.paused
-
-        );
-
-    }
-
-    protected async processMessage(
-
-        message: WebSocketMessage<TPayload>
-
-    ): Promise<void> {
-
-        if (
-
-            !this.canProcess()
-
-        ) {
-
-            return;
-
-        }
-
-        try {
-
-            await this.beforeHandle(
-
-                message
-
-            );
-
-            await this.handleMessage(
-
-                message
-
-            );
-
-            await this.afterHandle(
-
-                message
-
-            );
-
-        }
-
-        catch (error) {
-
-            await this.handleError(
-
-                error
-
-            );
-
-        }
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                        CLEANUP                                         */
-    /* ---------------------------------------------------------------------- */
 
     public destroy(): void {
 
-        this.unregister();
+        this.removeAllListeners();
 
         this.reset();
-
-        logger.info(
-
-            `Destroyed '${this.channel}' channel.`
-
-        );
 
     }
 

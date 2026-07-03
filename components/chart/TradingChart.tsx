@@ -331,7 +331,7 @@ export default function TradingChart({
           if (t.status === "OPEN") {
             return {
               time: t.entryTime || Math.floor(Date.now() / 1000),
-              position: "below",
+              position: "belowBar",
               color: "#2563eb",
               shape: "arrowUp",
               text: `${t.tradeType ?? ""} ${t.stake}`,
@@ -340,7 +340,7 @@ export default function TradingChart({
 
           return {
             time: t.exitTime || Math.floor(Date.now() / 1000),
-            position: "above",
+            position: "aboveBar",
             color: t.profit && t.profit > 0 ? "#16a34a" : "#ef4444",
             shape: "arrowDown",
             text: `${t.tradeType ?? ""} ${t.profit?.toFixed(2) ?? ""}`,

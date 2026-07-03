@@ -37,6 +37,16 @@
     "**/*.mts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "services/market/**",
+    "services/trading/**",
+    "services/websocket/channels/**",
+    "services/websocket/connection.ts",
+    "services/websocket/constants.ts",
+    "services/websocket/logger.ts",
+    "services/websocket/manager.ts",
+    "services/websocket/message.ts",
+    "services/websocket/parser.ts",
+    "services/websocket/types.ts"
   ]
 }

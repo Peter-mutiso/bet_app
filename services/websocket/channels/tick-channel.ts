@@ -2,580 +2,209 @@
  * ============================================================================
  * TICK CHANNEL
  * ============================================================================
- * Handles realtime tick subscriptions.
- * ============================================================================
  */
 
-import { BaseChannel } from "./base-channel";
-import { WebSocketManager } from "../manager";
-import { WebSocketMessage } from "../types";
-import { messageFactory } from "../message";
-import { logger } from "../logger";
+import { DerivWebSocketClient } from "../client";
 
-/* -------------------------------------------------------------------------- */
-/*                             TYPES                                          */
-/* -------------------------------------------------------------------------- */
+export interface TickMessage {
 
-export interface Tick {
+    tick: {
 
-    symbol: string;
+        symbol: string;
 
-    price: number;
+        quote: number;
 
-    bid?: number;
+        epoch: number;
 
-    ask?: number;
-
-    epoch: number;
-
-    quoteTime: Date;
+    };
 
 }
 
-/* -------------------------------------------------------------------------- */
-/*                           CHANNEL                                          */
-/* -------------------------------------------------------------------------- */
+export type TickHandler =
 
-export class TickChannel extends BaseChannel<Tick> {
+    (
 
-    private symbol?: string;
+        tick: TickMessage["tick"]
+
+    ) => void;
+
+export class TickChannel {
+
+    private readonly handlers =
+
+        new Map<string, Set<TickHandler>>();
 
     constructor(
 
-        manager: WebSocketManager
+        private readonly client: DerivWebSocketClient
 
     ) {
 
-        super(
+        this.client.on(
 
-            manager,
+            "message",
 
-            "tick"
-
-        );
-
-        this.initialize();
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                       SUBSCRIBE                                        */
-    /* ---------------------------------------------------------------------- */
-
-    public async subscribe(
-
-        symbol: string
-
-    ): Promise<void> {
-
-        this.ensureConnected();
-
-        this.symbol = symbol;
-
-        const message =
-
-            messageFactory.request(
-
-                "subscribe",
-
-                {
-
-                    ticks: symbol
-
-                },
-
-                this.name()
-
-            );
-
-        await this.subscribeInternal(
-
-            message
+            this.handleMessage.bind(this)
 
         );
 
-        await this.onSubscribed();
-
     }
 
-    /* ---------------------------------------------------------------------- */
-    /*                     UNSUBSCRIBE                                        */
-    /* ---------------------------------------------------------------------- */
+    public subscribe(
 
-    public async unsubscribe():
+        symbol: string,
 
-    Promise<void> {
+        handler: TickHandler
 
-        this.ensureConnected();
-
-        if (!this.symbol) {
-
-            return;
-
-        }
-
-        const message =
-
-            messageFactory.request(
-
-                "unsubscribe",
-
-                {
-
-                    ticks: this.symbol
-
-                },
-
-                this.name()
-
-            );
-
-        await this.unsubscribeInternal(
-
-            message
-
-        );
-
-        this.symbol = undefined;
-
-        await this.onUnsubscribed();
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                    MESSAGE HANDLER                                     */
-    /* ---------------------------------------------------------------------- */
-
-    protected async handleMessage(
-
-        message: WebSocketMessage<Tick>
-
-    ): Promise<void> {
+    ) {
 
         if (
 
-            !this.canProcess()
+            !this.handlers.has(
 
-        ) {
-
-            return;
-
-        }
-
-        this.emitSafe(
-
-            message.payload
-
-        );
-
-    }
-        /* ---------------------------------------------------------------------- */
-    /*                    PAYLOAD VALIDATION                                  */
-    /* ---------------------------------------------------------------------- */
-
-    private validateTick(
-
-        tick: Tick
-
-    ): boolean {
-
-        return (
-
-            typeof tick.symbol === "string" &&
-
-            typeof tick.price === "number" &&
-
-            typeof tick.epoch === "number" &&
-
-            tick.quoteTime instanceof Date
-
-        );
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                     SYMBOL MANAGEMENT                                  */
-    /* ---------------------------------------------------------------------- */
-
-    public currentSymbol():
-
-    string | undefined {
-
-        return this.symbol;
-
-    }
-
-    public async switchSymbol(
-
-        symbol: string
-
-    ): Promise<void> {
-
-        if (
-
-            this.symbol === symbol
-
-        ) {
-
-            return;
-
-        }
-
-        if (
-
-            this.isSubscribed()
-
-        ) {
-
-            await this.unsubscribe();
-
-        }
-
-        await this.subscribe(symbol);
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                  AUTOMATIC RECONNECT                                   */
-    /* ---------------------------------------------------------------------- */
-
-    public async reconnect():
-
-    Promise<void> {
-
-        if (
-
-            !this.symbol
-
-        ) {
-
-            return;
-
-        }
-
-        logger.info(
-
-            `Restoring tick subscription for '${this.symbol}'.`
-
-        );
-
-        await this.subscribe(
-
-            this.symbol
-
-        );
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                      INFORMATION                                        */
-    /* ---------------------------------------------------------------------- */
-
-    public statistics() {
-
-        return {
-
-            ...super.statistics(),
-
-            symbol: this.symbol
-
-        };
-
-    }
-
-    public information() {
-
-        return {
-
-            ...super.information(),
-
-            symbol: this.symbol
-
-        };
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                        HEALTH                                           */
-    /* ---------------------------------------------------------------------- */
-
-    public healthy(): boolean {
-
-        return (
-
-            super.healthy() &&
-
-            this.symbol !== undefined
-
-        );
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                      LOGGING                                            */
-    /* ---------------------------------------------------------------------- */
-
-    protected override async onSubscribed():
-
-    Promise<void> {
-
-        logger.info(
-
-            `Tick subscription established for '${this.symbol}'.`
-
-        );
-
-    }
-
-    protected override async onUnsubscribed():
-
-    Promise<void> {
-
-        logger.info(
-
-            "Tick subscription closed."
-
-        );
-
-    }
-        /* ---------------------------------------------------------------------- */
-    /*                       LAST TICK                                        */
-    /* ---------------------------------------------------------------------- */
-
-    private lastTick?: Tick;
-
-    public latest():
-
-    Tick | undefined {
-
-        return this.lastTick;
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                       HISTORY BUFFER                                   */
-    /* ---------------------------------------------------------------------- */
-
-    private readonly history: Tick[] = [];
-
-    private readonly maximumHistory = 500;
-
-    private remember(
-
-        tick: Tick
-
-    ): void {
-
-        this.lastTick = tick;
-
-        this.history.push(tick);
-
-        if (
-
-            this.history.length >
-
-            this.maximumHistory
-
-        ) {
-
-            this.history.shift();
-
-        }
-
-    }
-
-    public recentTicks():
-
-    readonly Tick[] {
-
-        return [...this.history];
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                       PRICE HELPERS                                    */
-    /* ---------------------------------------------------------------------- */
-
-    public latestPrice():
-
-    number | undefined {
-
-        return this.lastTick?.price;
-
-    }
-
-    public hasTick(): boolean {
-
-        return this.lastTick !== undefined;
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                     FILTERING                                          */
-    /* ---------------------------------------------------------------------- */
-
-    public filter(
-
-        predicate: (
-
-            tick: Tick
-
-        ) => boolean
-
-    ): Tick[] {
-
-        return this.history.filter(predicate);
-
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /*                     HANDLE TICK                                        */
-    /* ---------------------------------------------------------------------- */
-
-    protected override async handleMessage(
-
-        message: WebSocketMessage<Tick>
-
-    ): Promise<void> {
-
-        if (
-
-            !this.canProcess()
-
-        ) {
-
-            return;
-
-        }
-
-        if (
-
-            !this.validateTick(
-
-                message.payload
+                symbol
 
             )
 
         ) {
 
-            logger.warn(
+            this.handlers.set(
 
-                "Invalid tick payload received."
+                symbol,
+
+                new Set()
 
             );
+
+            this.client.send({
+
+                ticks: symbol,
+
+                subscribe: 1
+
+            });
+
+        }
+
+        this.handlers
+
+            .get(symbol)!
+
+            .add(handler);
+
+    }
+
+    public unsubscribe(
+
+        symbol: string,
+
+        handler?: TickHandler
+
+    ) {
+
+        const listeners =
+
+            this.handlers.get(
+
+                symbol
+
+            );
+
+        if (
+
+            !listeners
+
+        ) {
 
             return;
 
         }
 
-        this.remember(
+        if (
 
-            message.payload
+            handler
 
-        );
+        ) {
 
-        this.emitSafe(
+            listeners.delete(
 
-            message.payload
+                handler
 
-        );
+            );
 
-    }
+        } else {
 
-    /* ---------------------------------------------------------------------- */
-    /*                       RESET                                            */
-    /* ---------------------------------------------------------------------- */
+            listeners.clear();
 
-    public override reset(): void {
+        }
 
-        super.reset();
+        if (
 
-        this.symbol = undefined;
+            listeners.size === 0
 
-        this.lastTick = undefined;
+        ) {
 
-        this.history.length = 0;
+            this.handlers.delete(
 
-    }
+                symbol
 
-    /* ---------------------------------------------------------------------- */
-    /*                      INFORMATION                                       */
-    /* ---------------------------------------------------------------------- */
+            );
 
-    public override information() {
-
-        return {
-
-            ...super.information(),
-
-            symbol: this.symbol,
-
-            lastPrice: this.latestPrice(),
-
-            cachedTicks: this.history.length
-
-        };
-
-    }
-        /* ---------------------------------------------------------------------- */
-    /*                      CLEAR HISTORY                                     */
-    /* ---------------------------------------------------------------------- */
-
-    public clearHistory(): void {
-
-        this.history.length = 0;
-
-        this.lastTick = undefined;
+        }
 
     }
 
-    /* ---------------------------------------------------------------------- */
-    /*                      CACHE INFORMATION                                 */
-    /* ---------------------------------------------------------------------- */
+    private handleMessage(
 
-    public cacheSize(): number {
+        message: unknown
 
-        return this.history.length;
+    ) {
 
-    }
+        if (
 
-    public hasHistory(): boolean {
+            !message ||
 
-        return this.history.length > 0;
+            typeof message !== "object" ||
 
-    }
+            !("tick" in message)
 
-    /* ---------------------------------------------------------------------- */
-    /*                     EXPORT HISTORY                                     */
-    /* ---------------------------------------------------------------------- */
+        ) {
 
-    public exportHistory():
+            return;
 
-    readonly Tick[] {
+        }
 
-        return Object.freeze(
+        const tick =
 
-            [...this.history]
+            (message as TickMessage).tick;
 
-        );
+        const listeners =
 
-    }
+            this.handlers.get(
 
-    /* ---------------------------------------------------------------------- */
-    /*                     DESTROY                                            */
-    /* ---------------------------------------------------------------------- */
+                tick.symbol
 
-    public override destroy(): void {
+            );
 
-        this.clearHistory();
+        if (
 
-        this.symbol = undefined;
+            !listeners
 
-        super.destroy();
+        ) {
 
-        logger.info(
+            return;
 
-            "Tick channel destroyed."
+        }
+
+        listeners.forEach(
+
+            listener =>
+
+                listener(
+
+                    tick
+
+                )
 
         );
 
@@ -583,19 +212,15 @@ export class TickChannel extends BaseChannel<Tick> {
 
 }
 
-/* -------------------------------------------------------------------------- */
-/*                         FACTORY                                            */
-/* -------------------------------------------------------------------------- */
-
 export function createTickChannel(
 
-    manager: WebSocketManager
+    client: DerivWebSocketClient
 
-): TickChannel {
+) {
 
     return new TickChannel(
 
-        manager
+        client
 
     );
 

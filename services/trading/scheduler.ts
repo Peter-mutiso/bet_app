@@ -2,443 +2,193 @@
  * ============================================================================
  * TRADING SCHEDULER
  * ============================================================================
- * Executes periodic trading tasks.
+ *
+ * Responsible for:
+ *  - Contract expiry timers
+ *  - Periodic background jobs
+ *  - Synchronization events
  * ============================================================================
  */
 
-import { EventEmitter } from "events";
-
-/* -------------------------------------------------------------------------- */
-/*                         CONFIGURATION                                      */
-/* -------------------------------------------------------------------------- */
-
-export interface SchedulerConfiguration {
-
-    readonly enabled: boolean;
-
-    readonly heartbeatInterval: number;
-
-    readonly evaluationInterval: number;
-
-    readonly synchronizationInterval: number;
-
-}
-
-/* -------------------------------------------------------------------------- */
-/*                          TASK                                              */
-/* -------------------------------------------------------------------------- */
+import EventEmitter from "events";
 
 export interface ScheduledTask {
 
-    readonly name: string;
+    id: string;
 
-    readonly interval: number;
+    interval: number;
 
-    execute(): Promise<void>;
-
-}
-
-/* -------------------------------------------------------------------------- */
-/*                         METRICS                                            */
-/* -------------------------------------------------------------------------- */
-
-export interface SchedulerMetrics {
-
-    executions: number;
-
-    failures: number;
-
-    startedAt?: Date;
+    callback: () => void;
 
 }
 
-/* -------------------------------------------------------------------------- */
-/*                          STATE                                              */
-/* -------------------------------------------------------------------------- */
+export class TradingScheduler extends EventEmitter {
 
-export enum SchedulerState {
+    private static instance: TradingScheduler | null = null;
 
-    CREATED = "CREATED",
+    private readonly intervals =
 
-    RUNNING = "RUNNING",
+        new Map<string, ReturnType<typeof setInterval>>();
 
-    STOPPED = "STOPPED"
+    private readonly timeouts =
 
-}
+        new Map<string, ReturnType<typeof setTimeout>>();
 
-/* -------------------------------------------------------------------------- */
-/*                         SCHEDULER                                          */
-/* -------------------------------------------------------------------------- */
-
-export class TradingScheduler
-
-extends EventEmitter {
-
-    private readonly tasks =
-
-        new Map<string, NodeJS.Timeout>();
-
-    private readonly metrics:
-
-    SchedulerMetrics = {
-
-        executions: 0,
-
-        failures: 0
-
-    };
-
-    private state =
-
-        SchedulerState.CREATED;
-
-    constructor(
-
-        private readonly configuration:
-
-        SchedulerConfiguration
-
-    ) {
+    private constructor() {
 
         super();
 
     }
 
-    public enabled():
+    /* ---------------------------------------------------------------------- */
+    /* SINGLETON                                                              */
+    /* ---------------------------------------------------------------------- */
 
-    boolean {
+    public static getInstance(): TradingScheduler {
 
-        return this.configuration.enabled;
+        if (
 
-    }
+            !TradingScheduler.instance
 
-    public currentState():
+        ) {
 
-    SchedulerState {
+            TradingScheduler.instance =
 
-        return this.state;
+                new TradingScheduler();
 
-    }
+        }
 
-    public statistics():
-
-    Readonly<SchedulerMetrics> {
-
-        return Object.freeze({
-
-            ...this.metrics
-
-        });
+        return TradingScheduler.instance;
 
     }
 
-}
-/* -------------------------------------------------------------------------- */
-/*                         REGISTER TASK                                      */
-/* -------------------------------------------------------------------------- */
+    /* ---------------------------------------------------------------------- */
+    /* INTERVAL TASKS                                                         */
+    /* ---------------------------------------------------------------------- */
 
-    public register(
+    public schedule(
 
         task: ScheduledTask
 
     ): void {
 
-        if (
+        this.cancel(
 
-            this.tasks.has(
-
-                task.name
-
-            )
-
-        ) {
-
-            throw new Error(
-
-                `Task "${task.name}" is already registered.`
-
-            );
-
-        }
-
-        const timer = setInterval(
-
-            async () => {
-
-                await this.executeTask(
-
-                    task
-
-                );
-
-            },
-
-            task.interval
+            task.id
 
         );
-
-        this.tasks.set(
-
-            task.name,
-
-            timer
-
-        );
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                          EXECUTE TASK                                      */
-/* -------------------------------------------------------------------------- */
-
-    protected async executeTask(
-
-        task: ScheduledTask
-
-    ): Promise<void> {
-
-        try {
-
-            await task.execute();
-
-            this.metrics.executions++;
-
-            this.emit(
-
-                "taskCompleted",
-
-                task.name
-
-            );
-
-        }
-
-        catch (
-
-            error
-
-        ) {
-
-            this.metrics.failures++;
-
-            this.emit(
-
-                "taskFailed",
-
-                {
-
-                    task: task.name,
-
-                    error
-
-                }
-
-            );
-
-        }
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                           START                                            */
-/* -------------------------------------------------------------------------- */
-
-    public start():
-
-    void {
-
-        if (
-
-            !this.enabled()
-
-        ) {
-
-            return;
-
-        }
-
-        if (
-
-            this.state ===
-
-            SchedulerState.RUNNING
-
-        ) {
-
-            return;
-
-        }
-
-        this.state =
-
-            SchedulerState.RUNNING;
-
-        this.metrics.startedAt =
-
-            new Date();
-
-        this.emit(
-
-            "started"
-
-        );
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                             STOP                                           */
-/* -------------------------------------------------------------------------- */
-
-    public stop():
-
-    void {
-
-        if (
-
-            this.state ===
-
-            SchedulerState.STOPPED
-
-        ) {
-
-            return;
-
-        }
-
-        for (
-
-            const timer of
-
-            this.tasks.values()
-
-        ) {
-
-            clearInterval(
-
-                timer
-
-            );
-
-        }
-
-        this.tasks.clear();
-
-        this.state =
-
-            SchedulerState.STOPPED;
-
-        this.emit(
-
-            "stopped"
-
-        );
-
-    }
-    /* -------------------------------------------------------------------------- */
-/*                         UNREGISTER TASK                                    */
-/* -------------------------------------------------------------------------- */
-
-    public unregister(
-
-        name: string
-
-    ): boolean {
 
         const timer =
 
-            this.tasks.get(
+            setInterval(
 
-                name
+                () => {
+
+                    task.callback();
+
+                    this.emit(
+
+                        "task",
+
+                        task.id
+
+                    );
+
+                },
+
+                task.interval
 
             );
 
-        if (
+        this.intervals.set(
 
-            !timer
-
-        ) {
-
-            return false;
-
-        }
-
-        clearInterval(
+            task.id,
 
             timer
 
         );
 
-        this.tasks.delete(
+    }
 
-            name
+    /* ---------------------------------------------------------------------- */
+    /* TIMEOUTS                                                               */
+    /* ---------------------------------------------------------------------- */
+
+    public scheduleTimeout(
+
+        id: string,
+
+        delay: number,
+
+        callback: () => void
+
+    ): void {
+
+        this.cancelTimeout(
+
+            id
 
         );
 
-        this.emit(
+        const timer =
 
-            "taskRemoved",
+            setTimeout(
 
-            name
+                () => {
 
-        );
+                    callback();
 
-        return true;
+                    this.emit(
 
-    }
+                        "timeout",
 
-/* -------------------------------------------------------------------------- */
-/*                          TASK INFORMATION                                  */
-/* -------------------------------------------------------------------------- */
+                        id
 
-    public taskNames():
+                    );
 
-    readonly string[] {
+                    this.timeouts.delete(
 
-        return [
+                        id
 
-            ...this.tasks.keys()
+                    );
 
-        ];
+                },
 
-    }
+                delay
 
-    public hasTask(
+            );
 
-        name: string
+        this.timeouts.set(
 
-    ): boolean {
+            id,
 
-        return this.tasks.has(
-
-            name
+            timer
 
         );
 
     }
 
-/* -------------------------------------------------------------------------- */
-/*                            PAUSE                                           */
-/* -------------------------------------------------------------------------- */
+    /* ---------------------------------------------------------------------- */
+    /* CANCEL                                                                 */
+    /* ---------------------------------------------------------------------- */
 
-    public pause(): void {
+    public cancel(
+
+        id: string
+
+    ): void {
+
+        const timer =
+
+            this.intervals.get(
+
+                id
+
+            );
 
         if (
 
-            this.state !==
-
-            SchedulerState.RUNNING
-
-        ) {
-
-            return;
-
-        }
-
-        for (
-
-            const timer of
-
-            this.tasks.values()
+            timer
 
         ) {
 
@@ -448,231 +198,93 @@ extends EventEmitter {
 
             );
 
-        }
+            this.intervals.delete(
 
-        this.state =
-
-            SchedulerState.STOPPED;
-
-        this.emit(
-
-            "paused"
-
-        );
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                           RESUME                                           */
-/* -------------------------------------------------------------------------- */
-
-    public resume(): void {
-
-        if (
-
-            this.state !==
-
-            SchedulerState.STOPPED
-
-        ) {
-
-            return;
-
-        }
-
-        this.state =
-
-            SchedulerState.RUNNING;
-
-        this.emit(
-
-            "resumed"
-
-        );
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                           HEALTH                                           */
-/* -------------------------------------------------------------------------- */
-
-    public healthy():
-
-    boolean {
-
-        return (
-
-            this.enabled() &&
-
-            this.state !==
-
-            SchedulerState.STOPPED
-
-        );
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                         INFORMATION                                        */
-/* -------------------------------------------------------------------------- */
-
-    public information():
-
-    Readonly<Record<string, unknown>> {
-
-        return Object.freeze({
-
-            enabled:
-
-                this.enabled(),
-
-            state:
-
-                this.state,
-
-            taskCount:
-
-                this.tasks.size,
-
-            tasks:
-
-                this.taskNames(),
-
-            configuration:
-
-                this.configuration
-
-        });
-
-    }
-
-/* -------------------------------------------------------------------------- */
-/*                         DIAGNOSTICS                                        */
-/* -------------------------------------------------------------------------- */
-
-    public diagnostics():
-
-    Readonly<Record<string, unknown>> {
-
-        return Object.freeze({
-
-            healthy:
-
-                this.healthy(),
-
-            metrics:
-
-                this.statistics(),
-
-            information:
-
-                this.information()
-
-        });
-
-    }
-    /* -------------------------------------------------------------------------- */
-/*                              RESET                                         */
-/* -------------------------------------------------------------------------- */
-
-    public reset(): void {
-
-        for (
-
-            const timer of
-
-            this.tasks.values()
-
-        ) {
-
-            clearInterval(
-
-                timer
+                id
 
             );
 
         }
 
-        this.tasks.clear();
+    }
 
-        this.state =
+    public cancelTimeout(
 
-            SchedulerState.CREATED;
+        id: string
 
-        this.metrics.executions = 0;
+    ): void {
 
-        this.metrics.failures = 0;
+        const timer =
 
-        this.metrics.startedAt = undefined;
+            this.timeouts.get(
 
-        this.emit(
+                id
 
-            "reset"
+            );
 
-        );
+        if (
+
+            timer
+
+        ) {
+
+            clearTimeout(
+
+                timer
+
+            );
+
+            this.timeouts.delete(
+
+                id
+
+            );
+
+        }
 
     }
 
-/* -------------------------------------------------------------------------- */
-/*                         STATE HELPERS                                      */
-/* -------------------------------------------------------------------------- */
+    /* ---------------------------------------------------------------------- */
+    /* CLEANUP                                                                */
+    /* ---------------------------------------------------------------------- */
 
-    public isRunning():
+    public stopAll(): void {
 
-    boolean {
+        this.intervals.forEach(
 
-        return (
+            timer =>
 
-            this.state ===
+                clearInterval(
 
-            SchedulerState.RUNNING
+                    timer
 
-        );
-
-    }
-
-    public isStopped():
-
-    boolean {
-
-        return (
-
-            this.state ===
-
-            SchedulerState.STOPPED
+                )
 
         );
 
-    }
+        this.timeouts.forEach(
 
-/* -------------------------------------------------------------------------- */
-/*                            CLEANUP                                         */
-/* -------------------------------------------------------------------------- */
+            timer =>
 
-    public destroy(): void {
+                clearTimeout(
 
-        this.reset();
+                    timer
 
-        this.removeAllListeners();
+                )
 
+        );
+
+        this.intervals.clear();
+
+        this.timeouts.clear();
     }
 
 }
 
 /* -------------------------------------------------------------------------- */
-/*                           FACTORY                                          */
+/* EXPORT                                                                     */
 /* -------------------------------------------------------------------------- */
 
-export function createTradingScheduler(
+export const tradingScheduler =
 
-    configuration: SchedulerConfiguration
-
-): TradingScheduler {
-
-    return new TradingScheduler(
-
-        configuration
-
-    );
-
-}
+    TradingScheduler.getInstance();
