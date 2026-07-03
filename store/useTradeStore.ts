@@ -191,11 +191,6 @@ export const useTradeStore = create<TradeState>((set, get) => ({
   ],
 
 fullscreen: false,
-  timeframe: "1m",
-  chartType: "CANDLESTICK",
-  enabledIndicators: [],
-  watchlist: [],
-  fullscreen: false,
   showInstrumentPicker: false,
   currentTradeType: "ACCUMULATOR",
   autoMode: false,
@@ -323,6 +318,42 @@ fullscreen: false,
         : allowed[0],
     }));
   },
+
+  setTimeframe: (timeframe) => {
+  set({ timeframe });
+},
+
+setChartType: (chartType) => {
+  set({ chartType });
+},
+
+toggleIndicator: (indicator) => {
+  set((state) => ({
+    enabledIndicators: state.enabledIndicators.includes(indicator)
+      ? state.enabledIndicators.filter((i) => i !== indicator)
+      : [...state.enabledIndicators, indicator],
+  }));
+},
+
+addToWatchlist: (symbol) => {
+  set((state) => ({
+    watchlist: state.watchlist.includes(symbol)
+      ? state.watchlist
+      : [...state.watchlist, symbol],
+  }));
+},
+
+removeFromWatchlist: (symbol) => {
+  set((state) => ({
+    watchlist: state.watchlist.filter((item) => item !== symbol),
+  }));
+},
+
+toggleFullscreen: () => {
+  set((state) => ({
+    fullscreen: !state.fullscreen,
+  }));
+},
   setShowInstrumentPicker: (showInstrumentPicker) => set({ showInstrumentPicker }),
   setCurrentTradeType: (currentTradeType) => set({ currentTradeType }),
   setAutoMode: (autoMode) => set({ autoMode }),
