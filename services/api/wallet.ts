@@ -87,6 +87,22 @@ export class WalletService {
   this.wallet!.balance += request.amount;
   this.wallet!.availableBalance += request.amount;
   this.wallet!.updatedAt = new Date().toISOString();
+  this.saveTransaction({
+  id: crypto.randomUUID(),
+  type: "withdraw",
+  amount: -request.amount,
+  balance: this.wallet!.balance,
+  description: `Withdrawal to ${request.destination}`,
+  createdAt: new Date().toISOString(),
+});
+  this.saveTransaction({
+  id: crypto.randomUUID(),
+  type: "deposit",
+  amount: request.amount,
+  balance: this.wallet!.balance,
+  description: `Deposit via ${request.paymentMethod}`,
+  createdAt: new Date().toISOString(),
+});
 
   localStorage.setItem("demoWallet", JSON.stringify(this.wallet));
 
@@ -119,6 +135,13 @@ private saveTransaction(tx: WalletTransaction) {
   const txs = this.getTransactions();
   txs.unshift(tx);
   localStorage.setItem("demoTransactions", JSON.stringify(txs));
+}
+public async transactions(): Promise<WalletTransaction[]> {
+  const txs = this.getTransactions();
+
+  this.metrics.transactionsLoaded = txs.length;
+
+  return txs;
 }
   public current() {
     return this.wallet;
