@@ -50,50 +50,47 @@ export class TickChannel {
 
     }
 
-    public subscribe(
+    public async subscribe(
 
-        symbol: string,
+    symbol: string,
 
-        handler: TickHandler
+    handler: TickHandler
+
+): Promise<void> {
+
+    if (
+
+        !this.handlers.has(symbol)
 
     ) {
 
-        if (
+        this.handlers.set(
 
-            !this.handlers.has(
+            symbol,
 
-                symbol
+            new Set()
 
-            )
+        );
 
-        ) {
+        await this.client.ready();
 
-            this.handlers.set(
+        this.client.send({
 
-                symbol,
+            ticks: symbol,
 
-                new Set()
+            subscribe: 1
 
-            );
-
-            this.client.send({
-
-                ticks: symbol,
-
-                subscribe: 1
-
-            });
-
-        }
-
-        this.handlers
-
-            .get(symbol)!
-
-            .add(handler);
+        });
 
     }
 
+    this.handlers
+
+        .get(symbol)!
+
+        .add(handler);
+
+}
     public unsubscribe(
 
         symbol: string,

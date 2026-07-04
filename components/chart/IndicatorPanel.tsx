@@ -1,92 +1,64 @@
 "use client";
 
-import { useState } from "react";
 import {
     SlidersHorizontal,
     Check
 } from "lucide-react";
 
-interface Indicator {
+import { useState } from "react";
 
-    name: string;
+import {
+    Indicator,
+    useTradeStore
+} from "@/store/useTradeStore";
 
-    enabled: boolean;
+const ALL_INDICATORS: Indicator[] = [
 
-}
+    "EMA (9)",
+
+    "EMA (21)",
+
+    "EMA (50)",
+
+    "SMA (20)",
+
+    "RSI",
+
+    "MACD",
+
+    "Bollinger Bands",
+
+    "Stochastic",
+
+    "ATR",
+
+    "VWAP"
+
+];
 
 export default function IndicatorPanel() {
 
     const [open, setOpen] = useState(false);
 
-    const [indicators, setIndicators] = useState<Indicator[]>([
-        {
-            name: "EMA (9)",
-            enabled: true
-        },
-        {
-            name: "EMA (21)",
-            enabled: true
-        },
-        {
-            name: "SMA (50)",
-            enabled: false
-        },
-        {
-            name: "SMA (200)",
-            enabled: false
-        },
-        {
-            name: "Bollinger Bands",
-            enabled: true
-        },
-        {
-            name: "RSI",
-            enabled: false
-        },
-        {
-            name: "MACD",
-            enabled: false
-        },
-        {
-            name: "ATR",
-            enabled: false
-        },
-        {
-            name: "Stochastic",
-            enabled: false
-        },
-        {
-            name: "Ichimoku Cloud",
-            enabled: false
-        }
-    ]);
+    const enabledIndicators = useTradeStore(
 
-    function toggle(index: number) {
+        state => state.enabledIndicators
 
-        setIndicators(previous =>
+    );
 
-            previous.map((indicator, i) =>
+    const toggleIndicator = useTradeStore(
 
-                i === index
+        state => state.toggleIndicator
 
-                    ? {
-                        ...indicator,
-                        enabled: !indicator.enabled
-                    }
-
-                    : indicator
-
-            )
-
-        );
-
-    }
+    );
 
     return (
 
         <div className="indicator-panel">
 
             <button
+
+                type="button"
 
                 className="toolbar-btn"
 
@@ -112,19 +84,25 @@ export default function IndicatorPanel() {
 
                         {
 
-                            indicators.map(
+                            ALL_INDICATORS.map(
 
-                                (indicator, index) => (
+                                indicator => (
 
                                     <button
 
-                                        key={indicator.name}
+                                        key={indicator}
+
+                                        type="button"
 
                                         className="indicator-item"
 
                                         onClick={() =>
 
-                                            toggle(index)
+                                            toggleIndicator(
+
+                                                indicator
+
+                                            )
 
                                         }
 
@@ -132,13 +110,17 @@ export default function IndicatorPanel() {
 
                                         <span>
 
-                                            {indicator.name}
+                                            {indicator}
 
                                         </span>
 
                                         {
 
-                                            indicator.enabled && (
+                                            enabledIndicators.includes(
+
+                                                indicator
+
+                                            ) && (
 
                                                 <Check
 

@@ -1,21 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useTradeStore } from "@/store/useTradeStore";
 
 const timeframes = [
     "1T",
     "5T",
-    "10T",
     "15T",
-    "30T",
-    "1M",
-    "5M",
-    "15M"
-];
+    "1H",
+    "4H",
+    "1D"
+] as const;
 
 export default function TimeframeSelector() {
 
-    const [selected, setSelected] = useState("1T");
+    const selected = useTradeStore(
+        (state) => state.timeframe
+    );
+
+    const setTimeframe = useTradeStore(
+        (state) => state.setTimeframe
+    );
 
     return (
 
@@ -26,13 +30,27 @@ export default function TimeframeSelector() {
                 timeframes.map((frame) => (
 
                     <button
+
                         key={frame}
-                        onClick={() => setSelected(frame)}
-                        className={
-                            selected === frame
-                                ? "timeframe-btn active"
-                                : "timeframe-btn"
+
+                        type="button"
+
+                        onClick={() =>
+
+                            setTimeframe(frame)
+
                         }
+
+                        className={
+
+                            selected === frame
+
+                                ? "timeframe-btn active"
+
+                                : "timeframe-btn"
+
+                        }
+
                     >
 
                         {frame}

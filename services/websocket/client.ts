@@ -56,7 +56,7 @@ export class DerivWebSocketClient {
     }
 
     if (!this.readyPromise) {
-      this.readyPromise = new Promise((resolve, reject) => {
+      this.readyPromise = new Promise<void>((resolve, reject) => {
         this.resolveReady = resolve;
         this.rejectReady = reject;
       });
@@ -100,26 +100,37 @@ export class DerivWebSocketClient {
   }
 
   public async connect() {
-    if (this.connected() || this.state === ConnectionState.CONNECTING) {
-      return;
+    if (this.connected()) {
+        return;
     }
 
-    if (typeof WebSocket === "undefined" || !this.configuration.endpoint) {
-      this.state = ConnectionState.DISCONNECTED;
+    if (this.state === ConnectionState.CONNECTING) {
+        await this.ready();
+        return;
+    }
 
-      // ❌ fail ready promise
-      this.rejectReady?.("WebSocket unavailable");
-      this.readyPromise = undefined;
+    if (
+        typeof WebSocket === "undefined" ||
+        !this.configuration.endpoint
+    ) {
+        this.state = ConnectionState.DISCONNECTED;
 
-      return;
+        this.rejectReady?.("WebSocket unavailable");
+        this.readyPromise = undefined;
+
+        return;
     }
 
     this.state = ConnectionState.CONNECTING;
-    this.socket = new WebSocket(this.configuration.endpoint);
+
+    this.socket = new WebSocket(
+        this.configuration.endpoint
+    );
 
     this.registerEvents();
-  }
 
+    await this.ready();
+}
   public disconnect(code = 1000, reason = "Normal Closure") {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
@@ -137,17 +148,26 @@ export class DerivWebSocketClient {
     this.socket.close(code, reason);
   }
 
-  // =========================================================
-  // 🔥 FIXED SEND (SAFE WITH READY CHECK)
-  // =========================================================
   public send(payload: unknown) {
-    if (!this.connected() || !this.socket) {
-      throw new Error("WebSocket is not connected.");
+
+    if (
+        !this.socket ||
+        this.socket.readyState !== WebSocket.OPEN
+    ) {
+
+        throw new Error(
+            "WebSocket is not connected."
+        );
+
     }
 
-    this.socket.send(JSON.stringify(payload));
+    this.socket.send(
+        JSON.stringify(payload)
+    );
+
     this.metrics.sent++;
-  }
+
+}
 
   public request(payload: Record<string, unknown>) {
     const requestId = crypto.randomUUID();
@@ -165,10 +185,12 @@ export class DerivWebSocketClient {
       this.state = ConnectionState.CONNECTED;
       this.metrics.lastConnected = new Date();
 
-      // =====================================================
-      // ✅ RESOLVE READY PROMISE HERE
-      // =====================================================
       this.resolveReady?.();
+
+      this.resolveReady = undefined;
+
+      this.rejectReady = undefined;
+
       this.readyPromise = undefined;
 
       this.startHeartbeat();
@@ -189,8 +211,12 @@ export class DerivWebSocketClient {
       this.state = ConnectionState.DISCONNECTED;
       this.metrics.lastDisconnected = new Date();
 
-      // ❌ reject ready on disconnect
       this.rejectReady?.("Socket closed");
+
+      this.resolveReady = undefined;
+
+      this.rejectReady = undefined;
+
       this.readyPromise = undefined;
 
       this.emit("disconnected");

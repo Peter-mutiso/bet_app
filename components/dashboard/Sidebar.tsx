@@ -37,7 +37,7 @@ const mainMenu = [
     {
         title: "Trade",
         icon: LineChart,
-        href: "/trade"
+        href: "/trading"
     },
 
     {

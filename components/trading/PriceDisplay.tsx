@@ -1,26 +1,22 @@
-interface Props {
+"use client";
 
-    bid: number;
+import { useTradeStore } from "@/store/useTradeStore";
 
-    ask: number;
+export default function PriceDisplay() {
 
-}
+    const price = useTradeStore(
+        (state) => state.price
+    );
 
-export default function PriceDisplay({
+    // Simulated spread
+    const spread = 0.20;
 
-    bid,
-
-    ask
-
-}: Props) {
+    const bid = price;
+    const ask = price + spread;
 
     return (
 
-        <div
-
-            className="price-display"
-
-        >
+        <div className="price-display">
 
             <div>
 
@@ -32,7 +28,7 @@ export default function PriceDisplay({
 
                 <h2>
 
-                    {bid}
+                    {bid.toFixed(2)}
 
                 </h2>
 
@@ -48,7 +44,7 @@ export default function PriceDisplay({
 
                 <h2>
 
-                    {ask}
+                    {ask.toFixed(2)}
 
                 </h2>
 

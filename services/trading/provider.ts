@@ -74,10 +74,10 @@ export class TradingProvider {
             this.subscriptions.subscribe(key);
 
         if (firstSubscriber) {
-            this.channels.tick.subscribe(
-                symbol,
-                tick => this.dispatcher.emit(key, tick)
-            );
+            await this.channels.tick.subscribe(
+    symbol,
+    tick => this.dispatcher.emit(key, tick)
+);
         }
 
         this.dispatcher.on(key, callback);

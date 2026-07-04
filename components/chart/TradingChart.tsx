@@ -2,30 +2,71 @@
 
 import { useEffect, useRef } from "react";
 import {
-  createChart,
-  ColorType,
-  IChartApi,
-  ISeriesApi,
-  CandlestickData,
-  LineData,
-  UTCTimestamp,
+    createChart,
+    ColorType,
+    CrosshairMode,
+    IChartApi,
+    ISeriesApi,
+    CandlestickData,
+    LineData,
+    UTCTimestamp,
 } from "lightweight-charts";
 import { useTradeStore } from "@/store/useTradeStore";
 import { ALL_INSTRUMENTS } from "@/lib/instruments";
 
-type Props = {
-  type?: "line" | "candles" | "area" | "ohlc" | "hollow";
-};
 
 type Candle = CandlestickData;
+function calculateEMA(
+    candles: Candle[],
+    period: number
+) {
 
-export default function TradingChart({
-  type = "candles",
-}: Props) {
+    if (candles.length < period) {
+
+        return [];
+
+    }
+
+    const multiplier =
+        2 / (period + 1);
+
+    let ema =
+        candles[0].close;
+
+    return candles.map(candle => {
+
+        ema =
+            (candle.close - ema) *
+            multiplier +
+            ema;
+
+        return {
+
+            time: candle.time,
+
+            value: ema
+
+        };
+
+    });
+
+}
+
+export default function TradingChart() {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const chartRef = useRef<IChartApi | null>(null);
-  const seriesRef = useRef<ISeriesApi<any> | null>(null);
+
+const seriesRef = useRef<ISeriesApi<any> | null>(null);
+
+const ema9SeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
+
+const ema21SeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
+const bbUpperRef = useRef<ISeriesApi<"Line"> | null>(null);
+
+const bbMiddleRef = useRef<ISeriesApi<"Line"> | null>(null);
+
+const bbLowerRef = useRef<ISeriesApi<"Line"> | null>(null);
 
   const activeCandleRef = useRef<Candle | null>(null);
   const candlesRef = useRef<Candle[]>([]);
@@ -34,12 +75,49 @@ export default function TradingChart({
   const lastCandleTimeRef = useRef<number>(0);
   const frameRef = useRef<number | null>(null);
 
+const followLiveRef = useRef(true);
+  const ohlcRef = useRef<HTMLDivElement | null>(null);
+
   const { price } = useTradeStore();
-  const theme = useTradeStore((s) => s.theme);
-  const selectedInstrument = useTradeStore((s) => s.selectedInstrument);
-  const setSelectedInstrument = useTradeStore((s) => s.setSelectedInstrument);
-  const volatilityState = useTradeStore((s) => s.volatilityState);
-  const setVolatilityState = useTradeStore((s) => s.setVolatilityState);
+  const theme =
+    useTradeStore(
+        s => s.theme
+    );
+
+const selectedInstrument =
+    useTradeStore(
+        s => s.selectedInstrument
+    );
+
+const setSelectedInstrument =
+    useTradeStore(
+        s => s.setSelectedInstrument
+    );
+
+const volatilityState =
+    useTradeStore(
+        s => s.volatilityState
+    );
+
+const setVolatilityState =
+    useTradeStore(
+        s => s.setVolatilityState
+    );
+
+const chartType =
+    useTradeStore(
+        s => s.chartType
+    );
+
+const timeframe =
+    useTradeStore(
+        s => s.timeframe
+    );
+
+const enabledIndicators =
+    useTradeStore(
+        s => s.enabledIndicators
+    );
   const INSTRUMENTS = ALL_INSTRUMENTS || [selectedInstrument];
 
   // small overlay UI for instrument and volatility switching inside the chart
@@ -62,7 +140,26 @@ export default function TradingChart({
         },
         textColor: "#9ca3af",
       },
+      handleScroll: {
 
+    mouseWheel: true,
+
+    pressedMouseMove: true,
+
+    horzTouchDrag: true,
+
+    vertTouchDrag: true,
+
+},
+      handleScale: {
+
+    mouseWheel: true,
+
+    pinch: true,
+
+    axisPressedMouseMove: true,
+
+},
       grid: {
         vertLines: { color: "#1f2937" },
         horzLines: { color: "#1f2937" },
@@ -73,15 +170,124 @@ export default function TradingChart({
       },
 
       timeScale: {
-        borderColor: "#2a2e39",
-        timeVisible: true,
-        secondsVisible: true,
-      },
+
+    borderColor: "#2a2e39",
+
+    timeVisible: true,
+
+    secondsVisible: true,
+
+    rightOffset: 5,
+
+    barSpacing: 8,
+
+    minBarSpacing: 2,
+
+    fixLeftEdge: false,
+
+    fixRightEdge: false,
+
+    lockVisibleTimeRangeOnResize: true,
+
+},
+      crosshair: {
+
+    mode: CrosshairMode.Normal,
+
+    vertLine: {
+
+        color: "#3b82f6",
+
+        width: 1,
+
+        style: 2,
+
+        labelVisible: true,
+
+    },
+
+    horzLine: {
+
+        color: "#3b82f6",
+
+        width: 1,
+
+        style: 2,
+
+        labelVisible: true,
+
+    },
+
+},
     });
 
     chartRef.current = chart;
-    chart.timeScale().fitContent();
+    chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
 
+    followLiveRef.current = false;
+
+});
+
+chart.subscribeCrosshairMove((param) => {
+
+    if (
+        !ohlcRef.current ||
+        !param.time ||
+        !param.seriesData
+    ) {
+        return;
+    }
+
+    const data =
+    param.seriesData.get(
+        seriesRef.current as any
+    ) as any;
+
+if (!data) {
+    return;
+}
+
+if ("open" in data) {
+
+    ohlcRef.current.innerHTML = `
+        O: ${data.open.toFixed(2)}
+        &nbsp;
+        H: ${data.high.toFixed(2)}
+        &nbsp;
+        L: ${data.low.toFixed(2)}
+        &nbsp;
+        C: ${data.close.toFixed(2)}
+    `;
+
+}
+else {
+
+    ohlcRef.current.innerHTML = `
+        Price:
+        ${data.value.toFixed(2)}
+    `;
+
+}
+containerRef.current?.addEventListener(
+
+    "mouseleave",
+
+    () => {
+
+        if (ohlcRef.current) {
+
+            ohlcRef.current.innerHTML =
+
+                "O:- H:- L:- C:-";
+
+        }
+
+    }
+
+);
+});
+
+chart.timeScale().fitContent();
     return () => {
       if (frameRef.current) {
         cancelAnimationFrame(frameRef.current);
@@ -173,6 +379,19 @@ export default function TradingChart({
     if (!chartRef.current) return;
 
     const chart = chartRef.current;
+    if (ema9SeriesRef.current) {
+    try {
+        chart.removeSeries(ema9SeriesRef.current);
+    } catch {}
+    ema9SeriesRef.current = null;
+}
+
+if (ema21SeriesRef.current) {
+    try {
+        chart.removeSeries(ema21SeriesRef.current);
+    } catch {}
+    ema21SeriesRef.current = null;
+}
 
     // Double-buffer swap: create new series first, populate it, then remove old series
     const oldSeries = seriesRef.current;
@@ -183,7 +402,7 @@ export default function TradingChart({
     const upColor = isDark ? "#22c55e" : "#0f9d58";
     const downColor = isDark ? "#ef4444" : "#d32f2f";
 
-    switch (type) {
+    switch (chartType) {
       case "line":
         series = chart.addLineSeries({
           color: isDark ? "#3b82f6" : "#1e40af",
@@ -219,23 +438,240 @@ export default function TradingChart({
       lastCandleTimeRef.current = seed[seed.length - 1].time as number;
 
       newSeries.setData(
-        type === "line" || type === "area"
+        chartType === "line" || chartType === "area"
           ? seed.map((c) => ({ time: c.time, value: c.close }))
           : seed
       );
+      if (
+    enabledIndicators.includes("EMA (9)")
+) {
 
-      chart.timeScale().scrollToRealTime();
+    ema9SeriesRef.current =
+        chart.addLineSeries({
+
+            color: "#3b82f6",
+
+            lineWidth: 2,
+
+            lastValueVisible: false,
+
+            priceLineVisible: false
+
+        });
+
+    ema9SeriesRef.current.setData(
+
+        calculateEMA(
+            seed,
+            9
+        )
+        
+
+    );
+function calculateBollinger(
+    candles: Candle[],
+    period = 20,
+    multiplier = 2
+) {
+
+    if (candles.length < period) {
+
+        return {
+            upper: [],
+            middle: [],
+            lower: []
+        };
+
+    }
+
+    const upper: LineData[] = [];
+
+    const middle: LineData[] = [];
+
+    const lower: LineData[] = [];
+
+    for (
+
+        let i = period - 1;
+
+        i < candles.length;
+
+        i++
+
+    ) {
+
+        const slice = candles.slice(
+
+            i - period + 1,
+
+            i + 1
+
+        );
+
+        const average =
+
+            slice.reduce(
+
+                (sum, candle) =>
+
+                    sum + candle.close,
+
+                0
+
+            ) / period;
+
+        const variance =
+
+            slice.reduce(
+
+                (sum, candle) =>
+
+                    sum +
+
+                    Math.pow(
+
+                        candle.close - average,
+
+                        2
+
+                    ),
+
+                0
+
+            ) / period;
+
+        const deviation =
+
+            Math.sqrt(
+
+                variance
+
+            );
+
+        upper.push({
+
+            time: candles[i].time,
+
+            value:
+
+                average +
+
+                deviation * multiplier
+
+        });
+
+        middle.push({
+
+            time: candles[i].time,
+
+            value: average
+
+        });
+
+        lower.push({
+
+            time: candles[i].time,
+
+            value:
+
+                average -
+
+                deviation * multiplier
+
+        });
+
+    }
+
+    return {
+
+        upper,
+
+        middle,
+
+        lower
+
+    };
+
+}
+}
+
+if (
+    enabledIndicators.includes("EMA (21)")
+) {
+
+    ema21SeriesRef.current =
+        chart.addLineSeries({
+
+            color: "#f59e0b",
+
+            lineWidth: 2,
+
+            lastValueVisible: false,
+
+            priceLineVisible: false
+
+        });
+
+    ema21SeriesRef.current.setData(
+
+        calculateEMA(
+            seed,
+            21
+        )
+
+    );
+
+}
+
+if (followLiveRef.current) {
+
+    chart.timeScale().scrollToRealTime();
+
+}
     }
 
     // now make the new series live and remove the old one shortly after to avoid flicker
     seriesRef.current = newSeries;
+    
+
+if (
+
+    enabledIndicators.includes(
+
+        "EMA (21)"
+
+    )
+
+) {
+
+    ema21SeriesRef.current =
+
+        chart.addLineSeries({
+
+            color: "#f59e0b",
+
+            lineWidth: 2,
+
+            lastValueVisible: false,
+
+            priceLineVisible: false
+
+        });
+
+}
     if (oldSeries && oldSeries !== newSeries) {
       // schedule removal on next animation frame to make swap appear atomic
       requestAnimationFrame(() => {
         try { chart.removeSeries(oldSeries); } catch {}
       });
     }
-  }, [type, theme]);
+  }, [
+    chartType,
+    theme,
+    enabledIndicators,
+    timeframe,
+    selectedInstrument,
+]);
 
   // =====================================================
   // LIVE ENGINE (STABLE CANDLE LOGIC)
@@ -315,14 +751,59 @@ export default function TradingChart({
       // =====================================================
       // RENDER
       // =====================================================
-      if (type === "line" || type === "area") {
-        series.update({
-          time: now as UTCTimestamp,
-          value: currentPrice,
-        } as LineData);
-      } else if (c) {
-        series.update({ ...c });
-      }
+      if (
+    chartType === "line" ||
+    chartType === "area"
+) {
+
+    series.update({
+
+        time: now as UTCTimestamp,
+
+        value: currentPrice,
+
+    } as LineData);
+
+}
+else if (c) {
+
+    series.update({
+
+        ...c
+
+    });
+
+}
+
+if (
+    ema9SeriesRef.current
+) {
+
+    ema9SeriesRef.current.setData(
+
+        calculateEMA(
+            candlesRef.current,
+            9
+        )
+
+    );
+
+}
+
+if (
+    ema21SeriesRef.current
+) {
+
+    ema21SeriesRef.current.setData(
+
+        calculateEMA(
+            candlesRef.current,
+            21
+        )
+
+    );
+
+}
 
       // render trade markers
       try {
@@ -363,11 +844,57 @@ export default function TradingChart({
         frameRef.current = null;
       }
     };
-  }, [type]);
+  }, [chartType]);
 
   return (
     <div ref={containerRef} className="w-full h-full relative">
       <div className="absolute left-3 top-3 z-20 text-slate-300 text-xs">
+        <div
+    ref={ohlcRef}
+    className="absolute top-3 right-4 z-30 rounded bg-black/70 px-3 py-1 text-xs text-white"
+>
+
+    O:
+    -
+
+    H:
+    -
+
+    L:
+    -
+
+    C:
+    -
+
+</div>
+<button
+    className="
+        absolute
+        top-12
+        right-4
+        z-30
+        rounded
+        bg-blue-600
+        px-3
+        py-1
+        text-xs
+        text-white
+        hover:bg-blue-700
+    "
+    onClick={() => {
+
+        followLiveRef.current = true;
+
+        chartRef.current
+            ?.timeScale()
+            .scrollToRealTime();
+
+    }}
+>
+
+    LIVE
+
+</button>
         <div className="flex flex-col gap-2">
           <select
             aria-label="Instrument"
