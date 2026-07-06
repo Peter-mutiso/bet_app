@@ -1,0 +1,354 @@
+/* ============================================================
+   TRADING PAGE OVERRIDES
+   Only affects the Trading Page
+============================================================ */
+
+.trading-layout{
+
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+    background:#070b13;
+    overflow:hidden;
+
+}
+
+.trading-main{
+
+    flex:1;
+
+    display:grid;
+
+    grid-template-columns:
+        250px
+        minmax(0,1fr)
+        360px;
+
+    gap:18px;
+
+    padding:18px;
+
+    overflow:hidden;
+
+}
+.chart-container{
+
+    flex:1;
+
+}
+
+
+/* ================= BOTTOM ================= */
+
+.bottom-wrapper{
+
+    display:flex;
+
+    flex-direction:column;
+
+    overflow:hidden;
+
+    background:#0d111b;
+
+    border-radius:18px;
+
+    border:1px solid #1b2638;
+
+    box-shadow:
+        0 8px 30px rgba(0,0,0,.30);
+
+}
+
+
+/* ================= ORDER PANEL ================= */
+
+.order-wrapper{
+
+    display:flex;
+
+    overflow:hidden;
+
+}
+
+.order-panel{
+
+    width:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+    background:#0d111b;
+
+    border:1px solid #1b2638;
+
+    border-radius:18px;
+
+    padding:20px;
+
+    overflow:auto;
+
+    box-shadow:
+        0 8px 30px rgba(0,0,0,.30);
+
+}
+
+
+/* ================= SIDEBAR ================= */
+
+.trading-sidebar{
+
+    background:#0d111b;
+
+    border-radius:18px;
+
+    border:1px solid #1b2638;
+
+    overflow:auto;
+
+    padding:14px;
+
+    box-shadow:
+        0 8px 30px rgba(0,0,0,.30);
+
+}
+
+
+/* ================= HEADER ================= */
+
+.trading-header{
+
+    flex-shrink:0;
+
+    height:74px;
+
+}
+
+
+/* ================= CARDS ================= */
+
+.market-card,
+.summary-card,
+.account-card{
+
+    border-radius:14px !important;
+
+    transition:.25s;
+
+}
+
+.market-card:hover,
+.summary-card:hover{
+
+    transform:translateY(-2px);
+
+    border-color:#2563eb;
+
+}
+
+
+/* ================= BUTTONS ================= */
+
+.trade-button{
+
+    margin-top:auto;
+
+    height:54px;
+
+    border-radius:14px;
+
+    font-size:16px;
+
+    font-weight:700;
+
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #1d4ed8
+    );
+
+    transition:.25s;
+
+}
+
+.trade-button:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(37,99,235,.35);
+
+}
+
+
+/* Stake */
+
+.stake-box{
+
+    height:48px;
+
+    border-radius:12px;
+
+}
+
+.stake-box input{
+
+    font-size:18px;
+
+    font-weight:700;
+
+}
+
+
+/* Duration */
+
+.duration-box{
+
+    height:48px;
+
+    border-radius:12px;
+
+}
+
+
+/* ================= SCROLLBARS ================= */
+
+.order-panel::-webkit-scrollbar,
+.trading-sidebar::-webkit-scrollbar,
+.bottom-wrapper::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+.order-panel::-webkit-scrollbar-thumb,
+.trading-sidebar::-webkit-scrollbar-thumb,
+.bottom-wrapper::-webkit-scrollbar-thumb{
+
+    background:#2d3748;
+
+    border-radius:20px;
+
+}
+
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width:1500px){
+
+.trading-main{
+
+grid-template-columns:
+
+220px
+
+minmax(0,1fr)
+
+330px;
+
+}
+
+}
+
+@media (max-width:1300px){
+
+.trading-main{
+
+grid-template-columns:
+
+210px
+
+minmax(0,1fr);
+
+}
+
+.order-wrapper{
+
+display:none;
+
+}
+
+}
+
+@media (max-width:960px){
+
+.trading-main{
+
+display:flex;
+
+flex-direction:column;
+
+overflow:auto;
+
+}
+.trading-sidebar{
+
+height:auto;
+
+}
+
+}
+
+/* =========================================================
+   TRADING CENTER
+========================================================= */
+
+.trading-center{
+
+    display:grid;
+
+    grid-template-rows:minmax(0,1fr) 250px;
+
+    gap:18px;
+
+    min-height:0;
+
+    min-width:0;
+
+    overflow:hidden;
+
+    background:#0b1018;
+
+}
+
+/* =========================================================
+   CHART
+========================================================= */
+
+.chart-wrapper{
+
+    display:flex;
+
+    flex-direction:column;
+
+    min-height:0;
+
+    min-width:0;
+
+    overflow:hidden;
+
+    background:#0d111b;
+
+    border:1px solid #1b2638;
+
+    border-radius:18px;
+
+}
+
+/* =========================================================
+   BOTTOM
+========================================================= */
+
+.bottom-wrapper{
+
+    min-height:250px;
+
+    overflow:hidden;
+
+    background:#0b1018;
+
+    border-radius:18px;
+
+}

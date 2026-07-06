@@ -120,8 +120,6 @@ export default function MarketsPage() {
             <MarketTable
     markets={filteredMarkets}
     loading={loading}
-    favoriteIds={[]}
-    onToggleFavorite={() => {}}
 />
 
             <Watchlist

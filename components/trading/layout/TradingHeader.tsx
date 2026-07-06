@@ -6,17 +6,20 @@ import {
     Wallet,
     ChevronDown,
     Activity,
-    Clock3
+    Clock3,
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
 import { useTradeStore } from "@/store/useTradeStore";
 
+
 export default function TradingHeader() {
 
-    const price = useTradeStore(state => state.price);
-    const balance = useTradeStore(state => state.balance);
-    const instrument = useTradeStore(state => state.selectedInstrument);
+    const price = useTradeStore((state) => state.price);
+    const balance = useTradeStore((state) => state.balance);
+    const instrument = useTradeStore(
+        (state) => state.selectedInstrument
+    );
 
     const [time, setTime] = useState("");
 
@@ -34,19 +37,18 @@ export default function TradingHeader() {
 
         update();
 
-        const id = setInterval(update,1000);
+        const interval = setInterval(update, 1000);
 
-        return () => clearInterval(id);
+        return () => clearInterval(interval);
 
-    },[]);
+    }, []);
 
     const high = (price + 4.25).toFixed(2);
 
-const low = (price - 3.80).toFixed(2);
+    const low = (price - 3.80).toFixed(2);
 
-const spread = (high && low)
-    ? (Number(high) - Number(low)).toFixed(2)
-    : "0.00";
+    const spread = (Number(high) - Number(low)).toFixed(2);
+
     return (
 
         <header className="trading-header">
@@ -61,23 +63,21 @@ const spread = (high && low)
 
                 </div>
 
-                <div>
+                <div className="instrument-wrapper">
 
                     <div className="instrument-row">
 
-                        <h2>
+                        <h2>{instrument}</h2>
 
-                            {instrument}
-
-                        </h2>
-
-                        <ChevronDown size={16}/>
+                        <ChevronDown size={17} />
 
                     </div>
 
                     <div className="market-status">
 
-                        <Activity size={13}/>
+                        <span className="live-dot"></span>
+
+                        <Activity size={13} />
 
                         LIVE MARKET
 
@@ -147,11 +147,19 @@ const spread = (high && low)
 
                 <div className="account-card">
 
-                    <small>DEMO ACCOUNT</small>
+                    <small>Demo Account</small>
 
                     <h3>
 
-                        ${balance.toFixed(2)}
+                        $
+
+                        {balance.toLocaleString(undefined, {
+
+                            minimumFractionDigits: 2,
+
+                            maximumFractionDigits: 2,
+
+                        })}
 
                     </h3>
 
@@ -159,7 +167,7 @@ const spread = (high && low)
 
                 <div className="clock-box">
 
-                    <Clock3 size={16}/>
+                    <Clock3 size={15} />
 
                     {time}
 
@@ -167,19 +175,19 @@ const spread = (high && low)
 
                 <button className="icon-btn">
 
-                    <Bell size={18}/>
+                    <Bell size={18} />
 
                 </button>
 
                 <button className="icon-btn">
 
-                    <Settings size={18}/>
+                    <Settings size={18} />
 
                 </button>
 
                 <button className="deposit-btn">
 
-                    <Wallet size={17}/>
+                    <Wallet size={17} />
 
                     Deposit
 

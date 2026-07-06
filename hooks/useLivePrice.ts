@@ -11,45 +11,78 @@ import {
 export function useLivePrice(
     marketId: string
 ) {
-    const [
-        price,
-        setPrice
-    ] = useState(0);
+
+    const [price, setPrice] = useState(0);
 
     useEffect(() => {
 
-        void tradingProvider.connect();
+        if (!marketId) {
+
+            return;
+
+        }
+
+        let active = true;
 
         const onTick = (
+
             tick: Tick
+
         ) => {
 
             if (
+
+                active &&
                 tick.symbol === marketId
+
             ) {
+
                 setPrice(
+
                     tick.quote
+
                 );
+
             }
+
         };
 
-        tradingProvider.subscribeTicks(
-            marketId,
-            onTick
-        );
+        async function start() {
+
+            await tradingProvider.connect();
+
+            await tradingProvider.subscribeTicks(
+
+                marketId,
+
+                onTick
+
+            );
+
+        }
+
+        void start();
 
         return () => {
 
+            active = false;
+
             tradingProvider.unsubscribeTicks(
+
                 marketId,
+
                 onTick
+
             );
 
         };
 
     }, [
+
         marketId
+
     ]);
 
     return price;
+
 }

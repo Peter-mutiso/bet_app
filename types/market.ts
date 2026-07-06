@@ -1,12 +1,15 @@
 import {
-
     Timestamped,
-
     UUID
-
 } from "./common";
 
+/* =========================================================
+   MARKET
+========================================================= */
+
 export interface Market extends Timestamped {
+
+    /* Identity */
 
     id: UUID;
 
@@ -16,12 +19,35 @@ export interface Market extends Timestamped {
 
     category: string;
 
+    /* State */
+
     favorite: boolean;
+
+    isOpen: boolean;
+
+    /* Live Pricing */
 
     price: number;
 
     change: number;
 
-    isOpen: boolean;
+    previousPrice?: number;
 
+    tickDirection?: "up" | "down" | "flat";
+
+    /* Order Book */
+
+    bid?: number;
+
+    ask?: number;
+
+    spread?: number;
+
+    /* Session Statistics */
+
+    high?: number;
+
+    low?: number;
+
+    volume?: number;
 }

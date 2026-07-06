@@ -1,42 +1,48 @@
 "use client";
 
 import { useState } from "react";
-
 import {
-
     TrendingUp,
     TrendingDown,
     Activity,
     Clock3,
     DollarSign
-
 } from "lucide-react";
 
 import { useLivePrice } from "../../hooks/useLivePrice";
 
 interface Market {
-
     id: string;
-
     name: string;
-
     price: number;
-
     change: number;
-
 }
 
 interface Props {
-
     market: Market | null;
-
 }
 
 export default function TradingPanel({
-
     market
-
 }: Props) {
+
+    // ----------------------------------------------------
+    // ALL HOOKS MUST BE CALLED FIRST
+    // ----------------------------------------------------
+
+    const marketId = market?.id ?? "";
+
+    const livePrice = useLivePrice(marketId);
+
+    const [stake, setStake] = useState(10);
+
+    const [duration, setDuration] = useState("5 Ticks");
+
+    const [contract, setContract] = useState("Rise/Fall");
+
+    // ----------------------------------------------------
+    // SAFE EARLY RETURN
+    // ----------------------------------------------------
 
     if (!market) {
 
@@ -64,25 +70,7 @@ export default function TradingPanel({
 
     }
 
-    const livePrice =
-
-        useLivePrice(market.id);
-
-    const [stake, setStake] =
-
-        useState(10);
-
-    const [duration, setDuration] =
-
-        useState("5 Ticks");
-
-    const [contract, setContract] =
-
-        useState("Rise/Fall");
-
-    const payout =
-
-        (stake * 1.92).toFixed(2);
+    const payout = (stake * 1.92).toFixed(2);
 
     return (
 
@@ -131,10 +119,8 @@ export default function TradingPanel({
                 {
 
                     market.change >= 0
-
-                        ? <TrendingUp size={18}/>
-
-                        : <TrendingDown size={18}/>
+                        ? <TrendingUp size={18} />
+                        : <TrendingDown size={18} />
 
                 }
 
@@ -152,7 +138,7 @@ export default function TradingPanel({
 
                 <label>
 
-                    <DollarSign size={16}/>
+                    <DollarSign size={16} />
 
                     Stake
 
@@ -164,17 +150,15 @@ export default function TradingPanel({
 
                     value={stake}
 
-                    onChange={(e)=>
-
+                    onChange={(e) =>
                         setStake(Number(e.target.value))
-
                     }
 
                 />
 
                 <label>
 
-                    <Clock3 size={16}/>
+                    <Clock3 size={16} />
 
                     Duration
 
@@ -184,10 +168,8 @@ export default function TradingPanel({
 
                     value={duration}
 
-                    onChange={(e)=>
-
+                    onChange={(e) =>
                         setDuration(e.target.value)
-
                     }
 
                 >
@@ -228,10 +210,8 @@ export default function TradingPanel({
 
                     value={contract}
 
-                    onChange={(e)=>
-
+                    onChange={(e) =>
                         setContract(e.target.value)
-
                     }
 
                 >

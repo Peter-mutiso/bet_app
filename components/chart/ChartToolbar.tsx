@@ -4,12 +4,10 @@ import {
     CandlestickChart,
     LineChart,
     AreaChart,
-    ChevronDown,
-    Camera,
+    Star,
     Maximize2,
-    BarChart3,
-    Pencil,
-    Layers
+    Activity,
+    BarChart3
 } from "lucide-react";
 
 import { useTradeStore } from "@/store/useTradeStore";
@@ -17,77 +15,101 @@ import { ALL_INSTRUMENTS } from "@/lib/instruments";
 
 import TimeframeSelector from "./TimeframeSelector";
 import IndicatorPanel from "./IndicatorPanel";
-import FullscreenButton from "./FullscreenButton";
 
 export default function ChartToolbar() {
 
     const instrument =
-        useTradeStore(
-            state => state.selectedInstrument
-        );
+        useTradeStore(state => state.selectedInstrument);
 
     const setInstrument =
-        useTradeStore(
-            state => state.setSelectedInstrument
-        );
+        useTradeStore(state => state.setSelectedInstrument);
 
     const chartType =
-        useTradeStore(
-            state => state.chartType
-        );
+        useTradeStore(state => state.chartType);
 
     const setChartType =
-        useTradeStore(
-            state => state.setChartType
-        );
+        useTradeStore(state => state.setChartType);
+
+    const toggleFullscreen =
+        useTradeStore(state => state.toggleFullscreen);
+
+    const addToWatchlist =
+        useTradeStore(state => state.addToWatchlist);
 
     return (
 
-        <div className="h-[54px] border-b border-[#202734] bg-[#0f1724] px-5 flex items-center justify-between">
+        <header className="chart-toolbar">
 
-            {/* LEFT */}
+            <div className="toolbar-left">
 
-            <div className="flex items-center gap-4">
+                <div className="market-live">
 
-                <div className="flex items-center gap-2">
+                    <Activity size={14}/>
 
-                    <select
-                        value={instrument}
-                        onChange={(e)=>
-                            setInstrument(e.target.value)
-                        }
-                        className="bg-[#182231] border border-[#2a3647] rounded-md px-3 py-2 text-sm text-white"
-                    >
+                    LIVE
 
-                        {ALL_INSTRUMENTS.map(symbol=>(
-                            <option
-                                key={symbol}
-                                value={symbol}
-                            >
-                                {symbol}
-                            </option>
-                        ))}
-
-                    </select>
-
-                    <ChevronDown size={15}/>
                 </div>
+
+                <select
+
+                    className="instrument-select"
+
+                    value={instrument}
+
+                    onChange={(e)=>
+
+                        setInstrument(e.target.value)
+
+                    }
+
+                >
+
+                    {
+
+                        ALL_INSTRUMENTS.map(symbol=>(
+
+                            <option
+
+                                key={symbol}
+
+                                value={symbol}
+
+                            >
+
+                                {symbol}
+
+                            </option>
+
+                        ))
+
+                    }
+
+                </select>
 
                 <TimeframeSelector/>
 
             </div>
 
-            {/* CENTER */}
-
-            <div className="flex items-center gap-2">
+            <div className="toolbar-center">
 
                 <button
-                    onClick={()=>setChartType("candles")}
-                    className={`toolbar-btn ${
+
+                    className={
+
                         chartType==="candles"
-                            ? "bg-blue-600 text-white"
-                            : ""
-                    }`}
+
+                            ?"tool-btn active"
+
+                            :"tool-btn"
+
+                    }
+
+                    onClick={()=>
+
+                        setChartType("candles")
+
+                    }
+
                 >
 
                     <CandlestickChart size={17}/>
@@ -95,12 +117,23 @@ export default function ChartToolbar() {
                 </button>
 
                 <button
-                    onClick={()=>setChartType("line")}
-                    className={`toolbar-btn ${
+
+                    className={
+
                         chartType==="line"
-                            ? "bg-blue-600 text-white"
-                            : ""
-                    }`}
+
+                            ?"tool-btn active"
+
+                            :"tool-btn"
+
+                    }
+
+                    onClick={()=>
+
+                        setChartType("line")
+
+                    }
+
                 >
 
                     <LineChart size={17}/>
@@ -108,63 +141,74 @@ export default function ChartToolbar() {
                 </button>
 
                 <button
-                    onClick={()=>setChartType("area")}
-                    className={`toolbar-btn ${
+
+                    className={
+
                         chartType==="area"
-                            ? "bg-blue-600 text-white"
-                            : ""
-                    }`}
+
+                            ?"tool-btn active"
+
+                            :"tool-btn"
+
+                    }
+
+                    onClick={()=>
+
+                        setChartType("area")
+
+                    }
+
                 >
 
                     <AreaChart size={17}/>
 
                 </button>
 
-                <div className="w-px h-7 bg-[#2d3748]"/>
+            </div>
+
+            <div className="toolbar-right">
 
                 <IndicatorPanel/>
 
-                <button className="toolbar-btn">
+                <button
 
-                    <BarChart3 size={17}/>
+                    className="tool-btn"
 
-                    <span>Compare</span>
+                    onClick={()=>
+
+                        addToWatchlist(instrument)
+
+                    }
+
+                >
+
+                    <Star size={16}/>
 
                 </button>
 
-                <button className="toolbar-btn">
+                <button
 
-                    <Pencil size={17}/>
+                    className="tool-btn"
 
-                    <span>Drawing</span>
+                    onClick={toggleFullscreen}
+
+                >
+
+                    <Maximize2 size={16}/>
 
                 </button>
 
-                <button className="toolbar-btn">
+                <button className="analysis-btn">
 
-                    <Layers size={17}/>
+                    <BarChart3 size={16}/>
 
-                    <span>Templates</span>
+                    Analysis
 
                 </button>
 
             </div>
 
-            {/* RIGHT */}
-
-            <div className="flex items-center gap-2">
-
-                <button className="toolbar-btn">
-
-                    <Camera size={17}/>
-
-                </button>
-
-                <FullscreenButton/>
-
-            </div>
-
-        </div>
+        </header>
 
     );
 

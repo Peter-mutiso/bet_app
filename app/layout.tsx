@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+
 import ThemeApplier from "@/components/ThemeApplier";
+
 import { AppProvider } from "@/contexts/AppContext";
+import { TradingProvider } from "@/contexts/TradingContext";
+import { WatchlistProvider } from "@/contexts/WatchlistContext";
+import { TransactionProvider } from "@/contexts/TransactionContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,8 +37,14 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <AppProvider>
-          <ThemeApplier />
-          {children}
+          <TradingProvider>
+            <WatchlistProvider>
+                <TransactionProvider>
+                  <ThemeApplier />
+                  {children}
+                </TransactionProvider>
+            </WatchlistProvider>
+          </TradingProvider>
         </AppProvider>
       </body>
     </html>

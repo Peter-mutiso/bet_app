@@ -7,33 +7,53 @@ import TradingOrderPanel from "./TradingOrderPanel";
 import TradingBottomPanel from "./TradingBottomPanel";
 
 export default function TradingLayout() {
+
     return (
+
         <div className="trading-layout">
+
+            {/* TOP HEADER */}
 
             <TradingHeader />
 
+            {/* MAIN CONTENT */}
+
             <div className="trading-main">
 
-                {/* LEFT NAVIGATION */}
+                {/* LEFT SIDEBAR */}
 
                 <TradingSidebar />
 
-                {/* CENTER */}
+                {/* CHART + BOTTOM */}
 
-                <div className="trading-center">
+                <main className="trading-center">
 
-                    <TradingChartArea />
+                    <section className="chart-wrapper">
 
-                    <TradingBottomPanel />
+                        <TradingChartArea />
 
-                </div>
+                    </section>
 
-                {/* RIGHT ORDER PANEL */}
+                    <section className="bottom-wrapper">
 
-                <TradingOrderPanel />
+                        <TradingBottomPanel />
+
+                    </section>
+
+                </main>
+
+                {/* ORDER PANEL */}
+
+                <aside className="order-wrapper">
+
+                    <TradingOrderPanel />
+
+                </aside>
 
             </div>
 
         </div>
+
     );
+
 }

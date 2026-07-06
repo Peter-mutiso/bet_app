@@ -1,93 +1,55 @@
-import {
+"use client";
 
-    Market
+import type { Market } from "../../types/market";
 
-} from "../../types";
-
-interface Props {
-
+type Props = {
     markets: Market[];
+};
 
+function format(n?: number) {
+    if (n === undefined || n === null) return "-";
+    return n.toFixed(2);
 }
 
-export default function Watchlist({
-
-    markets
-
-}: Props) {
+export default function Watchlist({ markets }: Props) {
+    const favorites = markets.filter(m => m.favorite);
 
     return (
-
-        <section
-
-            className="watchlist"
-
-        >
-
-            <h2>
-
+        <div className="watchlist">
+            <div className="watchlist-header">
                 Watchlist
+            </div>
 
-            </h2>
-
-            {
-
-                markets.length ===
-
-                0 ? (
-
-                    <p>
-
-                        No favorite markets.
-
-                    </p>
-
+            <div className="watchlist-body">
+                {favorites.length === 0 ? (
+                    <div className="empty">
+                        No favorites yet
+                    </div>
                 ) : (
+                    favorites.map(m => {
+                        const isUp = (m.change ?? 0) >= 0;
 
-                    markets.map(
+                        return (
+                            <div key={m.id} className="watch-item">
+                                <div className="left">
+                                    <div className="symbol">
+                                        {m.symbol}
+                                    </div>
 
-                        market => (
+                                    <div className="price">
+                                        {format(m.price)}
+                                    </div>
+                                </div>
 
-                            <div
-
-                                key={
-
-                                    market.id
-
-                                }
-
-                            >
-
-                                <strong>
-
-                                    {
-
-                                        market.symbol
-
-                                    }
-
-                                </strong>
-
-                                {" - "}
-
-                                {
-
-                                    market.price
-
-                                }
-
+                                <div className={`right ${isUp ? "up" : "down"}`}>
+                                    {isUp ? "+" : ""}
+                                    {m.change?.toFixed(2)}%
+                                </div>
                             </div>
-
-                        )
-
-                    )
-
-                )
-
-            }
-
-        </section>
-
+                        );
+                    })
+                )}
+            </div>
+        </div>
     );
-
 }

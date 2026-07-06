@@ -1,17 +1,10 @@
-button{
-
+.dashboard button{
     border:none;
-
     border-radius:var(--radius);
-
     padding:14px 18px;
-
     background:var(--primary);
-
     color:white;
-
     font-weight:600;
-
     transition:var(--transition);
 }
 
@@ -99,19 +92,7 @@ button:disabled{
     background: rgba(255,255,255,.45);
 }
 
-.sidebar-logo{
 
-    display:flex;
-
-    align-items:center;
-
-    gap:14px;
-
-    padding:28px;
-
-    border-bottom:1px solid rgba(255,255,255,.05);
-
-}
 .sidebar-user{
 
     display:flex;
@@ -677,17 +658,7 @@ button:disabled{
     background:#1b2333;
 }
 
-.market-status{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    padding:4px 10px;
-    border-radius:20px;
-    background:#133b1c;
-    color:#5af78e;
-    font-size:.75rem;
-    font-weight:600;
-}
+
 
 .trade-actions{
     display:flex;
@@ -695,15 +666,7 @@ button:disabled{
     justify-content:flex-end;
 }
 
-.buy-btn,
-.sell-btn{
-    border:none;
-    border-radius:8px;
-    padding:8px 14px;
-    cursor:pointer;
-    font-weight:600;
-    transition:.25s;
-}
+
 
 .buy-btn{
     background:#16a34a;

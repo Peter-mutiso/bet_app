@@ -11,8 +11,12 @@ import {
     Globe,
     Wallet,
     Bot,
-    Activity
+    Activity,
+    UserCircle,
+    LogOut
 } from "lucide-react";
+
+import { useState } from "react";
 
 const items = [
 
@@ -58,29 +62,29 @@ const items = [
 
     {
         icon: Bot,
-        label: "Bot"
-
+        label: "Trading Bot"
     },
 
     {
         icon: Bell,
         label: "Alerts"
-
     }
 
 ];
 
 export default function TradingSidebar() {
 
+    const [active, setActive] = useState("Trading");
+
     return (
 
-        <aside className="h-full flex flex-col items-center bg-[#0b1018] border-r border-[#202734] py-4">
+        <aside className="trading-sidebar">
 
-            {/* Logo */}
+            {/* LOGO */}
 
-            <div className="mb-8">
+            <div className="sidebar-logo">
 
-                <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                <div className="logo-circle">
 
                     B
 
@@ -88,49 +92,92 @@ export default function TradingSidebar() {
 
             </div>
 
-            {/* Icons */}
+            {/* NAVIGATION */}
 
-            <div className="flex flex-col gap-3 flex-1">
+            <div className="sidebar-nav">
 
-                {items.map((item) => {
+                {
 
-                    const Icon = item.icon;
+                    items.map(item => {
 
-                    return (
+                        const Icon = item.icon;
 
-                        <button
+                        const selected =
+                            active === item.label;
 
-                            key={item.label}
+                        return (
 
-                            title={item.label}
+                            <button
 
-                            className="group w-12 h-12 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#1d4ed8] hover:text-white transition-all duration-200"
+                                key={item.label}
 
-                        >
+                                onClick={() =>
+                                    setActive(item.label)
+                                }
 
-                            <Icon size={20} />
+                                className={
+                                    selected
+                                        ? "sidebar-btn active"
+                                        : "sidebar-btn"
+                                }
 
-                        </button>
+                            >
 
-                    );
+                                <Icon size={21}/>
 
-                })}
+                                <span>
+
+                                    {item.label}
+
+                                </span>
+
+                            </button>
+
+                        );
+
+                    })
+
+                }
 
             </div>
 
-            {/* Bottom */}
+            {/* USER */}
 
-            <div className="flex flex-col gap-3">
+            <div className="sidebar-footer">
 
-                <button
+                <button className="sidebar-btn">
 
-                    title="Settings"
+                    <UserCircle size={20}/>
 
-                    className="w-12 h-12 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#1d4ed8] hover:text-white transition"
+                    <span>
 
-                >
+                        Account
 
-                    <Settings size={20} />
+                    </span>
+
+                </button>
+
+                <button className="sidebar-btn">
+
+                    <Settings size={20}/>
+
+                    <span>
+
+                        Settings
+
+                    </span>
+
+                </button>
+
+                <button className="sidebar-btn logout">
+
+                    <LogOut size={20}/>
+
+                    <span>
+
+                        Logout
+
+                    </span>
 
                 </button>
 

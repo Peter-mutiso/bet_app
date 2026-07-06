@@ -8,23 +8,25 @@ export default function TradingChartArea() {
 
     return (
 
-        <main className="flex flex-col bg-[#111827] overflow-hidden">
+        <main className="trading-chart-area">
 
-            {/* Toolbar */}
+            <div className="chart-toolbar-wrapper">
 
-            <ChartToolbar />
-
-            {/* Chart */}
-
-            <div className="flex-1 relative">
-
-                <TradingChart />
+                <ChartToolbar />
 
             </div>
 
-            {/* Live price */}
+            <section className="chart-content">
 
-            <PriceDisplay />
+                <TradingChart />
+
+            </section>
+
+            <div className="price-display-wrapper">
+
+                <PriceDisplay />
+
+            </div>
 
         </main>
 

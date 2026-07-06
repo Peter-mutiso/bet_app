@@ -1,31 +1,85 @@
 import {
-
     Timestamped,
-
     UUID
-
 } from "./common";
 
-export interface Bet extends Timestamped {
+/* =========================================================
+   TRANSACTION TYPES
+========================================================= */
+
+export type TransactionType =
+    | "TRADE_OPEN"
+    | "TRADE_SETTLEMENT"
+    | "DEPOSIT"
+    | "WITHDRAWAL"
+    | "BONUS"
+    | "COMMISSION"
+    | "TRANSFER";
+
+/* =========================================================
+   TRANSACTION STATUS
+========================================================= */
+
+export type TransactionStatus =
+    | "PENDING"
+    | "COMPLETED"
+    | "FAILED"
+    | "CANCELLED";
+
+/* =========================================================
+   TRANSACTION MODEL
+========================================================= */
+
+export interface Transaction extends Timestamped {
 
     id: UUID;
 
-    marketId: UUID;
+    /**
+     * Type of account transaction.
+     */
+    type: TransactionType;
 
-    market: string;
+    /**
+     * Related trade (if applicable).
+     */
+    tradeId?: UUID;
 
-    stake: number;
+    /**
+     * Related market (if applicable).
+     */
+    marketId?: UUID;
 
-    payout: number;
+    /**
+     * Human-readable description.
+     * Example:
+     * "Opened RISE contract on Volatility 75"
+     */
+    description: string;
 
-    status:
+    /**
+     * Positive = credit
+     * Negative = debit
+     */
+    amount: number;
 
-        | "OPEN"
+    /**
+     * Account balance immediately after this transaction.
+     */
+    balanceAfter: number;
 
-        | "WON"
+    /**
+     * Transaction status.
+     */
+    status: TransactionStatus;
 
-        | "LOST"
+    /**
+     * Optional reference number
+     * (useful for deposits/withdrawals).
+     */
+    reference?: string;
 
-        | "VOID";
-
+    /**
+     * Optional notes.
+     */
+    notes?: string;
 }

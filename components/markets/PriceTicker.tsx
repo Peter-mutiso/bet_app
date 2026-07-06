@@ -1,57 +1,47 @@
-import {
+"use client";
 
-    Market
+import { useMemo } from "react";
+import type { Market } from "../../types/market";
 
-} from "../../types";
-
-interface Props {
-
+type Props = {
     markets: Market[];
+};
 
+function formatPrice(p?: number) {
+    if (p === undefined || p === null) return "-";
+    return p.toFixed(2);
 }
 
-export default function PriceTicker({
-
-    markets
-
-}: Props) {
+export default function PriceTicker({ markets }: Props) {
+    const tape = useMemo(() => {
+        // Duplicate for seamless infinite scroll
+        return [...markets, ...markets];
+    }, [markets]);
 
     return (
+        <div className="ticker-wrap">
+            <div className="ticker-track">
+                {tape.map((m, idx) => {
+                    const isUp = (m.change ?? 0) >= 0;
 
-        <div
-
-            className="price-ticker"
-
-        >
-
-            {
-
-                markets.map(
-
-                    market => (
-
-                        <span
-
-                            key={market.id}
-
+                    return (
+                        <div
+                            key={`${m.id}-${idx}`}
+                            className={`ticker-item ${isUp ? "up" : "down"}`}
                         >
+                            <span className="symbol">{m.symbol}</span>
 
-                            {market.symbol}
+                            <span className="price">
+                                {formatPrice(m.price)}
+                            </span>
 
-                            {" "}
-
-                            {market.price}
-
-                        </span>
-
-                    )
-
-                )
-
-            }
-
+                            <span className="change">
+                                {isUp ? "▲" : "▼"} {m.change?.toFixed(2)}%
+                            </span>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
-
     );
-
 }
