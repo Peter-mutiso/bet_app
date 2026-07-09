@@ -1,15 +1,16 @@
 "use client";
 
-import { useTradeStore } from "@/store/useTradeStore";
+import { Clock3 } from "lucide-react";
+import { useTradeStore, type Timeframe } from "@/store/useTradeStore";
 
-const timeframes = [
+const TIMEFRAMES: Timeframe[] = [
     "1T",
     "5T",
     "15T",
     "1H",
     "4H",
     "1D"
-] as const;
+];
 
 export default function TimeframeSelector() {
 
@@ -25,41 +26,36 @@ export default function TimeframeSelector() {
 
         <div className="timeframe-selector">
 
-            {
+            <div className="timeframe-label">
 
-                timeframes.map((frame) => (
+                <Clock3 size={14} />
+
+                <span>Interval</span>
+
+            </div>
+
+            <div className="timeframe-buttons">
+
+                {TIMEFRAMES.map((frame) => (
 
                     <button
-
                         key={frame}
-
                         type="button"
-
-                        onClick={() =>
-
-                            setTimeframe(frame)
-
-                        }
-
                         className={
-
                             selected === frame
-
                                 ? "timeframe-btn active"
-
                                 : "timeframe-btn"
-
                         }
-
+                        onClick={() => setTimeframe(frame)}
                     >
 
                         {frame}
 
                     </button>
 
-                ))
+                ))}
 
-            }
+            </div>
 
         </div>
 

@@ -5,36 +5,47 @@ import TradingSidebar from "./TradingSidebar";
 import TradingChartArea from "./TradingChartArea";
 import TradingOrderPanel from "./TradingOrderPanel";
 import TradingBottomPanel from "./TradingBottomPanel";
+import { MarketSelector } from "../market-selector";
 
 export default function TradingLayout() {
-
     return (
-
         <div className="trading-layout">
 
-            {/* TOP HEADER */}
+            {/* ================= HEADER ================= */}
 
-            <TradingHeader />
+            <header className="terminal-header">
 
-            {/* MAIN CONTENT */}
+                <TradingHeader />
+
+            </header>
+
+            {/* ================= TERMINAL ================= */}
 
             <div className="trading-main">
 
-                {/* LEFT SIDEBAR */}
+                {/* Left Sidebar */}
 
-                <TradingSidebar />
+                <aside className="terminal-sidebar">
 
-                {/* CHART + BOTTOM */}
+                    <TradingSidebar />
 
-                <main className="trading-center">
+                </aside>
 
-                    <section className="chart-wrapper">
+                {/* Center Column */}
+
+                <main className="terminal-center">
+
+                    {/* Trading Chart */}
+
+                    <section className="terminal-chart">
 
                         <TradingChartArea />
 
                     </section>
 
-                    <section className="bottom-wrapper">
+                    {/* Positions / History */}
+
+                    <section className="terminal-bottom">
 
                         <TradingBottomPanel />
 
@@ -42,9 +53,9 @@ export default function TradingLayout() {
 
                 </main>
 
-                {/* ORDER PANEL */}
+                {/* Order Panel */}
 
-                <aside className="order-wrapper">
+                <aside className="terminal-order">
 
                     <TradingOrderPanel />
 
@@ -52,8 +63,8 @@ export default function TradingLayout() {
 
             </div>
 
+            <MarketSelector />
+
         </div>
-
     );
-
 }

@@ -5,31 +5,24 @@ import TradingChart from "@/components/chart/TradingChart";
 import PriceDisplay from "@/components/trading/PriceDisplay";
 
 export default function TradingChartArea() {
-
     return (
+        <section className="trading-chart-area">
 
-        <main className="trading-chart-area">
-
-            <div className="chart-toolbar-wrapper">
-
+            {/* Top Toolbar */}
+            <header className="chart-header">
                 <ChartToolbar />
+            </header>
 
-            </div>
-
-            <section className="chart-content">
-
+            {/* Main Chart */}
+            <main className="chart-body">
                 <TradingChart />
+            </main>
 
-            </section>
-
-            <div className="price-display-wrapper">
-
+            {/* Bottom Market Information */}
+            <footer className="chart-footer">
                 <PriceDisplay />
+            </footer>
 
-            </div>
-
-        </main>
-
+        </section>
     );
-
 }

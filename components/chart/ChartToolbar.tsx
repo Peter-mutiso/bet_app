@@ -1,215 +1,237 @@
+
 "use client";
 
 import {
     CandlestickChart,
     LineChart,
     AreaChart,
+    ChartColumn,
     Star,
     Maximize2,
     Activity,
-    BarChart3
+    BarChart3,
+    ChevronDown,
+    Settings2,
 } from "lucide-react";
 
 import { useTradeStore } from "@/store/useTradeStore";
-import { ALL_INSTRUMENTS } from "@/lib/instruments";
 
 import TimeframeSelector from "./TimeframeSelector";
 import IndicatorPanel from "./IndicatorPanel";
 
+
 export default function ChartToolbar() {
 
-    const instrument =
-        useTradeStore(state => state.selectedInstrument);
 
-    const setInstrument =
-        useTradeStore(state => state.setSelectedInstrument);
+    const market = useTradeStore(
+        (state) => state.selectedMarket
+    );
 
-    const chartType =
-        useTradeStore(state => state.chartType);
 
-    const setChartType =
-        useTradeStore(state => state.setChartType);
+    const chartType = useTradeStore(
+        (state) => state.chartType
+    );
 
-    const toggleFullscreen =
-        useTradeStore(state => state.toggleFullscreen);
 
-    const addToWatchlist =
-        useTradeStore(state => state.addToWatchlist);
+    const setChartType = useTradeStore(
+        (state) => state.setChartType
+    );
+
+
+    const toggleFullscreen = useTradeStore(
+        (state) => state.toggleFullscreen
+    );
+
+
+    const addToWatchlist = useTradeStore(
+        (state) => state.addToWatchlist
+    );
+
+
+    const setShowInstrumentPicker = useTradeStore(
+        (state) => state.setShowInstrumentPicker
+    );
+
+
 
     return (
 
         <header className="chart-toolbar">
 
+
+            {/* LEFT */}
+
             <div className="toolbar-left">
 
-                <div className="market-live">
 
-                    <Activity size={14}/>
+                
 
-                    LIVE
 
-                </div>
 
-                <select
+                
 
-                    className="instrument-select"
 
-                    value={instrument}
 
-                    onChange={(e)=>
+                <TimeframeSelector />
 
-                        setInstrument(e.target.value)
-
-                    }
-
-                >
-
-                    {
-
-                        ALL_INSTRUMENTS.map(symbol=>(
-
-                            <option
-
-                                key={symbol}
-
-                                value={symbol}
-
-                            >
-
-                                {symbol}
-
-                            </option>
-
-                        ))
-
-                    }
-
-                </select>
-
-                <TimeframeSelector/>
 
             </div>
+
+
+
+
+            {/* CENTER */}
 
             <div className="toolbar-center">
 
-                <button
 
-                    className={
+                <div className="chart-type-group">
 
-                        chartType==="candles"
 
-                            ?"tool-btn active"
+                    <button
+                        className={
+                            chartType === "candles"
+                            ? "tool-btn active"
+                            : "tool-btn"
+                        }
 
-                            :"tool-btn"
+                        onClick={() =>
+                            setChartType("candles")
+                        }
 
-                    }
+                        title="Candlestick"
+                    >
+                        <CandlestickChart size={17}/>
+                    </button>
 
-                    onClick={()=>
 
-                        setChartType("candles")
 
-                    }
+                    <button
+                        className={
+                            chartType === "ohlc"
+                            ? "tool-btn active"
+                            : "tool-btn"
+                        }
 
-                >
+                        onClick={() =>
+                            setChartType("ohlc")
+                        }
 
-                    <CandlestickChart size={17}/>
+                        title="OHLC"
+                    >
+                        <ChartColumn size={17}/>
+                    </button>
 
-                </button>
 
-                <button
 
-                    className={
+                    <button
+                        className={
+                            chartType === "line"
+                            ? "tool-btn active"
+                            : "tool-btn"
+                        }
 
-                        chartType==="line"
+                        onClick={() =>
+                            setChartType("line")
+                        }
 
-                            ?"tool-btn active"
+                        title="Line"
+                    >
+                        <LineChart size={17}/>
+                    </button>
 
-                            :"tool-btn"
 
-                    }
 
-                    onClick={()=>
+                    <button
+                        className={
+                            chartType === "area"
+                            ? "tool-btn active"
+                            : "tool-btn"
+                        }
 
-                        setChartType("line")
+                        onClick={() =>
+                            setChartType("area")
+                        }
 
-                    }
+                        title="Area"
+                    >
+                        <AreaChart size={17}/>
+                    </button>
 
-                >
 
-                    <LineChart size={17}/>
+                </div>
 
-                </button>
-
-                <button
-
-                    className={
-
-                        chartType==="area"
-
-                            ?"tool-btn active"
-
-                            :"tool-btn"
-
-                    }
-
-                    onClick={()=>
-
-                        setChartType("area")
-
-                    }
-
-                >
-
-                    <AreaChart size={17}/>
-
-                </button>
 
             </div>
 
+
+
+
+
+            {/* RIGHT */}
+
             <div className="toolbar-right">
 
-                <IndicatorPanel/>
+
+                <div className="toolbar-divider"/>
+
+
+                <IndicatorPanel />
+
+
 
                 <button
-
                     className="tool-btn"
+                    title="Watchlist"
 
-                    onClick={()=>
-
-                        addToWatchlist(instrument)
-
+                    onClick={() =>
+                        addToWatchlist(
+                            market?.name ??
+                            "Volatility 100 Index"
+                        )
                     }
-
                 >
 
                     <Star size={16}/>
 
                 </button>
 
-                <button
 
+
+
+                <button
                     className="tool-btn"
+                    title="Fullscreen"
 
                     onClick={toggleFullscreen}
-
                 >
 
                     <Maximize2 size={16}/>
 
                 </button>
 
-                <button className="analysis-btn">
 
-                    <BarChart3 size={16}/>
 
-                    Analysis
+
+                <button
+                    className="tool-btn"
+                    title="Settings"
+                >
+
+                    <Settings2 size={16}/>
 
                 </button>
 
+
+
+
+                
+
+
             </div>
+
 
         </header>
 
     );
-
 }

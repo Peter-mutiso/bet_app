@@ -1,0 +1,348 @@
+/* ==========================================================
+   ACTIVE BETS
+========================================================== */
+
+.dashboard-active-bets {
+
+    width: 100%;
+
+    display: flex;
+
+    flex-direction: column;
+
+    background: rgba(15,23,42,.85);
+
+    border: 1px solid rgba(148,163,184,.12);
+
+    border-radius: 18px;
+
+    overflow: hidden;
+
+    color: #f8fafc;
+
+}
+
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+.section-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 20px 24px;
+
+    border-bottom: 1px solid rgba(148,163,184,.1);
+
+}
+
+.section-header h2 {
+
+    margin: 0;
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+}
+
+.section-header span {
+
+    color: #64748b;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   EMPTY STATE
+========================================================== */
+
+.empty-state {
+
+    padding: 60px 20px;
+
+    text-align: center;
+
+    color: #64748b;
+
+    font-size: 14px;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.bets-table {
+
+    width: 100%;
+
+}
+
+.bets-header {
+
+    display: grid;
+
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+
+    align-items: center;
+
+    padding: 14px 24px;
+
+    background: rgba(2,6,23,.55);
+
+    color: #64748b;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: .8px;
+
+}
+
+
+/* ==========================================================
+   ROW
+========================================================== */
+
+.bet-row {
+
+    display: grid;
+
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+
+    align-items: center;
+
+    padding: 18px 24px;
+
+    border-top: 1px solid rgba(148,163,184,.08);
+
+    transition: .25s ease;
+
+}
+
+.bet-row:hover {
+
+    background: rgba(30,41,59,.55);
+
+}
+
+
+/* ==========================================================
+   MARKET
+========================================================== */
+
+.bet-market {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+.bet-market svg {
+
+    color: #38bdf8;
+
+}
+
+.bet-market strong {
+
+    display: block;
+
+    font-size: 14px;
+
+    color: #f8fafc;
+
+}
+
+.bet-market small {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color: #64748b;
+
+    font-size: 11px;
+
+}
+
+
+/* ==========================================================
+   MONEY
+========================================================== */
+
+.bet-row > div:nth-child(2) {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    color: #e2e8f0;
+
+    font-weight: 600;
+
+}
+
+.bet-row > div:nth-child(2) svg {
+
+    color: #fbbf24;
+
+}
+
+.bet-profit {
+
+    color: #22c55e;
+
+    font-weight: 700;
+
+}
+
+
+/* ==========================================================
+   STATUS BADGES
+========================================================== */
+
+.status {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 78px;
+
+    padding: 6px 12px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: .5px;
+
+}
+
+.status.running {
+
+    background: rgba(59,130,246,.12);
+
+    color: #38bdf8;
+
+    border: 1px solid rgba(56,189,248,.25);
+
+}
+
+.status.pending {
+
+    background: rgba(245,158,11,.12);
+
+    color: #f59e0b;
+
+    border: 1px solid rgba(245,158,11,.25);
+
+}
+
+.status.won {
+
+    background: rgba(34,197,94,.12);
+
+    color: #22c55e;
+
+    border: 1px solid rgba(34,197,94,.25);
+
+}
+
+.status.lost {
+
+    background: rgba(239,68,68,.12);
+
+    color: #ef4444;
+
+    border: 1px solid rgba(239,68,68,.25);
+
+}
+
+
+/* ==========================================================
+   CASH OUT BUTTON
+========================================================== */
+
+.cashout-btn {
+
+    width: 100%;
+
+    height: 36px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: rgba(148,163,184,.12);
+
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    cursor: not-allowed;
+
+    opacity: .7;
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width: 900px) {
+
+    .bets-header {
+
+        display: none;
+
+    }
+
+    .bet-row {
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 14px;
+
+    }
+
+    .cashout-btn {
+
+        width: 100%;
+
+    }
+
+}

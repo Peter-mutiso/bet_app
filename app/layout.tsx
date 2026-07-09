@@ -8,7 +8,8 @@ import { AppProvider } from "@/contexts/AppContext";
 import { TradingProvider } from "@/contexts/TradingContext";
 import { WatchlistProvider } from "@/contexts/WatchlistContext";
 import { TransactionProvider } from "@/contexts/TransactionContext";
-
+import { NotificationProvider } from "@/contexts/NotificationContext";
+import UIEffectsProvider from "@/components/providers/UIEffectsProvider";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -40,8 +41,12 @@ export default function RootLayout({
           <TradingProvider>
             <WatchlistProvider>
                 <TransactionProvider>
-                  <ThemeApplier />
-                  {children}
+                  <NotificationProvider>
+                    <UIEffectsProvider>
+                        <ThemeApplier />
+                        {children}
+                    </UIEffectsProvider>
+                  </NotificationProvider>
                 </TransactionProvider>
             </WatchlistProvider>
           </TradingProvider>

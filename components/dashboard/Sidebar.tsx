@@ -12,7 +12,6 @@ import {
     Receipt,
     Bell,
     Settings,
-    BarChart3,
     Star,
     LogOut,
     UserCircle,
@@ -20,88 +19,78 @@ import {
     Shield
 } from "lucide-react";
 
-const mainMenu = [
+import { useAuthStore } from "@/store/useAuthStore";
 
+const mainMenu = [
     {
         title: "Dashboard",
         icon: LayoutDashboard,
         href: "/dashboard"
     },
-
-    {
-        title: "Markets",
-        icon: ChartCandlestick,
-        href: "/markets"
-    },
-
+    
     {
         title: "Trade",
         icon: LineChart,
         href: "/trading"
     },
-
     {
         title: "Portfolio",
         icon: Wallet,
         href: "/portfolio"
     },
-
     {
         title: "Watchlist",
         icon: Star,
         href: "/watchlist"
     }
-
 ];
 
 const financeMenu = [
-
     {
         title: "Deposit",
         icon: ArrowDownCircle,
         href: "/deposit"
     },
-
     {
         title: "Withdraw",
         icon: ArrowUpCircle,
         href: "/withdraw"
     },
-
     {
         title: "Transactions",
         icon: Receipt,
         href: "/transactions"
     }
-
 ];
 
 const systemMenu = [
-
-    {
-        title: "Notifications",
-        icon: Bell,
-        href: "/notifications"
-    },
-
+    
     {
         title: "Security",
         icon: Shield,
         href: "/security"
     },
-
     {
         title: "Settings",
         icon: Settings,
         href: "/settings"
     }
-
 ];
 
 export default function Sidebar() {
 
     const pathname = usePathname();
     const router = useRouter();
+
+    const logout = useAuthStore(state => state.logout);
+
+    const handleLogout = () => {
+
+        logout();
+
+        router.replace("/login");
+
+    };
 
     return (
 
@@ -152,9 +141,7 @@ export default function Sidebar() {
             <div className="sidebar-scroll">
 
                 <span className="sidebar-title">
-
                     MAIN
-
                 </span>
 
                 <nav className="sidebar-nav">
@@ -188,9 +175,7 @@ export default function Sidebar() {
                 </nav>
 
                 <span className="sidebar-title">
-
                     WALLET
-
                 </span>
 
                 <nav className="sidebar-nav">
@@ -224,9 +209,7 @@ export default function Sidebar() {
                 </nav>
 
                 <span className="sidebar-title">
-
                     SYSTEM
-
                 </span>
 
                 <nav className="sidebar-nav">
@@ -267,7 +250,7 @@ export default function Sidebar() {
 
                 <button
                     className="logout-button"
-                    onClick={() => router.push("/login")}
+                    onClick={handleLogout}
                 >
 
                     <LogOut size={18} />

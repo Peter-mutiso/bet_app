@@ -1,86 +1,73 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 import {
     LayoutDashboard,
     CandlestickChart,
     Star,
     Newspaper,
     BarChart3,
-    Bell,
     Settings,
     Globe,
-    Wallet,
     Bot,
-    Activity,
     UserCircle,
-    LogOut
+    LogOut,
 } from "lucide-react";
 
-import { useState } from "react";
-
-const items = [
-
+const tradingItems = [
     {
         icon: LayoutDashboard,
-        label: "Dashboard"
+        label: "Overview",
+        href: "/trading",
     },
-
     {
         icon: CandlestickChart,
-        label: "Markets"
+        label: "Markets",
+        href: "/trading/markets",
     },
-
-    {
-        icon: Activity,
-        label: "Trading"
-    },
-
     {
         icon: Star,
-        label: "Watchlist"
+        label: "Watchlist",
+        href: "/trading/watchlist",
     },
-
     {
         icon: Globe,
-        label: "Assets"
+        label: "Assets",
+        href: "/trading/assets",
     },
+];
 
-    {
-        icon: Wallet,
-        label: "Portfolio"
-    },
-
+const toolsItems = [
     {
         icon: Newspaper,
-        label: "News"
+        label: "News",
+        href: "/trading/news",
     },
-
     {
         icon: BarChart3,
-        label: "Analytics"
+        label: "Analytics",
+        href: "/trading/analytics",
     },
-
     {
         icon: Bot,
-        label: "Trading Bot"
+        label: "Trading Bot",
+        href: "/trading/bot",
     },
-
-    {
-        icon: Bell,
-        label: "Alerts"
-    }
-
 ];
 
 export default function TradingSidebar() {
 
-    const [active, setActive] = useState("Trading");
+    const pathname = usePathname();
 
     return (
 
         <aside className="trading-sidebar">
 
+            {/* ================================================= */}
             {/* LOGO */}
+            {/* ================================================= */}
 
             <div className="sidebar-logo">
 
@@ -90,40 +77,55 @@ export default function TradingSidebar() {
 
                 </div>
 
+                <div className="logo-text">
+
+                    <h2>
+
+                        BetPro
+
+                    </h2>
+
+                    <span>
+
+                        Trading Terminal
+
+                    </span>
+
+                </div>
+
             </div>
 
-            {/* NAVIGATION */}
+            {/* ================================================= */}
+            {/* MAIN NAVIGATION */}
+            {/* ================================================= */}
 
-            <div className="sidebar-nav">
+            <div className="sidebar-section">
 
-                {
+                <span className="sidebar-heading">
 
-                    items.map(item => {
+                    TRADING
+
+                </span>
+
+                <nav className="sidebar-nav">
+
+                    {tradingItems.map((item) => {
 
                         const Icon = item.icon;
 
-                        const selected =
-                            active === item.label;
+                        const active = pathname === item.href;
 
                         return (
 
-                            <button
-
-                                key={item.label}
-
-                                onClick={() =>
-                                    setActive(item.label)
-                                }
-
-                                className={
-                                    selected
-                                        ? "sidebar-btn active"
-                                        : "sidebar-btn"
-                                }
-
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={`sidebar-btn ${
+                                    active ? "active" : ""
+                                }`}
                             >
 
-                                <Icon size={21}/>
+                                <Icon size={20} />
 
                                 <span>
 
@@ -131,23 +133,80 @@ export default function TradingSidebar() {
 
                                 </span>
 
-                            </button>
+                            </Link>
 
                         );
 
-                    })
+                    })}
 
-                }
+                </nav>
 
             </div>
 
-            {/* USER */}
+            {/* ================================================= */}
+            {/* TOOLS */}
+            {/* ================================================= */}
+
+            <div className="sidebar-section">
+
+                <span className="sidebar-heading">
+
+                    TOOLS
+
+                </span>
+
+                <nav className="sidebar-nav">
+
+                    {toolsItems.map((item) => {
+
+                        const Icon = item.icon;
+
+                        const active = pathname === item.href;
+
+                        return (
+
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={`sidebar-btn ${
+                                    active ? "active" : ""
+                                }`}
+                            >
+
+                                <Icon size={20} />
+
+                                <span>
+
+                                    {item.label}
+
+                                </span>
+
+                            </Link>
+
+                        );
+
+                    })}
+
+                </nav>
+
+            </div>
+
+            {/* ================================================= */}
+            {/* FOOTER */}
+            {/* ================================================= */}
 
             <div className="sidebar-footer">
 
-                <button className="sidebar-btn">
+                <Link
+                    href="/dashboard/account"
+                    className={`sidebar-btn ${
+                        pathname === "/dashboard/account"
+                            ? "active"
+                            : ""
+                    }`}
+                >
 
-                    <UserCircle size={20}/>
+                    <UserCircle size={20} />
 
                     <span>
 
@@ -155,11 +214,18 @@ export default function TradingSidebar() {
 
                     </span>
 
-                </button>
+                </Link>
 
-                <button className="sidebar-btn">
+                <Link
+                    href="/settings"
+                    className={`sidebar-btn ${
+                        pathname === "/settings"
+                            ? "active"
+                            : ""
+                    }`}
+                >
 
-                    <Settings size={20}/>
+                    <Settings size={20} />
 
                     <span>
 
@@ -167,11 +233,14 @@ export default function TradingSidebar() {
 
                     </span>
 
-                </button>
+                </Link>
 
-                <button className="sidebar-btn logout">
+                <button
+                    type="button"
+                    className="sidebar-btn logout"
+                >
 
-                    <LogOut size={20}/>
+                    <LogOut size={20} />
 
                     <span>
 

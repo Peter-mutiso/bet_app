@@ -101,7 +101,7 @@ export default function WithdrawPage() {
 
     return (
 
-<div className="space-y-6 p-6">
+<div className="withdraw-page space-y-6 p-6">
 
     {/* ======================================
         WALLET SUMMARY
@@ -109,7 +109,7 @@ export default function WithdrawPage() {
 
     <div className="grid gap-4 md:grid-cols-3">
 
-        <div className="rounded-xl bg-slate-900 p-5">
+        <div className="wallet-card">
 
             <p className="text-xs text-slate-400">
 
@@ -125,7 +125,7 @@ export default function WithdrawPage() {
 
         </div>
 
-        <div className="rounded-xl bg-slate-900 p-5">
+        <div className="wallet-card">
 
             <p className="text-xs text-slate-400">
 
@@ -141,7 +141,7 @@ export default function WithdrawPage() {
 
         </div>
 
-        <div className="rounded-xl bg-slate-900 p-5">
+        <div className="wallet-card">
 
             <p className="text-xs text-slate-400">
 
@@ -163,7 +163,7 @@ export default function WithdrawPage() {
         WITHDRAW FORM
     ======================================= */}
 
-    <div className="rounded-xl bg-slate-900 p-6 space-y-5">
+    <div className="withdraw-card space-y-5">
 
         <h2 className="text-xl font-semibold">
 
@@ -193,7 +193,7 @@ export default function WithdrawPage() {
 
                 }
 
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 p-3"
+                className="withdraw-input"
 
             >
 
@@ -231,7 +231,7 @@ export default function WithdrawPage() {
 
                 placeholder="Enter amount"
 
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 p-3"
+                className="withdraw-input"
 
             />
 
@@ -257,7 +257,7 @@ export default function WithdrawPage() {
 
                 placeholder="2547XXXXXXXX"
 
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 p-3"
+                className="withdraw-select"
 
             />
 
@@ -269,7 +269,7 @@ export default function WithdrawPage() {
 
             disabled={loading}
 
-            className="w-full rounded-lg bg-red-600 py-3 font-semibold transition hover:bg-red-500 disabled:opacity-50"
+            className="withdraw-btn"
 
         >
 
@@ -308,7 +308,7 @@ export default function WithdrawPage() {
 
 <div className="grid gap-4 md:grid-cols-3">
 
-    <div className="rounded-xl bg-slate-900 p-5">
+    <div className="wallet-card">
 
         <p className="text-xs text-slate-400">
 
@@ -328,7 +328,7 @@ export default function WithdrawPage() {
 
     </div>
 
-    <div className="rounded-xl bg-slate-900 p-5">
+    <div className="wallet-card">
 
         <p className="text-xs text-slate-400">
 
@@ -348,8 +348,7 @@ export default function WithdrawPage() {
 
     </div>
 
-    <div className="rounded-xl bg-slate-900 p-5">
-
+    <div className="wallet-card">
         <p className="text-xs text-slate-400">
 
             Net Amount
@@ -389,8 +388,7 @@ export default function WithdrawPage() {
 
                     key={tx.id}
 
-                    className="flex items-center justify-between rounded-lg bg-slate-800 p-4"
-
+                    className="transaction-row"
                 >
 
                     <div>

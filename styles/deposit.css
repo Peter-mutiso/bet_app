@@ -1,0 +1,1918 @@
+/* ==========================================================================
+   DEPOSIT PAGE
+   Professional Trading Wallet
+   Part 1 - Layout & Dashboard
+   ========================================================================== */
+
+:root{
+
+    --deposit-bg:#0b1220;
+
+    --deposit-surface:#111827;
+
+    --deposit-surface-light:#1e293b;
+
+    --deposit-border:#273449;
+
+    --deposit-hover:#334155;
+
+    --deposit-primary:#16a34a;
+
+    --deposit-primary-hover:#22c55e;
+
+    --deposit-warning:#eab308;
+
+    --deposit-danger:#ef4444;
+
+    --deposit-info:#3b82f6;
+
+    --deposit-text:#f8fafc;
+
+    --deposit-muted:#94a3b8;
+
+    --deposit-radius:18px;
+
+    --deposit-radius-sm:12px;
+
+    --deposit-shadow:
+        0 15px 45px rgba(0,0,0,.35);
+
+    --deposit-transition:.28s ease;
+
+}
+
+
+/* ==========================================================================
+   PAGE
+   ========================================================================== */
+
+.deposit-page{
+
+    min-height:100%;
+
+    padding:32px;
+
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(34,197,94,.08),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at bottom left,
+            rgba(59,130,246,.06),
+            transparent 30%
+        ),
+        var(--deposit-bg);
+
+    color:var(--deposit-text);
+
+}
+
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+
+.deposit-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:28px;
+
+    gap:20px;
+
+    flex-wrap:wrap;
+
+}
+
+.deposit-title{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:6px;
+
+}
+
+.deposit-title h1{
+
+    margin:0;
+
+    font-size:2rem;
+
+    font-weight:700;
+
+    letter-spacing:.3px;
+
+}
+
+.deposit-title p{
+
+    margin:0;
+
+    color:var(--deposit-muted);
+
+    font-size:.95rem;
+
+}
+
+
+/* ==========================================================================
+   SUMMARY GRID
+   ========================================================================== */
+
+.deposit-summary{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(240px,1fr)
+        );
+
+    gap:22px;
+
+    margin-bottom:30px;
+
+}
+
+
+/* ==========================================================================
+   SUMMARY CARD
+   ========================================================================== */
+
+.deposit-card{
+
+    position:relative;
+
+    overflow:hidden;
+
+    background:
+
+        linear-gradient(
+            145deg,
+            rgba(30,41,59,.98),
+            rgba(15,23,42,.98)
+        );
+
+    border:1px solid var(--deposit-border);
+
+    border-radius:var(--deposit-radius);
+
+    padding:24px;
+
+    transition:var(--deposit-transition);
+
+    box-shadow:var(--deposit-shadow);
+
+}
+
+.deposit-card:hover{
+
+    transform:translateY(-4px);
+
+    border-color:rgba(34,197,94,.4);
+
+}
+
+.deposit-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.04),
+            transparent
+        );
+
+    pointer-events:none;
+
+}
+
+.deposit-card::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:160px;
+
+    height:160px;
+
+    right:-80px;
+
+    top:-80px;
+
+    border-radius:50%;
+
+    background:
+
+        radial-gradient(
+
+            rgba(34,197,94,.12),
+
+            transparent 70%
+
+        );
+
+}
+
+
+/* ==========================================================================
+   CARD LABEL
+   ========================================================================== */
+
+.deposit-card-label{
+
+    display:block;
+
+    font-size:.78rem;
+
+    text-transform:uppercase;
+
+    letter-spacing:1px;
+
+    color:var(--deposit-muted);
+
+    margin-bottom:14px;
+
+}
+
+
+/* ==========================================================================
+   CARD VALUE
+   ========================================================================== */
+
+.deposit-card-value{
+
+    font-size:2rem;
+
+    font-weight:700;
+
+    line-height:1;
+
+    letter-spacing:.4px;
+
+}
+
+
+/* ==========================================================================
+   CARD COLORS
+   ========================================================================== */
+
+.deposit-card.balance{
+
+    border-left:5px solid #22c55e;
+
+}
+
+.deposit-card.pending{
+
+    border-left:5px solid #f59e0b;
+
+}
+
+.deposit-card.total{
+
+    border-left:5px solid #3b82f6;
+
+}
+
+.deposit-card.balance .deposit-card-value{
+
+    color:#4ade80;
+
+}
+
+.deposit-card.pending .deposit-card-value{
+
+    color:#fbbf24;
+
+}
+
+.deposit-card.total .deposit-card-value{
+
+    color:#60a5fa;
+
+}
+
+
+/* ==========================================================================
+   MAIN CONTENT
+   ========================================================================== */
+
+.deposit-layout{
+
+    display:grid;
+
+    grid-template-columns:
+
+        minmax(420px,2fr)
+
+        minmax(300px,1fr);
+
+    gap:26px;
+
+    align-items:start;
+
+}
+
+
+/* ==========================================================================
+   PANELS
+   ========================================================================== */
+
+.deposit-panel{
+
+    background:
+
+        linear-gradient(
+            180deg,
+            rgba(17,24,39,.98),
+            rgba(15,23,42,.98)
+        );
+
+    border:1px solid var(--deposit-border);
+
+    border-radius:var(--deposit-radius);
+
+    padding:28px;
+
+    box-shadow:var(--deposit-shadow);
+
+}
+
+.deposit-panel-title{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:22px;
+
+}
+
+.deposit-panel-title h2{
+
+    margin:0;
+
+    font-size:1.2rem;
+
+    font-weight:600;
+
+}
+
+.deposit-panel-title span{
+
+    color:var(--deposit-muted);
+
+    font-size:.85rem;
+
+}
+
+
+/* ==========================================================================
+   DIVIDERS
+   ========================================================================== */
+
+.deposit-divider{
+
+    width:100%;
+
+    height:1px;
+
+    background:rgba(255,255,255,.06);
+
+    margin:24px 0;
+
+}
+
+
+/* ==========================================================================
+   SECTION TITLES
+   ========================================================================== */
+
+.deposit-section{
+
+    margin-bottom:24px;
+
+}
+
+.deposit-section:last-child{
+
+    margin-bottom:0;
+
+}
+
+.deposit-section h3{
+
+    margin:0 0 12px;
+
+    font-size:1rem;
+
+    font-weight:600;
+
+}
+
+.deposit-section p{
+
+    margin:0;
+
+    color:var(--deposit-muted);
+
+    font-size:.92rem;
+
+    line-height:1.6;
+
+}
+
+/* ==========================================================================
+   DEPOSIT FORM
+   Part 2 - Form Controls
+   ========================================================================== */
+
+.deposit-form{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:22px;
+
+}
+
+/* ==========================================================================
+   FORM GROUP
+   ========================================================================== */
+
+.deposit-group{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+}
+
+.deposit-group label{
+
+    color:var(--deposit-text);
+
+    font-size:.9rem;
+
+    font-weight:600;
+
+    letter-spacing:.3px;
+
+}
+
+/* ==========================================================================
+   INPUTS
+   ========================================================================== */
+
+.deposit-input,
+.deposit-select{
+
+    width:100%;
+
+    height:56px;
+
+    border-radius:14px;
+
+    border:1px solid var(--deposit-border);
+
+    background:rgba(15,23,42,.95);
+
+    color:var(--deposit-text);
+
+    padding:0 18px;
+
+    font-size:1rem;
+
+    outline:none;
+
+    transition:all .25s ease;
+
+    appearance:none;
+
+}
+
+.deposit-input::placeholder{
+
+    color:var(--deposit-muted);
+
+}
+
+.deposit-input:hover,
+.deposit-select:hover{
+
+    border-color:#3b82f6;
+
+}
+
+.deposit-input:focus,
+.deposit-select:focus{
+
+    border-color:#22c55e;
+
+    box-shadow:
+
+        0 0 0 4px rgba(34,197,94,.15);
+
+}
+
+/* ==========================================================================
+   SELECT
+   ========================================================================== */
+
+.deposit-select{
+
+    cursor:pointer;
+
+    background-image:
+
+        linear-gradient(45deg, transparent 50%, #94a3b8 50%),
+
+        linear-gradient(135deg, #94a3b8 50%, transparent 50%);
+
+    background-position:
+
+        calc(100% - 20px) calc(50% - 3px),
+
+        calc(100% - 14px) calc(50% - 3px);
+
+    background-size:6px 6px;
+
+    background-repeat:no-repeat;
+
+}
+
+.deposit-select option{
+
+    background:#0f172a;
+
+    color:white;
+
+}
+
+/* ==========================================================================
+   INPUT ICON WRAPPER
+   ========================================================================== */
+
+.deposit-input-wrapper{
+
+    position:relative;
+
+}
+
+.deposit-input-wrapper svg{
+
+    position:absolute;
+
+    left:18px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    width:18px;
+
+    height:18px;
+
+    color:#94a3b8;
+
+}
+
+.deposit-input-wrapper .deposit-input{
+
+    padding-left:48px;
+
+}
+
+/* ==========================================================================
+   AMOUNT INPUT
+   ========================================================================== */
+
+.deposit-amount{
+
+    position:relative;
+
+}
+
+.deposit-currency{
+
+    position:absolute;
+
+    right:18px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    color:#94a3b8;
+
+    font-size:.9rem;
+
+    font-weight:600;
+
+}
+
+/* ==========================================================================
+   PHONE INPUT
+   ========================================================================== */
+
+.deposit-phone{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+.deposit-phone-prefix{
+
+    min-width:70px;
+
+    height:56px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:#1e293b;
+
+    border-radius:14px;
+
+    border:1px solid var(--deposit-border);
+
+    color:white;
+
+    font-weight:600;
+
+}
+
+/* ==========================================================================
+   PAYMENT METHODS
+   ========================================================================== */
+
+.deposit-method-grid{
+
+    display:grid;
+
+    grid-template-columns:
+
+        repeat(auto-fit,minmax(150px,1fr));
+
+    gap:16px;
+
+}
+
+.deposit-method{
+
+    position:relative;
+
+    padding:20px;
+
+    border-radius:16px;
+
+    border:1px solid var(--deposit-border);
+
+    background:#111827;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    overflow:hidden;
+
+}
+
+.deposit-method:hover{
+
+    transform:translateY(-4px);
+
+    border-color:#22c55e;
+
+    background:#162032;
+
+}
+
+.deposit-method.active{
+
+    border-color:#22c55e;
+
+    background:
+
+        linear-gradient(
+
+            135deg,
+
+            rgba(34,197,94,.18),
+
+            rgba(22,163,74,.05)
+
+        );
+
+}
+
+.deposit-method::before{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+
+        linear-gradient(
+
+            180deg,
+
+            rgba(255,255,255,.04),
+
+            transparent
+
+        );
+
+    pointer-events:none;
+
+}
+
+.deposit-method-icon{
+
+    width:44px;
+
+    height:44px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    border-radius:12px;
+
+    background:#1e293b;
+
+    margin-bottom:14px;
+
+}
+
+.deposit-method-name{
+
+    font-weight:600;
+
+    color:white;
+
+    margin-bottom:4px;
+
+}
+
+.deposit-method-description{
+
+    color:var(--deposit-muted);
+
+    font-size:.82rem;
+
+}
+
+/* ==========================================================================
+   FORM GRID
+   ========================================================================== */
+
+.deposit-grid{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:18px;
+
+}
+
+.deposit-grid-full{
+
+    grid-column:1/-1;
+
+}
+
+/* ==========================================================================
+   HELPER TEXT
+   ========================================================================== */
+
+.deposit-helper{
+
+    margin-top:6px;
+
+    color:var(--deposit-muted);
+
+    font-size:.82rem;
+
+    line-height:1.5;
+
+}
+
+/* ==========================================================================
+   REQUIRED MARK
+   ========================================================================== */
+
+.deposit-required{
+
+    color:#ef4444;
+
+    margin-left:4px;
+
+}
+
+/* ==========================================================================
+   QUICK AMOUNTS
+   ========================================================================== */
+
+.deposit-quick{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+
+    margin-top:12px;
+
+}
+
+.deposit-quick button{
+
+    border:none;
+
+    cursor:pointer;
+
+    padding:10px 18px;
+
+    border-radius:999px;
+
+    background:#1e293b;
+
+    color:white;
+
+    font-size:.85rem;
+
+    transition:.25s;
+
+}
+
+.deposit-quick button:hover{
+
+    background:#22c55e;
+
+    color:#fff;
+
+    transform:translateY(-2px);
+
+}
+
+/* ==========================================================================
+   NOTES BOX
+   ========================================================================== */
+
+.deposit-note{
+
+    padding:18px;
+
+    border-radius:14px;
+
+    border:1px solid rgba(59,130,246,.25);
+
+    background:rgba(59,130,246,.08);
+
+    color:#bfdbfe;
+
+    line-height:1.7;
+
+    font-size:.9rem;
+
+}
+/* ==========================================================================
+   DEPOSIT PAGE
+   Part 3 - Buttons, Alerts & Animations
+   ========================================================================== */
+
+/* ==========================================================================
+   PRIMARY BUTTON
+   ========================================================================== */
+
+.deposit-button{
+
+    width:100%;
+
+    height:58px;
+
+    border:none;
+
+    outline:none;
+
+    cursor:pointer;
+
+    border-radius:16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #16a34a,
+            #22c55e
+        );
+
+    color:#fff;
+
+    font-size:1rem;
+
+    font-weight:700;
+
+    letter-spacing:.4px;
+
+    transition:all .25s ease;
+
+    position:relative;
+
+    overflow:hidden;
+
+    box-shadow:
+        0 15px 35px rgba(34,197,94,.25);
+
+}
+
+.deposit-button:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:
+        0 20px 40px rgba(34,197,94,.35);
+
+}
+
+.deposit-button:active{
+
+    transform:scale(.985);
+
+}
+
+.deposit-button:disabled{
+
+    cursor:not-allowed;
+
+    opacity:.6;
+
+    transform:none;
+
+    box-shadow:none;
+
+}
+
+.deposit-button::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+
+    left:-120%;
+
+    width:120%;
+
+    height:100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.25),
+            transparent
+        );
+
+    transition:.6s;
+
+}
+
+.deposit-button:hover::before{
+
+    left:120%;
+
+}
+
+/* ==========================================================================
+   SECONDARY BUTTON
+   ========================================================================== */
+
+.deposit-secondary{
+
+    width:100%;
+
+    height:54px;
+
+    border-radius:14px;
+
+    border:1px solid var(--deposit-border);
+
+    background:#1e293b;
+
+    color:#fff;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.deposit-secondary:hover{
+
+    background:#334155;
+
+    border-color:#22c55e;
+
+}
+
+/* ==========================================================================
+   BUTTON GROUP
+   ========================================================================== */
+
+.deposit-actions{
+
+    display:flex;
+
+    gap:16px;
+
+    margin-top:10px;
+
+}
+
+.deposit-actions button{
+
+    flex:1;
+
+}
+
+/* ==========================================================================
+   LOADING STATE
+   ========================================================================== */
+
+.deposit-loading{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:12px;
+
+    color:#fff;
+
+    font-weight:600;
+
+}
+
+.deposit-spinner{
+
+    width:22px;
+
+    height:22px;
+
+    border-radius:50%;
+
+    border:3px solid rgba(255,255,255,.18);
+
+    border-top-color:#22c55e;
+
+    animation:deposit-spin .9s linear infinite;
+
+}
+
+@keyframes deposit-spin{
+
+    to{
+
+        transform:rotate(360deg);
+
+    }
+
+}
+
+/* ==========================================================================
+   ALERTS
+   ========================================================================== */
+
+.deposit-alert{
+
+    width:100%;
+
+    padding:18px 20px;
+
+    border-radius:14px;
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:14px;
+
+    font-size:.92rem;
+
+    line-height:1.6;
+
+    border:1px solid transparent;
+
+    animation:fadeUp .35s ease;
+
+}
+
+.deposit-alert svg{
+
+    flex-shrink:0;
+
+    width:20px;
+
+    height:20px;
+
+}
+
+.deposit-alert-success{
+
+    background:rgba(34,197,94,.12);
+
+    border-color:rgba(34,197,94,.30);
+
+    color:#bbf7d0;
+
+}
+
+.deposit-alert-warning{
+
+    background:rgba(234,179,8,.10);
+
+    border-color:rgba(234,179,8,.30);
+
+    color:#fde68a;
+
+}
+
+.deposit-alert-error{
+
+    background:rgba(239,68,68,.10);
+
+    border-color:rgba(239,68,68,.30);
+
+    color:#fecaca;
+
+}
+
+.deposit-alert-info{
+
+    background:rgba(59,130,246,.10);
+
+    border-color:rgba(59,130,246,.28);
+
+    color:#bfdbfe;
+
+}
+
+/* ==========================================================================
+   STATUS BADGES
+   ========================================================================== */
+
+.deposit-badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    font-size:.75rem;
+
+    font-weight:700;
+
+    letter-spacing:.5px;
+
+    text-transform:uppercase;
+
+}
+
+.deposit-badge-success{
+
+    background:#14532d;
+
+    color:#86efac;
+
+}
+
+.deposit-badge-warning{
+
+    background:#78350f;
+
+    color:#fde68a;
+
+}
+
+.deposit-badge-danger{
+
+    background:#7f1d1d;
+
+    color:#fecaca;
+
+}
+
+.deposit-badge-info{
+
+    background:#172554;
+
+    color:#bfdbfe;
+
+}
+
+/* ==========================================================================
+   PAYMENT STATUS CARD
+   ========================================================================== */
+
+.deposit-status{
+
+    border-radius:16px;
+
+    border:1px solid var(--deposit-border);
+
+    background:#111827;
+
+    padding:22px;
+
+}
+
+.deposit-status-title{
+
+    font-size:1rem;
+
+    font-weight:700;
+
+    margin-bottom:10px;
+
+}
+
+.deposit-status-text{
+
+    color:var(--deposit-muted);
+
+    line-height:1.7;
+
+}
+
+/* ==========================================================================
+   PROGRESS BAR
+   ========================================================================== */
+
+.deposit-progress{
+
+    margin-top:18px;
+
+    width:100%;
+
+    height:10px;
+
+    border-radius:999px;
+
+    overflow:hidden;
+
+    background:#1e293b;
+
+}
+
+.deposit-progress-bar{
+
+    height:100%;
+
+    width:0%;
+
+    border-radius:999px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #16a34a,
+            #22c55e
+        );
+
+    animation:progressAnimation 3s linear forwards;
+
+}
+
+@keyframes progressAnimation{
+
+    from{
+
+        width:0;
+
+    }
+
+    to{
+
+        width:100%;
+
+    }
+
+}
+
+/* ==========================================================================
+   CARD HOVER EFFECT
+   ========================================================================== */
+
+.deposit-hover{
+
+    transition:.28s ease;
+
+}
+
+.deposit-hover:hover{
+
+    transform:translateY(-5px);
+
+    box-shadow:
+        0 20px 45px rgba(0,0,0,.35);
+
+}
+
+/* ==========================================================================
+   PULSE EFFECT
+   ========================================================================== */
+
+.deposit-pulse{
+
+    animation:pulseDeposit 2s infinite;
+
+}
+
+@keyframes pulseDeposit{
+
+    0%{
+
+        box-shadow:0 0 0 0 rgba(34,197,94,.35);
+
+    }
+
+    70%{
+
+        box-shadow:0 0 0 18px rgba(34,197,94,0);
+
+    }
+
+    100%{
+
+        box-shadow:0 0 0 0 rgba(34,197,94,0);
+
+    }
+
+}
+
+/* ==========================================================================
+   FADE ANIMATION
+   ========================================================================== */
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(15px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+/* ==========================================================================
+   SCALE IN
+   ========================================================================== */
+
+.deposit-scale{
+
+    animation:scaleDeposit .35s ease;
+
+}
+
+@keyframes scaleDeposit{
+
+    from{
+
+        opacity:0;
+
+        transform:scale(.95);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:scale(1);
+
+    }
+
+}
+/* ==========================================================================
+   DEPOSIT PAGE
+   Part 4 - Responsive Design & Final Polish
+   ========================================================================== */
+
+/* ==========================================================================
+   SIDEBAR SUMMARY
+   ========================================================================== */
+
+.deposit-sidebar{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:22px;
+
+}
+
+.deposit-info-card{
+
+    background:linear-gradient(
+        180deg,
+        rgba(17,24,39,.98),
+        rgba(15,23,42,.98)
+    );
+
+    border:1px solid var(--deposit-border);
+
+    border-radius:18px;
+
+    padding:24px;
+
+    box-shadow:var(--deposit-shadow);
+
+}
+
+.deposit-info-card h3{
+
+    margin:0 0 14px;
+
+    font-size:1rem;
+
+    font-weight:700;
+
+}
+
+.deposit-info-card ul{
+
+    margin:0;
+
+    padding-left:18px;
+
+    color:var(--deposit-muted);
+
+    line-height:1.8;
+
+}
+
+.deposit-info-card li{
+
+    margin-bottom:10px;
+
+}
+
+/* ==========================================================================
+   SECURITY BOX
+   ========================================================================== */
+
+.deposit-security{
+
+    border-radius:18px;
+
+    background:rgba(34,197,94,.08);
+
+    border:1px solid rgba(34,197,94,.25);
+
+    padding:20px;
+
+}
+
+.deposit-security-title{
+
+    color:#4ade80;
+
+    font-weight:700;
+
+    margin-bottom:12px;
+
+}
+
+.deposit-security p{
+
+    color:#cbd5e1;
+
+    line-height:1.7;
+
+}
+
+/* ==========================================================================
+   PAYMENT ICONS
+   ========================================================================== */
+
+.deposit-payment-icons{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:12px;
+
+    margin-top:18px;
+
+}
+
+.deposit-payment-icon{
+
+    width:58px;
+
+    height:58px;
+
+    border-radius:14px;
+
+    background:#1e293b;
+
+    border:1px solid var(--deposit-border);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    transition:.25s;
+
+}
+
+.deposit-payment-icon:hover{
+
+    border-color:#22c55e;
+
+    transform:translateY(-4px);
+
+}
+
+/* ==========================================================================
+   TRANSACTION SUMMARY
+   ========================================================================== */
+
+.deposit-summary-table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+.deposit-summary-table td{
+
+    padding:12px 0;
+
+    border-bottom:1px solid rgba(255,255,255,.06);
+
+}
+
+.deposit-summary-table td:first-child{
+
+    color:var(--deposit-muted);
+
+}
+
+.deposit-summary-table td:last-child{
+
+    text-align:right;
+
+    font-weight:600;
+
+}
+
+.deposit-summary-table tr:last-child td{
+
+    border:none;
+
+}
+
+/* ==========================================================================
+   SCROLLBAR
+   ========================================================================== */
+
+.deposit-page::-webkit-scrollbar{
+
+    width:10px;
+
+}
+
+.deposit-page::-webkit-scrollbar-track{
+
+    background:#111827;
+
+}
+
+.deposit-page::-webkit-scrollbar-thumb{
+
+    background:#334155;
+
+    border-radius:999px;
+
+}
+
+.deposit-page::-webkit-scrollbar-thumb:hover{
+
+    background:#22c55e;
+
+}
+
+/* ==========================================================================
+   INPUT AUTOFILL
+   ========================================================================== */
+
+.deposit-input:-webkit-autofill{
+
+    -webkit-box-shadow:
+        0 0 0 100px #111827 inset;
+
+    -webkit-text-fill-color:white;
+
+}
+
+/* ==========================================================================
+   SELECTION
+   ========================================================================== */
+
+.deposit-page ::selection{
+
+    background:#22c55e;
+
+    color:white;
+
+}
+
+/* ==========================================================================
+   LINKS
+   ========================================================================== */
+
+.deposit-page a{
+
+    color:#60a5fa;
+
+    text-decoration:none;
+
+}
+
+.deposit-page a:hover{
+
+    color:#93c5fd;
+
+}
+
+/* ==========================================================================
+   FADE CONTENT
+   ========================================================================== */
+
+.deposit-fade{
+
+    animation:depositFade .45s ease;
+
+}
+
+@keyframes depositFade{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(20px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width:1200px){
+
+    .deposit-layout{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
+
+@media (max-width:992px){
+
+    .deposit-summary{
+
+        grid-template-columns:repeat(2,1fr);
+
+    }
+
+    .deposit-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
+
+@media (max-width:768px){
+
+    .deposit-page{
+
+        padding:20px;
+
+    }
+
+    .deposit-header{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+    .deposit-title h1{
+
+        font-size:1.7rem;
+
+    }
+
+    .deposit-summary{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .deposit-card{
+
+        padding:20px;
+
+    }
+
+    .deposit-panel{
+
+        padding:20px;
+
+    }
+
+    .deposit-method-grid{
+
+        grid-template-columns:repeat(2,1fr);
+
+    }
+
+    .deposit-actions{
+
+        flex-direction:column;
+
+    }
+
+}
+
+@media (max-width:600px){
+
+    .deposit-method-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .deposit-payment-icons{
+
+        justify-content:center;
+
+    }
+
+    .deposit-button{
+
+        font-size:.95rem;
+
+    }
+
+    .deposit-input,
+
+    .deposit-select{
+
+        height:52px;
+
+    }
+
+}
+
+@media (max-width:420px){
+
+    .deposit-page{
+
+        padding:14px;
+
+    }
+
+    .deposit-title h1{
+
+        font-size:1.45rem;
+
+    }
+
+    .deposit-card-value{
+
+        font-size:1.55rem;
+
+    }
+
+    .deposit-panel{
+
+        padding:16px;
+
+    }
+
+}
+
+/* ==========================================================================
+   ACCESSIBILITY
+   ========================================================================== */
+
+.deposit-button:focus-visible,
+
+.deposit-input:focus-visible,
+
+.deposit-select:focus-visible{
+
+    outline:2px solid #22c55e;
+
+    outline-offset:3px;
+
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion:reduce){
+
+    *{
+
+        animation:none !important;
+
+        transition:none !important;
+
+        scroll-behavior:auto !important;
+
+    }
+
+}
+
+/* ==========================================================================
+   END OF FILE
+   ========================================================================== */

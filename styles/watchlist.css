@@ -1,0 +1,537 @@
+/* ==========================================================
+   WATCHLIST PAGE
+========================================================== */
+
+.watchlist-page{
+
+    width:100%;
+
+    min-height:100%;
+
+    padding:24px;
+
+    background:#0b1220;
+
+    color:#e2e8f0;
+
+}
+
+
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+.page-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    margin-bottom:28px;
+
+    gap:20px;
+
+}
+
+
+.page-header h1{
+
+    margin:0;
+
+    font-size:28px;
+
+    font-weight:700;
+
+    color:#ffffff;
+
+}
+
+
+.page-header p{
+
+    margin-top:6px;
+
+    color:#94a3b8;
+
+    font-size:14px;
+
+}
+
+
+.watchlist-count{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    min-width:120px;
+
+    height:42px;
+
+    padding:0 18px;
+
+    border-radius:10px;
+
+    background:#111827;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    color:#60a5fa;
+
+    font-weight:600;
+
+}
+
+
+
+
+
+/* ==========================================================
+   GRID
+========================================================== */
+
+.watchlist-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+
+    gap:18px;
+
+}
+
+
+
+
+
+/* ==========================================================
+   CARD
+========================================================== */
+
+.watch-card{
+
+    background:#111827;
+
+    border:1px solid rgba(255,255,255,.06);
+
+    border-radius:14px;
+
+    padding:18px;
+
+    transition:.2s ease;
+
+}
+
+
+.watch-card:hover{
+
+    transform:translateY(-3px);
+
+    border-color:#2563eb;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+
+}
+
+
+
+
+
+/* ==========================================================
+   CARD HEADER
+========================================================== */
+
+.watch-card-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    margin-bottom:18px;
+
+}
+
+
+.watch-card-header h3{
+
+    margin:0;
+
+    font-size:18px;
+
+    color:#ffffff;
+
+}
+
+
+.watch-card-header span{
+
+    display:block;
+
+    margin-top:4px;
+
+    font-size:13px;
+
+    color:#94a3b8;
+
+}
+
+
+
+
+
+/* ==========================================================
+   STAR BUTTON
+========================================================== */
+
+.favorite-btn{
+
+    width:38px;
+
+    height:38px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#1e293b;
+
+    color:#64748b;
+
+    cursor:pointer;
+
+    font-size:18px;
+
+    transition:.2s;
+
+}
+
+
+.favorite-btn:hover{
+
+    background:#334155;
+
+}
+
+
+.favorite-btn.active{
+
+    background:#f59e0b;
+
+    color:#ffffff;
+
+}
+
+
+
+
+
+/* ==========================================================
+   PRICE
+========================================================== */
+
+.watch-price{
+
+    font-size:34px;
+
+    font-weight:700;
+
+    letter-spacing:.5px;
+
+    color:#f8fafc;
+
+    margin-bottom:6px;
+
+}
+
+
+
+
+
+/* ==========================================================
+   CHANGE
+========================================================== */
+
+.watch-change{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    padding:5px 12px;
+
+    border-radius:999px;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    margin-bottom:20px;
+
+}
+
+
+.watch-change.up{
+
+    background:rgba(34,197,94,.15);
+
+    color:#22c55e;
+
+}
+
+
+.watch-change.down{
+
+    background:rgba(239,68,68,.15);
+
+    color:#ef4444;
+
+}
+
+
+
+
+
+/* ==========================================================
+   STATS
+========================================================== */
+
+.watch-stats{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:14px;
+
+    margin-top:10px;
+
+}
+
+
+.watch-stats div{
+
+    background:#0f172a;
+
+    border:1px solid rgba(255,255,255,.05);
+
+    border-radius:10px;
+
+    padding:12px;
+
+}
+
+
+.watch-stats span{
+
+    display:block;
+
+    font-size:11px;
+
+    color:#64748b;
+
+    margin-bottom:6px;
+
+    text-transform:uppercase;
+
+    letter-spacing:.5px;
+
+}
+
+
+.watch-stats strong{
+
+    color:#ffffff;
+
+    font-size:15px;
+
+}
+
+
+
+
+
+/* ==========================================================
+   EMPTY STATE
+========================================================== */
+
+.watchlist-empty{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    text-align:center;
+
+    padding:80px 20px;
+
+    border:1px dashed rgba(255,255,255,.08);
+
+    border-radius:16px;
+
+    background:#111827;
+
+}
+
+
+.empty-icon{
+
+    width:72px;
+
+    height:72px;
+
+    border-radius:50%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:#1e293b;
+
+    font-size:34px;
+
+    margin-bottom:20px;
+
+}
+
+
+.watchlist-empty h2{
+
+    margin-bottom:12px;
+
+    color:#ffffff;
+
+}
+
+
+.watchlist-empty p{
+
+    max-width:420px;
+
+    color:#94a3b8;
+
+    line-height:1.6;
+
+}
+
+
+
+
+
+/* ==========================================================
+   BUTTON
+========================================================== */
+
+.watchlist-button{
+
+    margin-top:24px;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    height:44px;
+
+    padding:0 24px;
+
+    border-radius:10px;
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+    text-decoration:none;
+
+    font-weight:600;
+
+    transition:.2s;
+
+}
+
+
+.watchlist-button:hover{
+
+    background:#1d4ed8;
+
+}
+
+
+
+
+
+/* ==========================================================
+   LOADING
+========================================================== */
+
+.watchlist-loading{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    min-height:300px;
+
+    color:#94a3b8;
+
+    font-size:15px;
+
+}
+
+
+
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media(max-width:900px){
+
+    .page-header{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+}
+
+
+@media(max-width:640px){
+
+    .watchlist-page{
+
+        padding:16px;
+
+    }
+
+    .watchlist-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .watch-price{
+
+        font-size:28px;
+
+    }
+
+}

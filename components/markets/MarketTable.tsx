@@ -6,6 +6,9 @@ import type { Market } from "../../types/market";
 
 import { useTrading } from "../../contexts/TradingContext";
 import { useWatchlist } from "../../contexts/WatchlistContext";
+import { useRouter } from "next/navigation";
+
+import { useTradingStore } from "@/store/tradingStore";
 
 type Props = {
     markets: Market[];
@@ -83,6 +86,11 @@ export default function MarketTable({
         useState<string | null>(null);
 
     const { executeTrade } = useTrading();
+    const router=useRouter();
+
+const setSelectedMarket=useTradingStore(
+state=>state.setSelectedMarket
+);
 
     const {
         isFavorite,
@@ -203,21 +211,23 @@ export default function MarketTable({
 
                                 <td>
                                     <button
-                                        className="trade-btn"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
+    className="trade-btn"
+    onClick={(e) => {
+        e.stopPropagation();
 
-                                            executeTrade({
-                                                marketId: m.id,
-                                                contract: "RISE",
-                                                duration: 5,
-                                                stake: 10,
-                                                entryPrice: m.price
-                                            });
-                                        }}
-                                    >
-                                        Trade
-                                    </button>
+        setSelectedMarket({
+            symbol: m.symbol,
+            name: m.name,
+            category: m.category,
+            price: m.price,
+            change: m.change
+        });
+
+        router.push("/trading");
+    }}
+>
+    Trade
+</button>
                                 </td>
 
                             </tr>

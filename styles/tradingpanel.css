@@ -1,0 +1,452 @@
+/* ==========================================================
+   TRADING PANEL
+========================================================== */
+
+.trading-panel {
+
+    width: 100%;
+
+    height: 100%;
+
+    display: flex;
+
+    flex-direction: column;
+
+    background: rgba(15,23,42,.88);
+
+    border: 1px solid rgba(148,163,184,.12);
+
+    border-radius: 18px;
+
+    color: #f8fafc;
+
+    overflow: hidden;
+
+}
+
+/* ==========================================================
+   EMPTY STATE
+========================================================== */
+
+.trading-panel.empty {
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    gap: 16px;
+
+    min-height: 620px;
+
+}
+
+.trading-panel.empty svg {
+
+    color: #38bdf8;
+
+    opacity: .7;
+
+}
+
+.trading-panel.empty h2 {
+
+    margin: 0;
+
+    font-size: 24px;
+
+    font-weight: 700;
+
+}
+
+.trading-panel.empty p {
+
+    margin: 0;
+
+    color: #94a3b8;
+
+}
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+.panel-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 24px;
+
+    border-bottom: 1px solid rgba(148,163,184,.10);
+
+}
+
+.panel-header h2 {
+
+    margin: 0;
+
+    font-size: 22px;
+
+    font-weight: 700;
+
+}
+
+.panel-header small {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: #64748b;
+
+    font-size: 12px;
+
+}
+
+.live-dot {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 6px 14px;
+
+    border-radius: 999px;
+
+    background: rgba(34,197,94,.12);
+
+    color: #22c55e;
+
+    border: 1px solid rgba(34,197,94,.25);
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    letter-spacing: .8px;
+
+}
+
+/* ==========================================================
+   LIVE PRICE
+========================================================== */
+
+.current-price {
+
+    padding: 28px 24px 8px;
+
+    text-align: center;
+
+    font-size: 42px;
+
+    font-weight: 800;
+
+    font-family: "JetBrains Mono", monospace;
+
+    color: #f8fafc;
+
+}
+
+.price-change {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    margin-bottom: 24px;
+
+}
+
+.price-change.positive {
+
+    color: #22c55e;
+
+}
+
+.price-change.negative {
+
+    color: #ef4444;
+
+}
+
+/* ==========================================================
+   CHART PLACEHOLDER
+========================================================== */
+
+.chart-placeholder {
+
+    margin: 0 24px;
+
+    height: 220px;
+
+    border-radius: 14px;
+
+    border: 1px dashed rgba(56,189,248,.25);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(30,41,59,.45),
+            rgba(15,23,42,.75)
+        );
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #64748b;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+}
+
+/* ==========================================================
+   CONTROLS
+========================================================== */
+
+.trade-controls {
+
+    display: grid;
+
+    grid-template-columns: 1fr;
+
+    gap: 14px;
+
+    padding: 24px;
+
+}
+
+.trade-controls label {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #cbd5e1;
+
+}
+
+.trade-controls input,
+
+.trade-controls select {
+
+    width: 100%;
+
+    height: 44px;
+
+    padding: 0 14px;
+
+    border-radius: 10px;
+
+    border: 1px solid rgba(148,163,184,.15);
+
+    background: rgba(30,41,59,.8);
+
+    color: #f8fafc;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition: .25s;
+
+}
+
+.trade-controls input:focus,
+
+.trade-controls select:focus {
+
+    border-color: #38bdf8;
+
+    box-shadow: 0 0 0 3px rgba(56,189,248,.15);
+
+}
+
+/* ==========================================================
+   PAYOUT
+========================================================== */
+
+.estimated-payout {
+
+    margin: 0 24px 24px;
+
+    padding: 18px;
+
+    border-radius: 12px;
+
+    background: rgba(34,197,94,.08);
+
+    border: 1px solid rgba(34,197,94,.15);
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    font-size: 14px;
+
+    color: #cbd5e1;
+
+}
+
+.estimated-payout strong {
+
+    font-size: 22px;
+
+    color: #22c55e;
+
+    font-family: "JetBrains Mono", monospace;
+
+}
+
+/* ==========================================================
+   BUY / SELL BUTTONS
+========================================================== */
+
+.trade-buttons {
+
+    display: grid;
+
+    grid-template-columns: repeat(2,1fr);
+
+    gap: 14px;
+
+    padding: 0 24px 24px;
+
+}
+
+.trade-buttons button {
+
+    height: 52px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: .25s;
+
+}
+
+.trade-buttons .buy-btn {
+
+    background: linear-gradient(
+        135deg,
+        #16a34a,
+        #22c55e
+    );
+
+    color: white;
+
+}
+
+.trade-buttons .buy-btn:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 12px 30px rgba(34,197,94,.35);
+
+}
+
+.trade-buttons .sell-btn {
+
+    background: linear-gradient(
+        135deg,
+        #dc2626,
+        #ef4444
+    );
+
+    color: white;
+
+}
+
+.trade-buttons .sell-btn:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 12px 30px rgba(239,68,68,.35);
+
+}
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width:900px) {
+
+    .current-price {
+
+        font-size: 34px;
+
+    }
+
+    .chart-placeholder {
+
+        height: 180px;
+
+    }
+
+}
+
+@media (max-width:600px) {
+
+    .panel-header {
+
+        padding: 18px;
+
+    }
+
+    .current-price {
+
+        font-size: 30px;
+
+    }
+
+    .trade-buttons {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .estimated-payout {
+
+        flex-direction: column;
+
+        gap: 10px;
+
+        text-align: center;
+
+    }
+
+}

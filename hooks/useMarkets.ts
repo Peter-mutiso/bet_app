@@ -50,21 +50,30 @@ export function useMarkets() {
 setLoading(false);
     }, []);
 
-    /* ---------------- LIVE ENGINE ---------------- */
+/* ---------------- LIVE ENGINE ---------------- */
 
 useEffect(() => {
     if (loading) return;
 
     intervalRef.current = setInterval(() => {
+
+        const priceUpdates: { id: string; price: number }[] = [];
+
         setMarkets(prev =>
             prev.map(m => {
+
                 const volatility =
                     m.category === "Volatility" ? 40 : 10;
 
-                const move = (Math.random() - 0.5) * volatility;
+                const move =
+                    (Math.random() - 0.5) * volatility;
 
                 const previousPrice = m.price;
-                const newPrice = Math.max(1, previousPrice + move);
+
+                const newPrice = Math.max(
+                    1,
+                    previousPrice + move
+                );
 
                 const change =
                     previousPrice !== 0
@@ -75,44 +84,52 @@ useEffect(() => {
                     newPrice > previousPrice
                         ? "up"
                         : newPrice < previousPrice
-                            ? "down"
-                            : "flat";
+                        ? "down"
+                        : "flat";
 
-                const high = Math.max(m.high ?? newPrice, newPrice);
-                const low = Math.min(m.low ?? newPrice, newPrice);
+                const high = Math.max(
+                    m.high ?? newPrice,
+                    newPrice
+                );
+
+                const low = Math.min(
+                    m.low ?? newPrice,
+                    newPrice
+                );
 
                 const bid = newPrice - 0.3;
                 const ask = newPrice + 0.3;
-                updateMarketPrice(m.id, newPrice);
+
+                // Store updates for later
+                priceUpdates.push({
+                    id: m.id,
+                    price: newPrice
+                });
+
                 return {
                     ...m,
-
-                    /* price tracking */
                     previousPrice,
                     price: newPrice,
-
-                    /* market movement */
                     change,
                     tickDirection,
-
-                    /* order book simulation */
                     bid,
                     ask,
                     spread: ask - bid,
-
-                    /* range tracking */
                     high,
                     low,
-
-                    /* activity */
                     volume:
                         (m.volume ?? 0) +
                         Math.floor(Math.random() * 50),
-
                     updatedAt: new Date().toISOString()
                 };
             })
         );
+
+        // Notify trading engine AFTER state calculation
+        priceUpdates.forEach(update => {
+            updateMarketPrice(update.id, update.price);
+        });
+
     }, 800);
 
     return () => {
@@ -121,10 +138,11 @@ useEffect(() => {
             intervalRef.current = null;
         }
     };
-}, [loading, updateMarketPrice]);
 
-    return {
-        markets,
-        loading
-    };
+}, [loading, updateMarketPrice]);
+return {
+    markets,
+    loading
+};
+
 }

@@ -1,0 +1,235 @@
+/* ==========================================================
+   TERMINAL LAYOUT
+========================================================== */
+.trading-layout{
+
+    display:flex;
+
+    flex-direction:column;
+
+    min-height:100vh;
+
+    background:#08111f;
+
+    overflow-y:auto;
+
+}
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+.terminal-header{
+
+    flex:0 0 72px;
+
+    height:72px;
+
+    border-bottom:1px solid rgba(255,255,255,.06);
+
+    background:#0f172a;
+
+    z-index:100;
+
+}
+
+/* ==========================================================
+   MAIN GRID
+========================================================== */
+
+.trading-main{
+
+    flex:1;
+
+    display:grid;
+
+    grid-template-columns:
+        220px
+        minmax(0,1fr)
+        360px;
+
+    gap:16px;
+
+    padding:16px;
+
+    min-height:900px;
+
+    overflow:visible;
+
+}
+
+/* ==========================================================
+   SIDEBAR
+========================================================== */
+.terminal-sidebar{
+    background:#0f172a;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.05);
+
+    display:flex;
+    flex-direction:column;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+}
+
+/* ==========================================================
+   CENTER COLUMN
+========================================================== */
+
+.terminal-center{
+
+    display:grid;
+
+    grid-template-rows:
+
+        minmax(520px,1fr)
+
+        300px;
+
+    gap:16px;
+
+    overflow:hidden;
+
+}
+
+/* ==========================================================
+   CHART
+========================================================== */
+
+.terminal-chart{
+
+    background:#0f172a;
+
+    border-radius:18px;
+
+    overflow:hidden;
+
+    border:1px solid rgba(255,255,255,.05);
+
+}
+
+/* ==========================================================
+   BOTTOM PANEL
+========================================================== */
+
+.terminal-bottom{
+
+    background:#0f172a;
+
+    border-radius:18px;
+    height:300px;
+    flex-shrink:0;
+    min-height: 240px;
+    overflow:hidden;
+
+    border:1px solid rgba(255,255,255,.05);
+
+}
+
+/* ==========================================================
+   ORDER PANEL
+========================================================== */
+
+.terminal-order{
+
+    background:#0f172a;
+
+    border-radius:18px;
+
+    display:flex;
+
+flex-direction:column;
+
+overflow-y:auto;
+
+min-width:340px;
+
+    border:1px solid rgba(255,255,255,.05);
+
+}
+
+/* ==========================================================
+   NICE SHADOW
+========================================================== */
+
+.terminal-sidebar,
+.terminal-chart,
+.terminal-bottom,
+.terminal-order{
+
+    box-shadow:
+
+        0 8px 30px rgba(0,0,0,.25);
+
+}
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width:1400px){
+
+.trading-main{
+
+grid-template-columns:
+
+200px
+
+minmax(0,1fr)
+
+320px;
+
+}
+
+}
+
+@media (max-width:1200px){
+
+.trading-main{
+
+grid-template-columns:
+
+220px
+
+1fr;
+
+}
+
+.terminal-order{
+
+grid-column:1/-1;
+
+height:380px;
+
+}
+
+}
+
+@media (max-width:768px){
+
+.trading-main{
+
+display:flex;
+
+flex-direction:column;
+
+overflow:auto;
+
+}
+
+.terminal-center{
+
+display:flex;
+
+flex-direction:column;
+
+}
+
+.terminal-chart{
+
+min-height:420px;
+
+}
+
+}

@@ -6,48 +6,33 @@ import {
     Wallet,
     ChevronDown,
     Activity,
-    Clock3,
 } from "lucide-react";
 
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTradeStore } from "@/store/useTradeStore";
-
 
 export default function TradingHeader() {
 
-    const price = useTradeStore((state) => state.price);
+    const router = useRouter();
+
     const balance = useTradeStore((state) => state.balance);
-    const instrument = useTradeStore(
-        (state) => state.selectedInstrument
+
+    const market = useTradeStore(
+        (state) => state.selectedMarket
     );
 
-    const [time, setTime] = useState("");
+    const price = useTradeStore(
+        (state) => state.price
+    );
 
-    useEffect(() => {
+    const setShowInstrumentPicker = useTradeStore(
+        (state) => state.setShowInstrumentPicker
+    );
+    const chartType = useTradeStore(
+    (state) => state.chartType
+);
 
-        const update = () => {
-
-            setTime(
-
-                new Date().toLocaleTimeString()
-
-            );
-
-        };
-
-        update();
-
-        const interval = setInterval(update, 1000);
-
-        return () => clearInterval(interval);
-
-    }, []);
-
-    const high = (price + 4.25).toFixed(2);
-
-    const low = (price - 3.80).toFixed(2);
-
-    const spread = (Number(high) - Number(low)).toFixed(2);
+    const currentPrice = Number(price ?? 0);
 
     return (
 
@@ -63,27 +48,35 @@ export default function TradingHeader() {
 
                 </div>
 
-                <div className="instrument-wrapper">
+                <button
+                    type="button"
+                    className="instrument-row"
+                    onClick={() =>
+                        setShowInstrumentPicker(true)
+                    }
+                >
 
-                    <div className="instrument-row">
+                    <div className="instrument-info">
 
-                        <h2>{instrument}</h2>
+                        <h2>
 
-                        <ChevronDown size={17} />
+                            {market?.name ??
+                                "Volatility 100 Index"}
+
+                        </h2>
+
+                        <span>
+
+                            {market?.symbol ??
+                                "R_100"}
+
+                        </span>
 
                     </div>
 
-                    <div className="market-status">
+                    <ChevronDown size={18} />
 
-                        <span className="live-dot"></span>
-
-                        <Activity size={13} />
-
-                        LIVE MARKET
-
-                    </div>
-
-                </div>
+                </button>
 
             </div>
 
@@ -91,51 +84,19 @@ export default function TradingHeader() {
 
             <div className="header-center">
 
-                <div className="market-card">
+                <div className="live-status">
 
-                    <span>Last</span>
+                    <span className="live-dot" />
 
-                    <strong className="red">
+                    <Activity size={14} />
 
-                        {price.toFixed(2)}
-
-                    </strong>
+                    LIVE
 
                 </div>
 
-                <div className="market-card">
+                <div className="header-price">
 
-                    <span>High</span>
-
-                    <strong className="green">
-
-                        {high}
-
-                    </strong>
-
-                </div>
-
-                <div className="market-card">
-
-                    <span>Low</span>
-
-                    <strong>
-
-                        {low}
-
-                    </strong>
-
-                </div>
-
-                <div className="market-card">
-
-                    <span>Spread</span>
-
-                    <strong>
-
-                        {spread}
-
-                    </strong>
+                    {currentPrice.toFixed(2)}
 
                 </div>
 
@@ -145,11 +106,15 @@ export default function TradingHeader() {
 
             <div className="header-right">
 
-                <div className="account-card">
+                <div className="balance-card">
 
-                    <small>Demo Account</small>
+                    <small>
 
-                    <h3>
+                        Demo Balance
+
+                    </small>
+
+                    <strong>
 
                         $
 
@@ -161,31 +126,40 @@ export default function TradingHeader() {
 
                         })}
 
-                    </h3>
+                    </strong>
 
                 </div>
 
-                <div className="clock-box">
-
-                    <Clock3 size={15} />
-
-                    {time}
-
-                </div>
-
-                <button className="icon-btn">
+                <button
+                    className="icon-btn"
+                    title="Notifications"
+                    onClick={() =>
+                        router.push("/notifications")
+                    }
+                >
 
                     <Bell size={18} />
 
                 </button>
 
-                <button className="icon-btn">
+                <button
+                    className="icon-btn"
+                    title="Settings"
+                    onClick={() =>
+                        router.push("/settings")
+                    }
+                >
 
                     <Settings size={18} />
 
                 </button>
 
-                <button className="deposit-btn">
+                <button
+                    className="deposit-btn"
+                    onClick={() =>
+                        router.push("/deposit")
+                    }
+                >
 
                     <Wallet size={17} />
 

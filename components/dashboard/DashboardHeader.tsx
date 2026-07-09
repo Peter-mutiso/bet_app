@@ -28,9 +28,7 @@ export default function DashboardHeader({
 
         <header className="dashboard-header">
 
-            {/* ------------------------------------------------ */}
             {/* LEFT */}
-            {/* ------------------------------------------------ */}
 
             <div className="dashboard-header-left">
 
@@ -58,9 +56,7 @@ export default function DashboardHeader({
 
             </div>
 
-            {/* ------------------------------------------------ */}
             {/* CENTER */}
-            {/* ------------------------------------------------ */}
 
             <div className="dashboard-search">
 
@@ -70,17 +66,31 @@ export default function DashboardHeader({
 
                     placeholder="Search markets..."
 
+                    onFocus={() => router.push("/trading/markets")}
+
+                    onClick={() => router.push("/trading/markets")}
+
+                    readOnly
+
                 />
 
             </div>
 
-            {/* ------------------------------------------------ */}
             {/* RIGHT */}
-            {/* ------------------------------------------------ */}
 
             <div className="dashboard-header-right">
 
-                <button className="notification-btn">
+                {/* Notifications */}
+
+                <button
+
+                    className="notification-btn"
+
+                    onClick={() => router.push("/notifications")}
+
+                    title="Notifications"
+
+                >
 
                     🔔
 
@@ -91,6 +101,8 @@ export default function DashboardHeader({
                     </span>
 
                 </button>
+
+                {/* Deposit */}
 
                 <button
 
@@ -104,7 +116,17 @@ export default function DashboardHeader({
 
                 </button>
 
-                <div className="profile-box">
+                {/* Profile */}
+
+                <button
+
+                    className="profile-box"
+
+                    onClick={() => router.push("/account")}
+
+                    type="button"
+
+                >
 
                     <div className="avatar">
 
@@ -128,60 +150,7 @@ export default function DashboardHeader({
 
                     </div>
 
-                </div>
-
-                <div className="menu-wrapper">
-
-                    <button
-
-                        className="menu-button"
-
-                        onClick={() => setMenuOpen(!menuOpen)}
-
-                    >
-
-                        ☰
-
-                    </button>
-
-                    {menuOpen && (
-
-                        <div className="dashboard-menu">
-
-                            <button onClick={() => router.push("/wallet")}>
-                                Wallet
-                            </button>
-
-                            <button onClick={() => router.push("/deposit")}>
-                                Deposit
-                            </button>
-
-                            <button onClick={() => router.push("/withdraw")}>
-                                Withdraw
-                            </button>
-
-                            <button onClick={() => router.push("/history")}>
-                                History
-                            </button>
-
-                            <button onClick={() => router.push("/settings")}>
-                                Settings
-                            </button>
-
-                            <hr />
-
-                            <button
-                                className="logout-btn"
-                                onClick={() => router.push("/login")}
-                            >
-                                Logout
-                            </button>
-
-                        </div>
-
-                    )}
-
-                </div>
+                </button>
 
             </div>
 

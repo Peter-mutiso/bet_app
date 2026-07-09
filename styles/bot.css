@@ -1,0 +1,468 @@
+/* ==========================================================
+   TRADING BOT PAGE
+========================================================== */
+
+.bot-page{
+
+    width:100%;
+
+    min-height:100vh;
+
+    padding:28px;
+
+    background:#0b1220;
+
+    color:#e5e7eb;
+
+}
+
+
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+.bot-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    margin-bottom:28px;
+
+    gap:24px;
+
+}
+
+
+
+.bot-header h1{
+
+    margin:0;
+
+    font-size:30px;
+
+    font-weight:700;
+
+    color:#ffffff;
+
+    letter-spacing:-.3px;
+
+}
+
+
+
+.bot-header p{
+
+    margin-top:8px;
+
+    color:#94a3b8;
+
+    font-size:15px;
+
+    line-height:1.6;
+
+}
+
+
+
+/* ==========================================================
+   MAIN LAYOUT
+========================================================== */
+
+.bot-page > *:not(.bot-header){
+
+    width:100%;
+
+    background:#111827;
+
+    border:1px solid rgba(255,255,255,.06);
+
+    border-radius:14px;
+
+    margin-bottom:22px;
+
+    padding:22px;
+
+    transition:
+        border-color .2s ease,
+        transform .2s ease,
+        box-shadow .2s ease;
+
+}
+
+
+
+.bot-page > *:not(.bot-header):hover{
+
+    border-color:rgba(59,130,246,.25);
+
+    box-shadow:0 12px 30px rgba(0,0,0,.28);
+
+}
+
+
+
+/* ==========================================================
+   SECTION TITLES
+========================================================== */
+
+.bot-page h2{
+
+    margin:0 0 18px;
+
+    font-size:18px;
+
+    font-weight:600;
+
+    color:#ffffff;
+
+}
+
+
+
+.bot-page h3{
+
+    margin:0 0 10px;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    color:#f8fafc;
+
+}
+
+
+
+.bot-page p{
+
+    color:#94a3b8;
+
+    line-height:1.6;
+
+}
+
+
+
+/* ==========================================================
+   COMMON CARDS INSIDE COMPONENTS
+========================================================== */
+
+.bot-card{
+
+    background:#0f172a;
+
+    border:1px solid rgba(255,255,255,.05);
+
+    border-radius:12px;
+
+    padding:18px;
+
+}
+
+
+
+.bot-card:hover{
+
+    border-color:rgba(59,130,246,.25);
+
+}
+
+
+
+/* ==========================================================
+   TABLES
+========================================================== */
+
+.bot-page table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+
+
+.bot-page th{
+
+    padding:14px;
+
+    text-align:left;
+
+    font-size:12px;
+
+    font-weight:600;
+
+    text-transform:uppercase;
+
+    letter-spacing:.5px;
+
+    color:#94a3b8;
+
+    border-bottom:1px solid rgba(255,255,255,.06);
+
+}
+
+
+
+.bot-page td{
+
+    padding:16px 14px;
+
+    border-bottom:1px solid rgba(255,255,255,.04);
+
+    color:#e5e7eb;
+
+}
+
+
+
+.bot-page tr:hover{
+
+    background:rgba(255,255,255,.02);
+
+}
+
+
+
+/* ==========================================================
+   BUTTONS
+========================================================== */
+
+.bot-page button{
+
+    height:40px;
+
+    padding:0 18px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#2563eb;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+    transition:.2s;
+
+}
+
+
+
+.bot-page button:hover{
+
+    background:#1d4ed8;
+
+}
+
+
+
+.bot-page button.secondary{
+
+    background:#1e293b;
+
+    color:#cbd5e1;
+
+}
+
+
+
+.bot-page button.secondary:hover{
+
+    background:#334155;
+
+}
+
+
+
+/* ==========================================================
+   INPUTS
+========================================================== */
+
+.bot-page input,
+
+.bot-page select{
+
+    width:100%;
+
+    height:42px;
+
+    padding:0 14px;
+
+    border-radius:10px;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    background:#0f172a;
+
+    color:#f8fafc;
+
+}
+
+
+
+.bot-page input:focus,
+
+.bot-page select:focus{
+
+    outline:none;
+
+    border-color:#2563eb;
+
+}
+
+
+
+/* ==========================================================
+   STATUS BADGES
+========================================================== */
+
+.status-active{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:5px 12px;
+
+    border-radius:999px;
+
+    background:rgba(34,197,94,.15);
+
+    color:#22c55e;
+
+    font-size:12px;
+
+    font-weight:700;
+
+}
+
+
+
+.status-paused{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:5px 12px;
+
+    border-radius:999px;
+
+    background:rgba(245,158,11,.15);
+
+    color:#f59e0b;
+
+    font-size:12px;
+
+    font-weight:700;
+
+}
+
+
+
+.status-stopped{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:5px 12px;
+
+    border-radius:999px;
+
+    background:rgba(239,68,68,.15);
+
+    color:#ef4444;
+
+    font-size:12px;
+
+    font-weight:700;
+
+}
+
+
+
+/* ==========================================================
+   SCROLLBAR
+========================================================== */
+
+.bot-page ::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+
+
+.bot-page ::-webkit-scrollbar-thumb{
+
+    background:#334155;
+
+    border-radius:20px;
+
+}
+
+
+
+.bot-page ::-webkit-scrollbar-track{
+
+    background:transparent;
+
+}
+
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width:1024px){
+
+    .bot-page{
+
+        padding:20px;
+
+    }
+
+}
+
+
+
+@media (max-width:768px){
+
+    .bot-page{
+
+        padding:16px;
+
+    }
+
+    .bot-header{
+
+        flex-direction:column;
+
+        gap:12px;
+
+    }
+
+    .bot-header h1{
+
+        font-size:24px;
+
+    }
+
+}

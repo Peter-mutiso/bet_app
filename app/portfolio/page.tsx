@@ -1,141 +1,393 @@
 "use client";
 
 import { useMemo } from "react";
+
 import { useTrading } from "../../contexts/TradingContext";
 
 import type { Trade } from "../../types/trade";
 
-function format(n: number) {
-    return Number(n || 0).toFixed(2);
+import {
+    TradeStatus,
+    TradeDirection,
+} from "../../types/trade";
+
+function format(value: number | undefined) {
+    return Number(value ?? 0).toFixed(2);
 }
 
-/* =========================================================
-   P&L CALC (CONTRACT-BASED)
-   ========================================================= */
+function calculateLivePnL(trade: Trade): number {
+    if (trade.status !== TradeStatus.OPEN) {
+        return trade.profitLoss.realizedPnL;
+    }
 
-function calculatePnL(trade: Trade) {
-    if (trade.status !== "OPEN") return 0;
+    const entry = trade.pricing.entryPrice;
+    const current =
+        trade.pricing.currentPrice ??
+        trade.pricing.entryPrice;
 
-    // Contract-style simplified valuation:
-    // We simulate direction based on entry vs current price
+    const volume = trade.size.volume;
 
-    const diff = trade.currentPrice - trade.entryPrice;
+    const diff = current - entry;
 
-    const direction =
-        trade.contract.includes("RISE") ||
-        trade.contract.includes("HIGHER") ||
-        trade.contract.includes("TOUCH");
-
-    const isWinningMove = direction ? diff > 0 : diff < 0;
-
-    const payoutFactor = trade.payout / 100;
-
-    return isWinningMove
-        ? trade.stake * payoutFactor
-        : -trade.stake;
+    return trade.direction === TradeDirection.BUY
+        ? diff * volume
+        : -diff * volume;
 }
-
-/* =========================================================
-   PAGE
-   ========================================================= */
 
 export default function PortfolioPage() {
+
     const { trades } = useTrading();
 
-    const enriched = useMemo(() => {
-        return trades.map(t => {
-            const pnl = calculatePnL(t);
+    const portfolio = useMemo(() => {
+
+        return trades.map((trade: Trade) => {
+
+            const pnl = calculateLivePnL(trade);
+
+            const investment =
+                trade.pricing.entryPrice *
+                trade.size.volume;
 
             const pnlPercent =
-                t.stake > 0 ? (pnl / t.stake) * 100 : 0;
+                investment > 0
+                    ? (pnl / investment) * 100
+                    : 0;
 
             return {
-                ...t,
+
+                ...trade,
+
                 pnl,
-                pnlPercent
+
+                pnlPercent,
+
             };
+
         });
+
     }, [trades]);
 
-    const totalPnL = enriched.reduce((sum, t) => sum + t.pnl, 0);
+    const totalPnL = portfolio.reduce(
 
-    const openTrades = enriched.filter(t => t.status === "OPEN");
-    const closedTrades = enriched.filter(t => t.status !== "OPEN");
+        (sum, trade) => sum + trade.pnl,
+
+        0
+
+    );
+
+    const openTrades = portfolio.filter(
+
+        trade => trade.status === TradeStatus.OPEN
+
+    );
+
+    const closedTrades = portfolio.filter(
+
+        trade => trade.status !== TradeStatus.OPEN
+
+    );
 
     return (
+
         <div className="portfolio-page">
 
+            {/* ========================================================= */}
             {/* HEADER */}
+            {/* ========================================================= */}
+
             <div className="portfolio-header">
-                <h1>Portfolio</h1>
 
-                <div className={`total-pnl ${totalPnL >= 0 ? "up" : "down"}`}>
-                    {totalPnL >= 0 ? "+" : ""}
-                    {format(totalPnL)}
+                <div>
+
+                    <h1>
+
+                        Portfolio
+
+                    </h1>
+
+                    <p>
+
+                        Monitor your open positions, profits and overall portfolio performance.
+
+                    </p>
+
                 </div>
+
+                <div
+                    className={`portfolio-total ${
+                        totalPnL >= 0
+                            ? "up"
+                            : "down"
+                    }`}
+                >
+
+                    {totalPnL >= 0 ? "+" : ""}
+
+                    {format(totalPnL)}
+
+                </div>
+
             </div>
 
+            {/* ========================================================= */}
             {/* SUMMARY */}
+            {/* ========================================================= */}
+
             <div className="portfolio-summary">
-                <div>Open Trades: {openTrades.length}</div>
-                <div>Closed Trades: {closedTrades.length}</div>
+
+                <div className="summary-card">
+
+                    <span>
+
+                        Open Positions
+
+                    </span>
+
+                    <strong>
+
+                        {openTrades.length}
+
+                    </strong>
+
+                </div>
+
+                <div className="summary-card">
+
+                    <span>
+
+                        Closed Positions
+
+                    </span>
+
+                    <strong>
+
+                        {closedTrades.length}
+
+                    </strong>
+
+                </div>
+
+                <div className="summary-card">
+
+                    <span>
+
+                        Total Trades
+
+                    </span>
+
+                    <strong>
+
+                        {portfolio.length}
+
+                    </strong>
+
+                </div>
+
+                <div className="summary-card">
+
+                    <span>
+
+                        Portfolio P/L
+
+                    </span>
+
+                    <strong
+                        className={
+                            totalPnL >= 0
+                                ? "up"
+                                : "down"
+                        }
+                    >
+
+                        {totalPnL >= 0 ? "+" : ""}
+
+                        {format(totalPnL)}
+
+                    </strong>
+
+                </div>
+
             </div>
 
+            {/* ========================================================= */}
             {/* TABLE */}
+            {/* ========================================================= */}
+
             <div className="portfolio-table">
+
                 <table>
+
                     <thead>
+
                         <tr>
-                            <th>Symbol</th>
-                            <th>Contract</th>
-                            <th>Stake</th>
-                            <th>Entry</th>
-                            <th>Current</th>
-                            <th>Status</th>
-                            <th>P&L</th>
-                            <th>%</th>
+
+                            <th>
+
+                                Instrument
+
+                            </th>
+
+                            <th>
+
+                                Direction
+
+                            </th>
+
+                            <th>
+
+                                Timeframe
+
+                            </th>
+
+                            <th>
+
+                                Volume
+
+                            </th>
+
+                            <th>
+
+                                Entry
+
+                            </th>
+
+                            <th>
+
+                                Current
+
+                            </th>
+
+                            <th>
+
+                                Status
+
+                            </th>
+
+                            <th>
+
+                                Profit / Loss
+
+                            </th>
+
+                            <th>
+
+                                Return %
+
+                            </th>
+
                         </tr>
+
                     </thead>
 
                     <tbody>
-                        {enriched.map(t => (
-                            <tr key={t.id}>
 
-                                <td>{t.marketId}</td>
+                        {portfolio.map((trade) => (
 
-                                <td>{t.contract}</td>
+                            <tr key={trade.id}>
 
-                                <td>{format(t.stake)}</td>
+                                <td>
 
-                                <td>{format(t.entryPrice)}</td>
+                                    {trade.instrument?.symbol ??
+                                        trade.instrument?.name ??
+                                        "--"}
 
-                                <td>{format(t.currentPrice)}</td>
+                                </td>
 
-                                <td className={
-                                    t.status === "OPEN"
-                                        ? "up"
-                                        : t.status === "WON"
+                                <td
+                                    className={
+                                        trade.direction ===
+                                        TradeDirection.BUY
                                             ? "up"
                                             : "down"
-                                }>
-                                    {t.status}
+                                    }
+                                >
+
+                                    {trade.direction}
+
                                 </td>
 
-                                <td className={t.pnl >= 0 ? "up" : "down"}>
-                                    {t.pnl >= 0 ? "+" : ""}
-                                    {format(t.pnl)}
+                                <td>
+
+                                    {trade.timeframe}
+
                                 </td>
 
-                                <td className={t.pnlPercent >= 0 ? "up" : "down"}>
-                                    {t.pnlPercent.toFixed(2)}%
+                                <td>
+
+                                    {format(
+                                        trade.size.volume
+                                    )}
+
+                                </td>
+
+                                <td>
+
+                                    {format(
+                                        trade.pricing.entryPrice
+                                    )}
+
+                                </td>
+
+                                <td>
+
+                                    {format(
+                                        trade.pricing.currentPrice
+                                    )}
+
+                                </td>
+
+                                <td>
+
+                                    {trade.status}
+
+                                </td>
+
+                                <td
+                                    className={
+                                        trade.pnl >= 0
+                                            ? "up"
+                                            : "down"
+                                    }
+                                >
+
+                                    {trade.pnl >= 0
+                                        ? "+"
+                                        : ""}
+
+                                    {format(
+                                        trade.pnl
+                                    )}
+
+                                </td>
+
+                                <td
+                                    className={
+                                        trade.pnlPercent >= 0
+                                            ? "up"
+                                            : "down"
+                                    }
+                                >
+
+                                    {trade.pnlPercent.toFixed(
+                                        2
+                                    )}
+
+                                    %
+
                                 </td>
 
                             </tr>
+
                         ))}
+
                     </tbody>
+
                 </table>
+
             </div>
 
         </div>
+
     );
+
 }

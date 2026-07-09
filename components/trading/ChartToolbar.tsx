@@ -94,7 +94,8 @@ export default function ChartToolbar() {
                             e.target.value as
                                 "candles" |
                                 "line" |
-                                "area"
+                                "area"| 
+                                "ohlc"
                         )
                     }
                     className="bg-slate-800 border border-slate-700 rounded px-3 py-1 text-sm"

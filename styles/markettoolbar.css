@@ -1,0 +1,480 @@
+/* ==========================================================
+   MARKET TOOLBAR
+========================================================== */
+
+
+.market-toolbar {
+
+    width:
+
+        100%;
+
+
+    min-height:
+
+        70px;
+
+
+    padding:
+
+        14px 20px;
+
+
+    display:
+
+        flex;
+
+
+    align-items:
+
+        center;
+
+
+    justify-content:
+
+        space-between;
+
+
+    gap:
+
+        18px;
+
+
+    background:
+
+        rgba(15,23,42,.55);
+
+
+    border-bottom:
+
+        1px solid rgba(148,163,184,.1);
+
+}
+
+
+
+/* ==========================================================
+   SEARCH BOX
+========================================================== */
+
+
+.market-search {
+
+    height:
+
+        42px;
+
+
+    flex:
+
+        1;
+
+
+    max-width:
+
+        360px;
+
+
+    display:
+
+        flex;
+
+
+    align-items:
+
+        center;
+
+
+    gap:
+
+        10px;
+
+
+    padding:
+
+        0 14px;
+
+
+    border-radius:
+
+        12px;
+
+
+    background:
+
+        rgba(30,41,59,.8);
+
+
+    border:
+
+        1px solid rgba(148,163,184,.15);
+
+
+    color:
+
+        #64748b;
+
+
+    transition:
+
+        .25s ease;
+
+}
+
+
+
+.market-search:hover {
+
+    border-color:
+
+        rgba(56,189,248,.35);
+
+}
+
+
+
+.market-search:focus-within {
+
+    border-color:
+
+        #38bdf8;
+
+
+    box-shadow:
+
+        0 0 0 3px rgba(56,189,248,.12);
+
+}
+
+
+
+.market-search svg {
+
+    flex-shrink:
+
+        0;
+
+
+    color:
+
+        #38bdf8;
+
+}
+
+
+
+.market-search input {
+
+    width:
+
+        100%;
+
+
+    height:
+
+        100%;
+
+
+    border:
+
+        none;
+
+
+    outline:
+
+        none;
+
+
+    background:
+
+        transparent;
+
+
+    color:
+
+        #f8fafc;
+
+
+    font-size:
+
+        13px;
+
+}
+
+
+
+.market-search input::placeholder {
+
+    color:
+
+        #64748b;
+
+}
+
+
+
+/* ==========================================================
+   FILTERS
+========================================================== */
+
+
+.market-filters {
+
+    display:
+
+        flex;
+
+
+    align-items:
+
+        center;
+
+
+    gap:
+
+        8px;
+
+
+    overflow-x:
+
+        auto;
+
+
+    scrollbar-width:
+
+        none;
+
+}
+
+
+
+.market-filters::-webkit-scrollbar {
+
+    display:
+
+        none;
+
+}
+
+
+
+.market-filters > svg {
+
+    color:
+
+        #64748b;
+
+
+    margin-right:
+
+        4px;
+
+}
+
+
+
+/* ==========================================================
+   CATEGORY BUTTONS
+========================================================== */
+
+
+.market-filters button {
+
+    height:
+
+        34px;
+
+
+    padding:
+
+        0 14px;
+
+
+    border-radius:
+
+        999px;
+
+
+    border:
+
+        1px solid rgba(148,163,184,.15);
+
+
+    background:
+
+        rgba(30,41,59,.65);
+
+
+    color:
+
+        #94a3b8;
+
+
+    font-size:
+
+        12px;
+
+
+    font-weight:
+
+        600;
+
+
+    cursor:
+
+        pointer;
+
+
+    white-space:
+
+        nowrap;
+
+
+    transition:
+
+        all .2s ease;
+
+}
+
+
+
+.market-filters button:hover {
+
+    color:
+
+        #e2e8f0;
+
+
+    border-color:
+
+        rgba(56,189,248,.35);
+
+
+    background:
+
+        rgba(56,189,248,.1);
+
+}
+
+
+
+/* ACTIVE FILTER */
+
+
+.market-filters button.active {
+
+    background:
+
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #38bdf8
+        );
+
+
+    border-color:
+
+        transparent;
+
+
+    color:
+
+        white;
+
+
+    box-shadow:
+
+        0 8px 20px rgba(37,99,235,.25);
+
+}
+
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+
+@media(max-width:1000px){
+
+
+    .market-toolbar {
+
+        flex-direction:
+
+            column;
+
+
+        align-items:
+
+            stretch;
+
+
+    }
+
+
+
+    .market-search {
+
+        max-width:
+
+            none;
+
+    }
+
+
+
+    .market-filters {
+
+        width:
+
+            100%;
+
+    }
+
+}
+
+
+
+@media(max-width:600px){
+
+
+    .market-toolbar {
+
+        padding:
+
+            12px;
+
+    }
+
+
+
+    .market-search {
+
+        height:
+
+            38px;
+
+    }
+
+
+
+    .market-filters button {
+
+        height:
+
+            32px;
+
+
+        padding:
+
+            0 12px;
+
+
+        font-size:
+
+            11px;
+
+    }
+
+}

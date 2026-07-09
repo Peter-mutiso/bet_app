@@ -1,0 +1,174 @@
+/* ==========================================================
+   ASSETS PAGE
+========================================================== */
+
+.assets-page {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem;
+    width: 100%;
+    min-height: 100%;
+    background: #0f172a;
+    color: #f8fafc;
+}
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+.assets-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.assets-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+}
+
+.assets-header p {
+    margin-top: .5rem;
+    max-width: 760px;
+    color: #94a3b8;
+    line-height: 1.7;
+    font-size: .96rem;
+}
+
+/* ==========================================================
+   SECTION WRAPPERS
+========================================================== */
+
+.assets-page > *:not(.assets-header) {
+    background: #111827;
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.25);
+    transition:
+        transform .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease;
+}
+
+.assets-page > *:not(.assets-header):hover {
+    transform: translateY(-2px);
+    border-color: rgba(59,130,246,.30);
+    box-shadow:
+        0 16px 40px rgba(0,0,0,.35);
+}
+
+/* ==========================================================
+   SPACING BETWEEN MODULES
+========================================================== */
+
+.assets-page > section,
+.assets-page > div {
+    width: 100%;
+}
+
+/* ==========================================================
+   SCROLLBAR
+========================================================== */
+
+.assets-page::-webkit-scrollbar {
+    width: 10px;
+}
+
+.assets-page::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+.assets-page::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 999px;
+}
+
+.assets-page::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* ==========================================================
+   ANIMATIONS
+========================================================== */
+
+.assets-page > * {
+    animation: assetFade .45s ease;
+}
+
+@keyframes assetFade {
+
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width: 1024px) {
+
+    .assets-page {
+        padding: 1.5rem;
+    }
+
+    .assets-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .assets-page {
+        gap: 1.25rem;
+        padding: 1rem;
+    }
+
+    .assets-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .assets-header p {
+        font-size: .9rem;
+    }
+
+    .assets-page > *:not(.assets-header) {
+        padding: 1.1rem;
+        border-radius: 14px;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .assets-page {
+        padding: .75rem;
+    }
+
+    .assets-header h1 {
+        font-size: 1.35rem;
+    }
+
+    .assets-header p {
+        line-height: 1.5;
+    }
+
+}

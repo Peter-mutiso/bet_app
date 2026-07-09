@@ -1,0 +1,506 @@
+.withdraw-page {
+    min-height: 100vh;
+    padding: 24px;
+    background: #020617;
+    color: white;
+}
+
+.wallet-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.wallet-card {
+    background: #0f172a;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #1e293b;
+}
+
+.wallet-label {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.wallet-value {
+    margin-top: 8px;
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.balance {
+    color: #4ade80;
+}
+
+.locked {
+    color: #facc15;
+}
+
+.withdrawn {
+    color: #60a5fa;
+}
+
+
+.withdraw-card {
+    margin-top: 24px;
+    background: #0f172a;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #1e293b;
+}
+
+.withdraw-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #cbd5e1;
+}
+
+
+.form-input,
+.form-select {
+
+    width: 100%;
+    padding: 12px;
+
+    background: #1e293b;
+
+    border: 1px solid #334155;
+
+    border-radius: 10px;
+
+    color: white;
+
+    outline: none;
+
+    transition: border .2s ease;
+
+}
+
+
+.form-input:focus,
+.form-select:focus {
+
+    border-color: #3b82f6;
+
+}
+
+
+
+.withdraw-button {
+
+    width: 100%;
+
+    padding: 14px;
+
+    margin-top: 10px;
+
+    background: #dc2626;
+
+    border-radius: 10px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: .2s;
+
+}
+
+
+.withdraw-button:hover {
+
+    background: #ef4444;
+
+}
+
+
+.withdraw-button:disabled {
+
+    opacity: .5;
+
+    cursor: not-allowed;
+
+}
+
+
+
+.message {
+
+    margin-top: 16px;
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    font-size: 14px;
+
+}
+
+
+.message-success {
+
+    background: #14532d;
+
+    color: #86efac;
+
+}
+
+
+.message-pending {
+
+    background: #713f12;
+
+    color: #fde68a;
+
+}
+
+
+.message-error {
+
+    background: #7f1d1d;
+
+    color: #fca5a5;
+
+}
+
+
+
+.summary-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(3,1fr);
+
+    gap: 16px;
+
+    margin-top: 24px;
+
+}
+
+
+
+.summary-card {
+
+    background: #0f172a;
+
+    padding: 20px;
+
+    border-radius: 16px;
+
+    border:1px solid #1e293b;
+
+}
+
+
+.summary-title {
+
+    color:#94a3b8;
+
+    font-size:12px;
+
+}
+
+
+.summary-value {
+
+    margin-top:10px;
+
+    font-size:20px;
+
+    font-weight:600;
+
+}
+
+
+
+.withdraw-history {
+
+    margin-top:24px;
+
+    background:#0f172a;
+
+    border-radius:16px;
+
+    padding:24px;
+
+}
+
+
+
+.transaction {
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    background:#1e293b;
+
+    padding:16px;
+
+    border-radius:12px;
+
+    margin-bottom:12px;
+
+}
+
+
+
+.transaction-date {
+
+    font-size:12px;
+
+    color:#94a3b8;
+
+}
+
+
+.status-completed {
+
+    color:#4ade80;
+
+    font-weight:600;
+
+}
+
+
+.status-pending {
+
+    color:#facc15;
+
+    font-weight:600;
+
+}
+
+
+.status-failed {
+
+    color:#f87171;
+
+    font-weight:600;
+
+}
+
+
+
+/* Mobile */
+
+@media(max-width:768px){
+
+    .wallet-grid,
+    .summary-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .withdraw-page{
+
+        padding:15px;
+
+    }
+
+
+    .transaction{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:10px;
+
+    }
+
+}
+/* =========================================
+   WITHDRAW PAGE CUSTOM STYLING
+========================================= */
+
+.withdraw-page {
+    min-height: 100vh;
+    background: #020617;
+    color: white;
+}
+
+
+/* Card style matching your JSX */
+
+.wallet-card,
+.withdraw-card,
+.summary-card,
+.history-card {
+
+    background: #0f172a;
+
+    border-radius: 16px;
+
+    padding: 24px;
+
+    border: 1px solid #1e293b;
+
+}
+
+
+/* Inputs */
+
+.withdraw-input {
+
+    width:100%;
+
+    padding:12px 14px;
+
+    background:#1e293b;
+
+    border:1px solid #334155;
+
+    border-radius:10px;
+
+    color:white;
+
+    outline:none;
+
+}
+
+
+.withdraw-input:focus {
+
+    border-color:#22c55e;
+
+}
+
+
+/* Select */
+
+.withdraw-select {
+
+    width:100%;
+
+    padding:12px 14px;
+
+    background:#1e293b;
+
+    border:1px solid #334155;
+
+    border-radius:10px;
+
+    color:white;
+
+}
+
+
+
+/* Button */
+
+.withdraw-btn {
+
+    width:100%;
+
+    padding:14px;
+
+    background:#dc2626;
+
+    border-radius:10px;
+
+    font-weight:600;
+
+    transition:.2s;
+
+}
+
+
+.withdraw-btn:hover {
+
+    background:#ef4444;
+
+}
+
+
+
+.withdraw-btn:disabled {
+
+    opacity:.5;
+
+}
+
+
+
+/* Message */
+
+.success-message {
+
+    background:#14532d;
+
+    color:#86efac;
+
+}
+
+
+.pending-message {
+
+    background:#713f12;
+
+    color:#fde68a;
+
+}
+
+
+.error-message {
+
+    background:#7f1d1d;
+
+    color:#fca5a5;
+
+}
+
+
+
+/* Transaction row */
+
+.transaction-row {
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    background:#1e293b;
+
+    padding:16px;
+
+    border-radius:12px;
+
+}
+
+
+
+/* Mobile */
+
+@media(max-width:768px){
+
+    .transaction-row{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:10px;
+
+    }
+
+}

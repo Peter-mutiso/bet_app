@@ -1,18 +1,33 @@
-@import "../styles/variables.css";
-
-@import "../styles/layout.css";
-
-@import "../styles/buttons.css";
-
-@import "../styles/forms.css";
-
-@import "../styles/cards.css";
 
 @import "../styles/login.css";
-
-@import "../styles/dashboard.css";
 @import "../styles/register.css";
+@import "../styles/tradingbottompanel.css";
+@import "../styles/tradingchart.css";
+@import "../styles/tradingheader.css";
+@import "../styles/tradingorderpanel.css";
+@import "../styles/tradingsidebar.css";
+@import "../styles/dashboard.css";
 @import "../styles/sidebar.css";
-@import "../styles/trading-v2.css";
-@import "../styles/markets.css";
-@import "../styles/portfolio.css";
+@import "../styles/walletsummary.css";
+@import "../styles/livemarkets.css";
+@import "../styles/dashboard.css";
+@import "../styles/dashboardlayout.css";
+@import "../styles/marketrow.css";
+@import "../styles/markettoolbar.css";
+@import "../styles/markettoolbar.css";
+@import "../styles/activebets.css";
+@import "../styles/tradingpanel.css";
+@import "../styles/tradinglayout.css";
+@import "../styles/tradingsidebar.css";
+@import "../styles/tradingchartarea.css";
+@import "../styles/deposit.css";
+@import "../styles/withdraw.css";
+@import "../styles/market.css";
+@import "../styles/animation.css";
+@import "../styles/assets.css";
+@import "../styles/charttoolbar.css";
+@import "../styles/watchlist.css";
+@import "../styles/bot.css";
+@import "../styles/news.css";
+@import "../styles/analytics.css";
+@import "../styles/settings.css";

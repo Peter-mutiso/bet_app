@@ -1,0 +1,189 @@
+/* ==========================================================
+   TRADING CHART AREA
+========================================================== */
+.trading-chart-area{
+
+    display:flex;
+
+    flex-direction:column;
+
+    width:100%;
+
+    height:600px;
+
+    min-height:500px;
+
+    background:#0b1120;
+
+    border-radius:14px;
+
+    overflow:hidden;
+
+}
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+.chart-header{
+
+    height:52px;
+
+    flex-shrink:0;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 18px;
+
+    background:#111827;
+
+    border-bottom:1px solid rgba(148,163,184,.12);
+
+}
+
+
+/* ==========================================================
+   BODY
+========================================================== */
+.chart-body{
+
+    flex:1;
+
+    position:relative;
+
+    min-height:0;
+
+    background:#0b1220;
+
+    overflow:hidden;
+
+}
+
+
+.chart-canvas-wrapper{
+
+    flex:1;
+
+    width:100%;
+
+    min-width:0;
+
+    min-height:0;
+
+    position:relative;
+
+}
+
+.trading-chart-container{
+
+    flex:1;
+
+    width:100%;
+
+    height:100%;
+
+    min-width:0;
+
+    min-height:0;
+
+}
+
+/* Trading chart fills entire body */
+
+.chart-body > *{
+
+    width:100%;
+
+    height:100%;
+
+}
+
+
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+.chart-footer{
+
+    height:48px;
+
+    flex-shrink:0;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 18px;
+
+    background:#111827;
+
+    border-top:1px solid rgba(148,163,184,.12);
+
+}
+
+
+/* ==========================================================
+   PROFESSIONAL EFFECTS
+========================================================== */
+
+.trading-chart-area{
+
+    box-shadow:
+
+        0 20px 45px rgba(0,0,0,.35);
+
+}
+
+
+.chart-header,
+.chart-footer{
+
+    backdrop-filter:blur(12px);
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width:1200px){
+
+    .chart-header{
+
+        padding:0 14px;
+
+    }
+
+    .chart-footer{
+
+        padding:0 14px;
+
+    }
+
+}
+
+
+@media (max-width:768px){
+
+    .chart-header{
+
+        height:48px;
+
+    }
+
+    .chart-footer{
+
+        height:44px;
+
+        font-size:13px;
+
+    }
+
+}

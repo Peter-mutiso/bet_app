@@ -1,0 +1,432 @@
+/* ==========================================================
+   TRADING SIDEBAR
+========================================================== */
+
+.trading-sidebar{
+    grid-column: 1;
+    min-width:100px;
+    width: 150px;
+
+    height:100%;
+
+    display:flex;
+
+    flex-direction:column;
+    z-index: 30;
+    background:#08111f;
+
+    border-right:1px solid #1e293b;
+
+    overflow:hidden;
+
+    flex-shrink:0;
+    border-right: 1px solid #1e293b;
+
+}
+
+/* ==========================================================
+   LOGO
+========================================================== */
+
+.sidebar-logo{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    height:72px;
+
+    padding:0 20px;
+
+    border-bottom:1px solid #1e293b;
+
+    flex-shrink:0;
+
+}
+
+.logo-circle{
+
+    width:44px;
+
+    height:44px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:14px;
+
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #1d4ed8
+    );
+
+    color:#fff;
+
+    font-size:20px;
+
+    font-weight:700;
+
+    box-shadow:
+        0 8px 20px rgba(37,99,235,.35);
+
+    flex-shrink:0;
+
+}
+
+.logo-text{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+.logo-text h2{
+
+    margin:0;
+
+    color:#f8fafc;
+
+    font-size:16px;
+
+    font-weight:700;
+
+}
+
+.logo-text span{
+
+    margin-top:2px;
+
+    color:#64748b;
+
+    font-size:11px;
+
+}
+
+/* ==========================================================
+   SECTIONS
+========================================================== */
+
+.sidebar-section{
+
+    padding:18px 12px 0;
+
+}
+
+.sidebar-heading{
+
+    display:block;
+
+    margin:0 12px 12px;
+
+    color:#64748b;
+
+    font-size:11px;
+
+    font-weight:700;
+
+    letter-spacing:.12em;
+
+}
+
+/* ==========================================================
+   NAVIGATION
+========================================================== */
+
+.sidebar-nav{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:4px;
+
+}
+
+/* ==========================================================
+   BUTTON
+========================================================== */
+
+.sidebar-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    height:48px;
+
+    padding:0 14px;
+
+    border-radius:12px;
+
+    text-decoration:none;
+
+    color:#94a3b8;
+
+    transition:all .2s ease;
+
+    border:1px solid transparent;
+
+    font-size:14px;
+
+    font-weight:500;
+
+}
+
+.sidebar-btn svg{
+
+    flex-shrink:0;
+
+}
+
+.sidebar-btn span{
+
+    white-space:nowrap;
+
+}
+
+/* ==========================================================
+   HOVER
+========================================================== */
+
+.sidebar-btn:hover{
+
+    background:#111827;
+
+    color:#f8fafc;
+
+    border-color:#1e293b;
+
+    transform:translateX(4px);
+
+}
+
+/* ==========================================================
+   ACTIVE
+========================================================== */
+
+.sidebar-btn.active{
+
+    background:linear-gradient(
+        90deg,
+        rgba(37,99,235,.18),
+        rgba(37,99,235,.05)
+    );
+
+    border-color:#2563eb;
+
+    color:#ffffff;
+
+}
+
+.sidebar-btn.active svg{
+
+    color:#60a5fa;
+
+}
+
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+.sidebar-footer{
+
+    margin-top:auto;
+
+    padding:16px 12px;
+
+    border-top:1px solid #1e293b;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:4px;
+
+}
+
+/* ==========================================================
+   LOGOUT
+========================================================== */
+
+.sidebar-btn.logout{
+
+    width:100%;
+
+    background:none;
+
+    border:none;
+
+    cursor:pointer;
+
+    text-align:left;
+
+    font:inherit;
+
+}
+
+.sidebar-btn.logout:hover{
+
+    background:rgba(239,68,68,.12);
+
+    color:#ef4444;
+
+}
+
+.sidebar-btn.logout:hover svg{
+
+    color:#ef4444;
+
+}
+
+/* ==========================================================
+   SCROLLBAR
+========================================================== */
+
+.sidebar-nav::-webkit-scrollbar{
+
+    width:6px;
+
+}
+
+.sidebar-nav::-webkit-scrollbar-track{
+
+    background:transparent;
+
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb{
+
+    background:#334155;
+
+    border-radius:999px;
+
+}
+
+/* ==========================================================
+   TABLET
+========================================================== */
+
+@media (max-width:1200px){
+
+.trading-sidebar{
+
+    width:80px;
+
+}
+
+.logo-text{
+
+    display:none;
+
+}
+
+.sidebar-heading{
+
+    display:none;
+
+}
+
+.sidebar-btn{
+
+    justify-content:center;
+
+    padding:0;
+
+}
+
+.sidebar-btn span{
+
+    display:none;
+
+}
+
+.sidebar-btn:hover{
+
+    transform:none;
+
+}
+
+}
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width:768px){
+
+.trading-sidebar{
+
+    width:100%;
+
+    height:auto;
+
+    border-right:none;
+
+    border-bottom:1px solid #1e293b;
+
+}
+
+.sidebar-logo{
+
+    justify-content:center;
+
+}
+
+.logo-text{
+
+    display:flex;
+
+}
+
+.sidebar-section{
+
+    padding:8px;
+
+}
+
+.sidebar-heading{
+
+    display:none;
+
+}
+
+.sidebar-nav{
+
+    flex-direction:row;
+
+    overflow-x:auto;
+
+    gap:8px;
+
+}
+
+.sidebar-btn{
+
+    min-width:60px;
+
+    justify-content:center;
+
+}
+
+.sidebar-btn span{
+
+    display:none;
+
+}
+
+.sidebar-footer{
+
+    display:none;
+
+}
+
+}

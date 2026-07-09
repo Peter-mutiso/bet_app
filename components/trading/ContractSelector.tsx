@@ -1,40 +1,39 @@
 import {
-
     ContractType
+} from "@/components/trading/types";
 
-} from "../../types";
 
 interface Props {
 
     value: ContractType;
 
     onChange(
-
         value: ContractType
-
     ): void;
 
 }
 
+
 const CONTRACTS: ContractType[] = [
 
-    "RISE",
+    ContractType.RISE,
 
-    "FALL",
+    ContractType.FALL,
 
-    "HIGHER",
+    ContractType.HIGHER,
 
-    "LOWER",
+    ContractType.LOWER,
 
-    "TOUCH",
+    ContractType.TOUCH,
 
-    "NO_TOUCH",
+    ContractType.NO_TOUCH,
 
-    "DIGIT_OVER",
+    ContractType.DIGIT_OVER,
 
-    "DIGIT_UNDER"
+    ContractType.DIGIT_UNDER,
 
 ];
+
 
 export default function ContractSelector({
 
@@ -44,23 +43,36 @@ export default function ContractSelector({
 
 }: Props) {
 
+
     return (
 
         <select
 
             value={value}
 
-            onChange={
+            onChange={(event) =>
 
-                event =>
+                onChange(
 
-                    onChange(
+                    event.target.value as ContractType
 
-                        event.target.value as ContractType
-
-                    )
+                )
 
             }
+
+            className="
+                w-full
+                rounded-lg
+                border
+                border-slate-700
+                bg-slate-900
+                px-3
+                py-2
+                text-sm
+                text-white
+                outline-none
+                focus:border-blue-500
+            "
 
         >
 
@@ -78,7 +90,7 @@ export default function ContractSelector({
 
                         >
 
-                            {contract}
+                            {contract.replace("_", " ")}
 
                         </option>
 

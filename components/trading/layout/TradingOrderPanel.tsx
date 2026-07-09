@@ -9,11 +9,14 @@ import {
     Clock,
     BarChart3
 } from "lucide-react";
+import { useState } from "react";
 
 import { useTradeStore } from "@/store/useTradeStore";
 
 export default function TradingOrderPanel() {
+    const [executing,setExecuting] = useState(false);
 
+const [message,setMessage] = useState("");
     const {
 
         stake,
@@ -244,15 +247,62 @@ export default function TradingOrderPanel() {
 
             <button
 
-                className="trade-button"
+    className="trade-button"
 
-                onClick={() => buy()}
+    disabled={executing}
 
-            >
+    onClick={() => {
 
-                Execute Trade
 
-            </button>
+        setExecuting(true);
+
+        setMessage("Executing order...");
+
+
+        setTimeout(()=>{
+
+
+            buy();
+
+
+            setMessage(
+                "Trade opened successfully"
+            );
+
+
+            setExecuting(false);
+
+
+        },1500);
+
+
+    }}
+
+>
+
+
+    {
+        executing
+
+        ? "Executing..."
+
+        : "Execute Trade"
+
+    }
+
+
+</button>
+{
+message && (
+
+<div className="trade-message">
+
+    {message}
+
+</div>
+
+)
+}
 
         </aside>
 

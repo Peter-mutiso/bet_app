@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { settlementManager } from "@/lib/settlementManager";
 
 export const TRADE_TYPES = ["ACCUMULATOR", "CALL", "PUT", "DIGIT_OVER", "DIGIT_UNDER"] as const;
 
@@ -11,9 +12,9 @@ export type TradeStatus = "OPEN" | "CLOSED";
 
 export type ChartType =
     | "candles"
+    | "ohlc"
     | "line"
     | "area";
-
 export type Timeframe =
     | "1T"
     | "5T"
@@ -55,18 +56,41 @@ export function getAllowedTradeTypesForInstrument(instrument: string): readonly 
 }
 
 export interface Trade {
-  id: string;
-  direction: "BUY" | "SELL";
-  tradeType: TradeType;
-  stake: number;
-  entry: number;
-  exit?: number;
-  profit?: number;
-  status: TradeStatus;
-  source?: "USER" | "BOT";
-  entryTime: number;
-  exitTime?: number;
+
+    id: string;
+
+    direction: "BUY" | "SELL";
+
+    tradeType: TradeType;
+
+    stake: number;
+
+    entry: number;
+
+    currentPrice: number;
+
+    floatingProfit: number;
+
+    exit?: number;
+
+    profit?: number;
+
+    status: "PENDING" | "OPEN" | "SETTLING" | "CLOSED";
+
+    source?: "USER" | "BOT";
+
+    entryTime: number;
+
+    expiryTime: number;
+
+    duration: number;
+
+    remainingSeconds: number;
+
+    exitTime?: number;
+
 }
+
 
 interface DemoAccount {
   id: string;
@@ -74,9 +98,23 @@ interface DemoAccount {
   balance: number;
 }
 
+export interface SelectedMarket {
+
+    symbol: string;
+
+    name: string;
+
+    category: string;
+
+    price: number;
+    change: number;
+
+}
+
 interface TradeState {
   price: number;
   stake: number;
+  duration:number;
   balance: number;
   currency: Currency;
   exchangeRate: number;
@@ -88,6 +126,8 @@ interface TradeState {
   volatilityState: 0 | 1 | 2 | 3 | 4;
   trend: "UP" | "DOWN" | "FLAT";
   selectedInstrument: string;
+  selectedMarket: SelectedMarket | null;
+  selectedSide: "BUY" | "SELL";
   timeframe: Timeframe;
   chartType: ChartType;
   enabledIndicators: Indicator[];
@@ -102,6 +142,7 @@ interface TradeState {
   lastBotRunAt: number;
   setPrice: (price: number) => void;
   setStake: (stake: number) => void;
+  setDuration:(seconds:number)=>void;
   increaseStake: () => void;
   decreaseStake: () => void;
   deposit: (amount: number) => void;
@@ -114,6 +155,7 @@ interface TradeState {
   loadDemoAccount: (id: string) => void;
   setVolatilityState: (state: 0 | 1 | 2 | 3 | 4) => void;
   setSelectedInstrument: (instrument: string) => void;
+  
   setTimeframe: (
     timeframe: Timeframe
 ) => void;
@@ -124,6 +166,13 @@ setChartType: (
 
 toggleIndicator: (
     indicator: Indicator
+) => void;
+setSelectedMarket: (
+    market: SelectedMarket
+) => void;
+
+setSelectedSide: (
+    side: "BUY" | "SELL"
 ) => void;
 
 addToWatchlist: (
@@ -139,20 +188,64 @@ toggleFullscreen: () => void;
   setCurrentTradeType: (type: TradeType) => void;
   setAutoMode: (enabled: boolean) => void;
   placeBotTrade: () => void;
+  updateOpenTrades: (price:number)=>void;
+  tickTrades: (price: number) => void;
+}
+const PAYOUT = 0.86;
+
+interface SettlementResult {
+
+    won: boolean;
+
+    profit: number;
+
+    payout: number;
+
 }
 
-function settle(entry: number, exit: number, stake: number, type: TradeType) {
-  const won = type === "PUT" ? exit < entry : exit >= entry;
-  return won ? stake * 0.86 : -stake;
+function settleTrade(
+
+    entry: number,
+
+    exit: number,
+
+    stake: number,
+
+    type: TradeType
+
+): SettlementResult {
+
+    const won =
+        type === "PUT"
+            ? exit < entry
+            : exit >= entry;
+
+    const profit =
+        won
+            ? stake * PAYOUT
+            : -stake;
+
+    return {
+
+        won,
+
+        profit,
+
+        payout: stake + profit,
+
+    };
+
 }
 
 export const useTradeStore = create<TradeState>((set, get) => ({
   price: 702,
   stake: 10,
+  duration:30,
   balance: 10000,
   currency: "USD",
   exchangeRate: 129,
   theme: "dark",
+  
   accountMode: "DEMO",
   selectedDemoAccount: "demo-standard",
   demoAccounts: [
@@ -164,6 +257,21 @@ export const useTradeStore = create<TradeState>((set, get) => ({
   volatilityState: 2,
   trend: "FLAT",
   selectedInstrument: "Volatility 100 Index",
+  selectedMarket: {
+
+    symbol: "R_100",
+
+    name: "Volatility 100 Index",
+
+    category: "Synthetic",
+
+    price: 702,
+
+    change: 1.42
+
+},
+
+selectedSide: "BUY",
   timeframe: "1T",
   chartType: "candles",
   enabledIndicators: [
@@ -205,6 +313,10 @@ fullscreen: false,
     });
   },
   setStake: (stake) => set({ stake: Math.max(0, Number.isFinite(stake) ? stake : 0) }),
+  setDuration: (duration) =>
+    set({
+        duration
+    }),
   increaseStake: () => set((state) => ({ stake: state.stake + 1 })),
   decreaseStake: () => set((state) => ({ stake: Math.max(1, state.stake - 1) })),
   deposit: (amount) => set((state) => ({ balance: state.balance + Math.max(0, amount) })),
@@ -221,20 +333,47 @@ fullscreen: false,
   buy: () => {
     const state = get();
 
+const marketPrice =
+    state.selectedMarket?.price ?? state.price;
+
+const now = Math.floor(Date.now() / 1000);
+
     if (state.stake <= 0 || state.stake > state.balance) {
       throw new Error("Insufficient balance or invalid stake.");
     }
 
     const trade: Trade = {
-      id: crypto.randomUUID(),
-      direction: state.currentTradeType === "PUT" ? "SELL" : "BUY",
-      tradeType: state.currentTradeType,
-      stake: state.stake,
-      entry: state.price,
-      status: "OPEN",
-      source: "USER",
-      entryTime: Math.floor(Date.now() / 1000),
-    };
+
+  id: crypto.randomUUID(),
+
+  direction:
+    state.currentTradeType === "PUT"
+      ? "SELL"
+      : "BUY",
+
+  tradeType: state.currentTradeType,
+
+  stake: state.stake,
+
+  entry: marketPrice,
+
+  currentPrice: marketPrice,
+
+  floatingProfit: 0,
+
+ status: "PENDING",
+
+source: "USER",
+
+entryTime: now,
+
+duration: state.duration,
+
+expiryTime: now + state.duration,
+
+remainingSeconds: state.duration
+
+};
 
     set((current) => ({
       balance: current.balance - current.stake,
@@ -252,13 +391,23 @@ fullscreen: false,
           return trade;
         }
 
-        const profit = settle(trade.entry, state.price, trade.stake, trade.tradeType);
+        const result = settleTrade(
+
+    trade.entry,
+
+    state.price,
+
+    trade.stake,
+
+    trade.tradeType
+
+);
 
         return {
           ...trade,
           status: "CLOSED",
           exit: state.price,
-          profit,
+          profit: result.profit,
           exitTime: Math.floor(Date.now() / 1000),
         };
       }),
@@ -269,11 +418,200 @@ fullscreen: false,
             return total;
           }
 
-          const profit = settle(trade.entry, state.price, trade.stake, trade.tradeType);
-          return total + trade.stake + profit;
+          const result = settleTrade(
+
+    trade.entry,
+
+    state.price,
+
+    trade.stake,
+
+    trade.tradeType
+
+);
+          return total + result.payout;
         }, 0),
     });
   },
+  updateOpenTrades:(price)=>{
+
+set((state)=>({
+
+trades:state.trades.map((trade)=>{
+
+
+if(trade.status==="CLOSED"){
+
+return trade;
+
+}
+
+
+let floatingProfit=0;
+
+
+if(trade.direction==="BUY"){
+
+floatingProfit =
+(price-trade.entry)
+*
+trade.stake;
+
+}
+
+
+if(trade.direction==="SELL"){
+
+floatingProfit =
+(trade.entry-price)
+*
+trade.stake;
+
+}
+
+
+return {
+
+...trade,
+
+currentPrice:price,
+
+floatingProfit
+
+};
+
+
+})
+
+}));
+
+},
+tickTrades: (price) => {
+
+    const now = Math.floor(Date.now() / 1000);
+
+    set((state) => {
+
+        let balance = state.balance;
+
+        const trades = state.trades.map((trade) => {
+
+            if (trade.status === "CLOSED") {
+                return trade;
+            }
+
+            let status = trade.status;
+            let remainingSeconds = trade.remainingSeconds;
+
+            if (
+                status === "PENDING" &&
+                now - trade.entryTime >= 1
+            ) {
+                status = "OPEN";
+            }
+
+            if (status === "OPEN") {
+
+                remainingSeconds =
+                    Math.max(
+                        0,
+                        trade.expiryTime - now
+                    );
+
+                if (remainingSeconds === 0) {
+
+                  const result = settleTrade(
+
+    trade.entry,
+
+    price,
+
+    trade.stake,
+
+    trade.tradeType
+
+);
+
+balance += result.payout;
+
+settlementManager({
+
+    won: result.won,
+
+    stake: trade.stake,
+
+    profit: result.profit,
+
+});  
+                    
+
+                    return {
+
+                        ...trade,
+
+                        status: "CLOSED",
+
+                        exit: price,
+
+                        currentPrice: price,
+
+                        profit: result.profit,
+
+                        floatingProfit: result.profit,
+
+                        remainingSeconds: 0,
+
+                        exitTime: now
+
+                    };
+
+                }
+
+            }
+
+            let floatingProfit = 0;
+
+            if (trade.direction === "BUY") {
+
+                floatingProfit =
+                    (price - trade.entry)
+                    * trade.stake;
+
+            } else {
+
+                floatingProfit =
+                    (trade.entry - price)
+                    * trade.stake;
+
+            }
+
+            return {
+
+                ...trade,
+
+                status,
+
+                currentPrice: price,
+
+                remainingSeconds,
+
+                floatingProfit
+
+            };
+
+        });
+
+        return {
+
+            balance,
+
+            trades
+
+        };
+
+    });
+
+},
   setCurrency: (currency) => set({ currency }),
   setTheme: (theme) => {
     if (typeof window !== "undefined") {
@@ -310,6 +648,7 @@ fullscreen: false,
   setVolatilityState: (volatilityState) => set({ volatilityState }),
   setSelectedInstrument: (selectedInstrument) => {
     const allowed = getAllowedTradeTypesForInstrument(selectedInstrument);
+  
 
     set((state) => ({
       selectedInstrument,
@@ -318,6 +657,36 @@ fullscreen: false,
         : allowed[0],
     }));
   },
+  setSelectedMarket: (selectedMarket) => {
+
+    set((state) => ({
+
+        selectedMarket,
+
+        selectedInstrument: selectedMarket.name,
+
+        price: selectedMarket.price,
+
+        trend:
+            selectedMarket.price > state.price
+                ? "UP"
+                : selectedMarket.price < state.price
+                ? "DOWN"
+                : "FLAT"
+
+    }));
+
+},
+
+setSelectedSide: (selectedSide) => {
+
+    set({
+
+        selectedSide
+
+    });
+
+},
 
   setTimeframe: (timeframe) => {
   set({ timeframe });
@@ -359,6 +728,8 @@ toggleFullscreen: () => {
   setAutoMode: (autoMode) => set({ autoMode }),
   placeBotTrade: () => {
     const state = get();
+    const marketPrice =
+    state.selectedMarket?.price ?? state.price;
 
     if (state.stake > state.balance) {
       set({ autoMode: false });
@@ -368,7 +739,17 @@ toggleFullscreen: () => {
     const trade = state.buy();
     const direction = Math.random() > 0.5 ? 1 : -1;
     const exit = state.price + direction * (Math.random() * 2);
-    const profit = settle(trade.entry, exit, trade.stake, trade.tradeType);
+    const result = settleTrade(
+
+    trade.entry,
+
+    exit,
+
+    trade.stake,
+
+    trade.tradeType
+
+);
 
     set((current) => ({
       lastBotRunAt: Date.now(),
@@ -379,12 +760,14 @@ toggleFullscreen: () => {
               source: "BOT",
               status: "CLOSED",
               exit,
-              profit,
+              profit: result.profit,
               exitTime: Math.floor(Date.now() / 1000),
             }
           : item
       ),
-      balance: current.balance + trade.stake + profit,
+      balance:
+current.balance +
+result.payout,
     }));
   },
 }));

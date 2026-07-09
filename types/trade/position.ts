@@ -1,17 +1,4 @@
-/**
- * ============================================================================
- * POSITION TYPES
- * ============================================================================
- * Professional Trading Position Models
- *
- * Used by:
- * - Trading Engine
- * - Portfolio
- * - Margin Engine
- * - Risk Management
- * - AI Trading
- * ============================================================================
- */
+
 
 import { Instrument } from "../market/market";
 import { Timeframe } from "../common/enums";

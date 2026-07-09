@@ -1,0 +1,514 @@
+/* ==========================================================
+   ANALYTICS PAGE
+========================================================== */
+
+.analytics-page{
+
+    width:100%;
+
+    min-height:100vh;
+
+    padding:28px;
+
+    background:#0b1220;
+
+    color:#e5e7eb;
+
+}
+
+
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+.analytics-header{
+
+    margin-bottom:30px;
+
+    padding-bottom:20px;
+
+    border-bottom:1px solid rgba(255,255,255,.06);
+
+}
+
+
+
+.analytics-header h1{
+
+    margin:0;
+
+    font-size:30px;
+
+    font-weight:700;
+
+    color:#ffffff;
+
+    letter-spacing:-.4px;
+
+}
+
+
+
+.analytics-header p{
+
+    margin-top:10px;
+
+    max-width:760px;
+
+    color:#94a3b8;
+
+    line-height:1.7;
+
+    font-size:15px;
+
+}
+
+
+
+/* ==========================================================
+   DASHBOARD PANELS
+========================================================== */
+
+.analytics-page > *:not(.analytics-header){
+
+    background:#111827;
+
+    border:1px solid rgba(255,255,255,.06);
+
+    border-radius:14px;
+
+    margin-bottom:22px;
+
+    padding:22px;
+
+    transition:
+        border-color .25s ease,
+        transform .25s ease,
+        box-shadow .25s ease;
+
+}
+
+
+
+.analytics-page > *:not(.analytics-header):hover{
+
+    border-color:rgba(59,130,246,.25);
+
+    box-shadow:0 10px 28px rgba(0,0,0,.28);
+
+}
+
+
+
+/* ==========================================================
+   HEADINGS
+========================================================== */
+
+.analytics-page h2{
+
+    margin:0 0 18px;
+
+    font-size:20px;
+
+    font-weight:600;
+
+    color:#ffffff;
+
+}
+
+
+
+.analytics-page h3{
+
+    margin:0 0 10px;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    color:#f8fafc;
+
+}
+
+
+
+.analytics-page p{
+
+    color:#94a3b8;
+
+    line-height:1.7;
+
+}
+
+
+
+/* ==========================================================
+   STATISTIC CARDS
+========================================================== */
+
+.analytics-card{
+
+    background:#0f172a;
+
+    border:1px solid rgba(255,255,255,.05);
+
+    border-radius:12px;
+
+    padding:18px;
+
+    transition:.2s;
+
+}
+
+
+
+.analytics-card:hover{
+
+    border-color:#2563eb;
+
+    transform:translateY(-2px);
+
+}
+
+
+
+.analytics-value{
+
+    font-size:32px;
+
+    font-weight:700;
+
+    color:#ffffff;
+
+    margin-top:10px;
+
+}
+
+
+
+.analytics-label{
+
+    font-size:13px;
+
+    color:#94a3b8;
+
+    text-transform:uppercase;
+
+    letter-spacing:.5px;
+
+}
+
+
+
+/* ==========================================================
+   PERFORMANCE COLORS
+========================================================== */
+
+.positive{
+
+    color:#22c55e;
+
+}
+
+
+
+.negative{
+
+    color:#ef4444;
+
+}
+
+
+
+.neutral{
+
+    color:#f59e0b;
+
+}
+
+
+
+/* ==========================================================
+   TABLES
+========================================================== */
+
+.analytics-page table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+
+
+.analytics-page th{
+
+    padding:14px;
+
+    text-align:left;
+
+    color:#94a3b8;
+
+    font-size:12px;
+
+    text-transform:uppercase;
+
+    letter-spacing:.5px;
+
+    border-bottom:1px solid rgba(255,255,255,.06);
+
+}
+
+
+
+.analytics-page td{
+
+    padding:15px 14px;
+
+    border-bottom:1px solid rgba(255,255,255,.05);
+
+    color:#e5e7eb;
+
+}
+
+
+
+.analytics-page tr:hover{
+
+    background:rgba(255,255,255,.02);
+
+}
+
+
+
+/* ==========================================================
+   CHART CONTAINERS
+========================================================== */
+
+.chart-panel{
+
+    width:100%;
+
+    height:380px;
+
+    border-radius:12px;
+
+    overflow:hidden;
+
+    background:#0f172a;
+
+    border:1px solid rgba(255,255,255,.05);
+
+}
+
+
+
+.chart-small{
+
+    height:260px;
+
+}
+
+
+
+/* ==========================================================
+   PROGRESS BARS
+========================================================== */
+
+.progress-track{
+
+    width:100%;
+
+    height:8px;
+
+    background:#1e293b;
+
+    border-radius:999px;
+
+    overflow:hidden;
+
+}
+
+
+
+.progress-fill{
+
+    height:100%;
+
+    background:#2563eb;
+
+    border-radius:999px;
+
+}
+
+
+
+/* ==========================================================
+   BADGES
+========================================================== */
+
+.analytics-badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    background:rgba(59,130,246,.12);
+
+    color:#60a5fa;
+
+    font-size:12px;
+
+    font-weight:600;
+
+}
+
+
+
+.badge-success{
+
+    background:rgba(34,197,94,.15);
+
+    color:#22c55e;
+
+}
+
+
+
+.badge-danger{
+
+    background:rgba(239,68,68,.15);
+
+    color:#ef4444;
+
+}
+
+
+
+.badge-warning{
+
+    background:rgba(245,158,11,.15);
+
+    color:#f59e0b;
+
+}
+
+
+
+/* ==========================================================
+   BUTTONS
+========================================================== */
+
+.analytics-page button{
+
+    height:40px;
+
+    padding:0 18px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#2563eb;
+
+    color:#fff;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+
+
+.analytics-page button:hover{
+
+    background:#1d4ed8;
+
+}
+
+
+
+/* ==========================================================
+   SCROLLBAR
+========================================================== */
+
+.analytics-page ::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+
+
+.analytics-page ::-webkit-scrollbar-thumb{
+
+    background:#334155;
+
+    border-radius:20px;
+
+}
+
+
+
+.analytics-page ::-webkit-scrollbar-track{
+
+    background:transparent;
+
+}
+
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width:1024px){
+
+    .analytics-page{
+
+        padding:20px;
+
+    }
+
+}
+
+
+
+@media (max-width:768px){
+
+    .analytics-page{
+
+        padding:16px;
+
+    }
+
+    .analytics-header h1{
+
+        font-size:24px;
+
+    }
+
+    .analytics-value{
+
+        font-size:26px;
+
+    }
+
+    .chart-panel{
+
+        height:280px;
+
+    }
+
+}

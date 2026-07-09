@@ -1,0 +1,871 @@
+/* ==========================================================
+   MARKET NEWS PAGE
+========================================================== */
+
+.news-page{
+
+    width:100%;
+
+    min-height:100vh;
+
+    padding:28px;
+
+    background:#0b1220;
+
+    color:#e5e7eb;
+
+}
+
+
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+.news-header{
+
+    margin-bottom:28px;
+
+    padding-bottom:22px;
+
+    border-bottom:1px solid rgba(255,255,255,.06);
+
+}
+
+
+
+.news-header h1{
+
+    margin:0;
+
+    font-size:30px;
+
+    font-weight:700;
+
+    color:#ffffff;
+
+    letter-spacing:-0.4px;
+
+}
+
+
+
+.news-header p{
+
+    margin-top:10px;
+
+    max-width:760px;
+
+    color:#94a3b8;
+
+    font-size:15px;
+
+    line-height:1.7;
+
+}
+
+
+
+/* ==========================================================
+   SECTION CONTAINERS
+========================================================== */
+
+.news-page > *:not(.news-header){
+
+    background:#111827;
+
+    border:1px solid rgba(255,255,255,.06);
+
+    border-radius:14px;
+
+    padding:22px;
+
+    margin-bottom:22px;
+
+    transition:
+        border-color .25s ease,
+        transform .25s ease,
+        box-shadow .25s ease;
+
+}
+
+
+
+.news-page > *:not(.news-header):hover{
+
+    border-color:rgba(59,130,246,.25);
+
+    box-shadow:0 12px 28px rgba(0,0,0,.25);
+
+}
+
+
+
+/* ==========================================================
+   SECTION HEADINGS
+========================================================== */
+
+.news-page h2{
+
+    margin:0 0 18px;
+
+    font-size:19px;
+
+    font-weight:600;
+
+    color:#ffffff;
+
+}
+
+
+
+.news-page h3{
+
+    margin:0 0 8px;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    color:#f8fafc;
+
+}
+
+
+
+.news-page p{
+
+    color:#94a3b8;
+
+    line-height:1.7;
+
+}
+
+
+
+/* ==========================================================
+   NEWS CARDS
+========================================================== */
+
+.news-card{
+
+    background:#0f172a;
+
+    border:1px solid rgba(255,255,255,.05);
+
+    border-radius:12px;
+
+    padding:18px;
+
+    transition:.25s;
+
+    cursor:pointer;
+
+}
+
+
+
+.news-card:hover{
+
+    transform:translateY(-2px);
+
+    border-color:#2563eb;
+
+    box-shadow:0 8px 22px rgba(0,0,0,.25);
+
+}
+
+
+
+.news-card-title{
+
+    font-size:17px;
+
+    font-weight:600;
+
+    color:#ffffff;
+
+    margin-bottom:10px;
+
+}
+
+
+
+.news-card-description{
+
+    font-size:14px;
+
+    color:#94a3b8;
+
+    line-height:1.6;
+
+}
+
+
+
+/* ==========================================================
+   META
+========================================================== */
+
+.news-meta{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:16px;
+
+    margin-top:16px;
+
+    font-size:12px;
+
+    color:#64748b;
+
+}
+
+
+
+.news-source{
+
+    color:#60a5fa;
+
+    font-weight:600;
+
+}
+
+
+
+.news-time{
+
+    color:#94a3b8;
+
+}
+
+
+
+/* ==========================================================
+   BREAKING BADGE
+========================================================== */
+
+.breaking-badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    background:rgba(239,68,68,.15);
+
+    color:#ef4444;
+
+    font-size:11px;
+
+    font-weight:700;
+
+    text-transform:uppercase;
+
+    letter-spacing:.5px;
+
+}
+
+
+
+/* ==========================================================
+   MARKET MOVERS
+========================================================== */
+
+.market-mover{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:14px 0;
+
+    border-bottom:1px solid rgba(255,255,255,.05);
+
+}
+
+
+
+.market-mover:last-child{
+
+    border-bottom:none;
+
+}
+
+
+
+.market-mover-name{
+
+    font-weight:600;
+
+    color:#ffffff;
+
+}
+
+
+
+.market-up{
+
+    color:#22c55e;
+
+    font-weight:700;
+
+}
+
+
+
+.market-down{
+
+    color:#ef4444;
+
+    font-weight:700;
+
+}
+
+
+
+/* ==========================================================
+   ECONOMIC CALENDAR
+========================================================== */
+
+.calendar-item{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:14px 0;
+
+    border-bottom:1px solid rgba(255,255,255,.05);
+
+}
+
+
+
+.calendar-item:last-child{
+
+    border-bottom:none;
+
+}
+
+
+
+.calendar-time{
+
+    color:#60a5fa;
+
+    font-weight:600;
+
+}
+
+
+
+.calendar-event{
+
+    color:#f8fafc;
+
+}
+
+
+
+.calendar-impact{
+
+    padding:5px 10px;
+
+    border-radius:999px;
+
+    font-size:11px;
+
+    font-weight:700;
+
+}
+
+
+
+.impact-high{
+
+    background:rgba(239,68,68,.15);
+
+    color:#ef4444;
+
+}
+
+
+
+.impact-medium{
+
+    background:rgba(245,158,11,.15);
+
+    color:#f59e0b;
+
+}
+
+
+
+.impact-low{
+
+    background:rgba(34,197,94,.15);
+
+    color:#22c55e;
+
+}
+
+
+
+/* ==========================================================
+   TRENDING TOPICS
+========================================================== */
+
+.topic-tag{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    padding:8px 14px;
+
+    margin:6px;
+
+    border-radius:999px;
+
+    background:#1e293b;
+
+    color:#cbd5e1;
+
+    font-size:13px;
+
+    transition:.2s;
+
+    cursor:pointer;
+
+}
+
+
+
+.topic-tag:hover{
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+}
+
+
+
+/* ==========================================================
+   LINKS
+========================================================== */
+
+.news-page a{
+
+    color:#60a5fa;
+
+    text-decoration:none;
+
+}
+
+
+
+.news-page a:hover{
+
+    color:#93c5fd;
+
+}
+
+
+
+/* ==========================================================
+   TABLES
+========================================================== */
+
+.news-page table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+
+
+.news-page th{
+
+    text-align:left;
+
+    padding:14px;
+
+    color:#94a3b8;
+
+    font-size:12px;
+
+    text-transform:uppercase;
+
+    border-bottom:1px solid rgba(255,255,255,.06);
+
+}
+
+
+
+.news-page td{
+
+    padding:14px;
+
+    border-bottom:1px solid rgba(255,255,255,.05);
+
+    color:#e5e7eb;
+
+}
+
+
+
+.news-page tr:hover{
+
+    background:rgba(255,255,255,.02);
+
+}
+
+
+
+/* ==========================================================
+   SCROLLBAR
+========================================================== */
+
+.news-page ::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+
+
+.news-page ::-webkit-scrollbar-thumb{
+
+    background:#334155;
+
+    border-radius:20px;
+
+}
+
+
+
+.news-page ::-webkit-scrollbar-track{
+
+    background:transparent;
+
+}
+
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width:1024px){
+
+    .news-page{
+
+        padding:20px;
+
+    }
+
+}
+
+
+
+@media (max-width:768px){
+
+    .news-page{
+
+        padding:16px;
+
+    }
+
+    .news-header h1{
+
+        font-size:24px;
+
+    }
+
+    .market-mover,
+
+    .calendar-item{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:10px;
+
+    }
+
+}
+/* ======================================================
+   TRENDING TOPICS
+====================================================== */
+
+.trending-topics{
+    margin-top:32px;
+}
+
+.topics-list{
+    display:grid;
+    gap:18px;
+    margin-top:20px;
+}
+
+.topic-card{
+    display:flex;
+    gap:18px;
+    padding:20px;
+    border-radius:16px;
+    background:#111827;
+    border:1px solid rgba(255,255,255,.06);
+    transition:.25s;
+}
+
+.topic-card:hover{
+    border-color:#2563eb;
+    transform:translateY(-2px);
+}
+
+.topic-number{
+    width:46px;
+    height:46px;
+    border-radius:12px;
+    background:#1d4ed8;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    flex-shrink:0;
+}
+
+.topic-content{
+    flex:1;
+}
+
+.topic-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+    gap:20px;
+}
+
+.topic-top h3{
+    margin:0;
+    color:#fff;
+    font-size:18px;
+}
+
+.topic-content p{
+    color:#94a3b8;
+    line-height:1.6;
+    margin:0 0 16px;
+}
+
+.topic-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+.topic-footer span{
+    color:#60a5fa;
+    font-size:14px;
+}
+
+.topic-button{
+    border:none;
+    background:#2563eb;
+    color:#fff;
+    padding:8px 16px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.topic-button:hover{
+    background:#1d4ed8;
+}
+
+.topic-sentiment{
+    padding:5px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.topic-sentiment.bullish{
+    background:rgba(34,197,94,.15);
+    color:#22c55e;
+}
+
+.topic-sentiment.bearish{
+    background:rgba(239,68,68,.15);
+    color:#ef4444;
+}
+
+.topic-sentiment.neutral{
+    background:rgba(245,158,11,.15);
+    color:#f59e0b;
+}
+
+@media (max-width:768px){
+
+    .topic-card{
+        flex-direction:column;
+    }
+
+    .topic-top{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .topic-footer{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+}
+/* ==========================================================
+   ECONOMIC CALENDAR
+========================================================== */
+
+.economic-calendar{
+    margin-top:32px;
+    background:#111827;
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:18px;
+    overflow:hidden;
+}
+
+.calendar-table{
+    width:100%;
+}
+
+.calendar-head,
+.calendar-row{
+    display:grid;
+    grid-template-columns:
+        80px
+        70px
+        2fr
+        90px
+        100px
+        100px
+        100px;
+    align-items:center;
+    gap:16px;
+    padding:16px 24px;
+}
+
+.calendar-head{
+    background:#0f172a;
+    color:#94a3b8;
+    font-size:13px;
+    font-weight:700;
+    text-transform:uppercase;
+    border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.calendar-row{
+    color:#e2e8f0;
+    border-bottom:1px solid rgba(255,255,255,.05);
+    transition:.2s;
+}
+
+.calendar-row:last-child{
+    border-bottom:none;
+}
+
+.calendar-row:hover{
+    background:#1e293b;
+}
+
+.calendar-event{
+    font-weight:600;
+}
+
+.impact{
+    display:inline-flex;
+    justify-content:center;
+    align-items:center;
+    padding:5px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.impact.high{
+    background:rgba(239,68,68,.18);
+    color:#ef4444;
+}
+
+.impact.medium{
+    background:rgba(245,158,11,.18);
+    color:#f59e0b;
+}
+
+.impact.low{
+    background:rgba(34,197,94,.18);
+    color:#22c55e;
+}
+
+.calendar-filter{
+    border:none;
+    background:#2563eb;
+    color:#fff;
+    padding:10px 18px;
+    border-radius:10px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.25s;
+}
+
+.calendar-filter:hover{
+    background:#1d4ed8;
+}
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media(max-width:1100px){
+
+    .calendar-head{
+        display:none;
+    }
+
+    .calendar-row{
+        display:flex;
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+        padding:20px;
+    }
+
+    .calendar-row span{
+        display:flex;
+        gap:8px;
+    }
+
+    .calendar-event{
+        font-size:16px;
+    }
+
+}

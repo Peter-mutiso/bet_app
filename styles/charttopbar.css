@@ -1,0 +1,121 @@
+.chart-top-bar{
+
+    position:absolute;
+
+    top:12px;
+
+    left:12px;
+
+    right:12px;
+
+    z-index:40;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+.chart-top-left{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+.chart-top-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+.instrument-selector{
+
+    height:36px;
+
+    padding:0 14px;
+
+    border:1px solid #334155;
+
+    border-radius:8px;
+
+    background:#111827;
+
+    color:white;
+
+    font-size:13px;
+
+}
+
+.instrument-selector:focus{
+
+    outline:none;
+
+    border-color:#3b82f6;
+
+}
+
+.ohlc-display{
+
+    display:flex;
+
+    gap:14px;
+
+    background:rgba(0,0,0,.55);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:10px;
+
+    padding:8px 14px;
+
+    color:white;
+
+    font-size:12px;
+
+    font-family:monospace;
+
+}
+
+.ohlc-display span{
+
+    display:flex;
+
+    gap:5px;
+
+}
+
+.live-button{
+
+    height:36px;
+
+    padding:0 16px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#16a34a;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+}
+
+.live-button:hover{
+
+    background:#22c55e;
+
+}
