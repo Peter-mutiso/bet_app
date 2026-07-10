@@ -8,7 +8,7 @@ import {
 
 import {
 
-    ContractType
+    TradeType
 
 } from "../types";
 
@@ -32,9 +32,9 @@ export function useTrading() {
 
     ] =
 
-        useState<ContractType>(
+        useState<TradeType>(
 
-            "RISE"
+            "CALL"
 
         );
 

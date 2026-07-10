@@ -1,8 +1,8 @@
 "use client";
 
 import AnimatedTradeCard from "@/components/trading/AnimatedTradeCard";
-import { Trade, TRADE_TYPE_LABELS } from "@/store/useTradeStore";
-
+import type { Trade } from "@/types/trade";
+import { TRADE_TYPE_LABELS } from "@/store/useTradeStore";
 interface Props {
     positions: Trade[];
 }

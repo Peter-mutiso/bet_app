@@ -3,33 +3,26 @@
 import { useMemo } from "react";
 
 import { useTrading } from "../../contexts/TradingContext";
-
 import type { Trade } from "../../types/trade";
-
-import {
-    TradeStatus,
-    TradeDirection,
-} from "../../types/trade";
 
 function format(value: number | undefined) {
     return Number(value ?? 0).toFixed(2);
 }
 
 function calculateLivePnL(trade: Trade): number {
-    if (trade.status !== TradeStatus.OPEN) {
-        return trade.profitLoss.realizedPnL;
+    if (trade.status !== "OPEN") {
+        return trade.profitLoss?.realizedPnL ?? trade.profit ?? 0;
     }
 
-    const entry = trade.pricing.entryPrice;
+    const entry = trade.pricing?.entryPrice ?? trade.entry;
     const current =
-        trade.pricing.currentPrice ??
-        trade.pricing.entryPrice;
+    trade.currentPrice ?? trade.entry;
 
-    const volume = trade.size.volume;
+    const volume = trade.size?.volume ?? trade.stake;
 
     const diff = current - entry;
 
-    return trade.direction === TradeDirection.BUY
+    return trade.direction === "BUY"
         ? diff * volume
         : -diff * volume;
 }
@@ -45,8 +38,8 @@ export default function PortfolioPage() {
             const pnl = calculateLivePnL(trade);
 
             const investment =
-                trade.pricing.entryPrice *
-                trade.size.volume;
+    (trade.pricing?.entryPrice ?? trade.entry) *
+    (trade.size?.volume ?? 1);
 
             const pnlPercent =
                 investment > 0
@@ -77,13 +70,13 @@ export default function PortfolioPage() {
 
     const openTrades = portfolio.filter(
 
-        trade => trade.status === TradeStatus.OPEN
+        trade => trade.status === "OPEN"
 
     );
 
     const closedTrades = portfolio.filter(
 
-        trade => trade.status !== TradeStatus.OPEN
+        trade => trade.status !== "OPEN"
 
     );
 
@@ -296,7 +289,7 @@ export default function PortfolioPage() {
                                 <td
                                     className={
                                         trade.direction ===
-                                        TradeDirection.BUY
+                                        "BUY"
                                             ? "up"
                                             : "down"
                                     }
@@ -315,7 +308,7 @@ export default function PortfolioPage() {
                                 <td>
 
                                     {format(
-                                        trade.size.volume
+                                        trade.size?.volume ?? trade.stake
                                     )}
 
                                 </td>
@@ -323,7 +316,7 @@ export default function PortfolioPage() {
                                 <td>
 
                                     {format(
-                                        trade.pricing.entryPrice
+                                        trade.pricing?.entryPrice ?? trade.entry
                                     )}
 
                                 </td>
@@ -331,7 +324,7 @@ export default function PortfolioPage() {
                                 <td>
 
                                     {format(
-                                        trade.pricing.currentPrice
+                                        trade.pricing?.currentPrice ?? trade.currentPrice
                                     )}
 
                                 </td>

@@ -1,18 +1,4 @@
-/**
- * ============================================================================
- * TRADE TYPES
- * ============================================================================
- * Professional Trading Models
- *
- * Used by:
- * - Trading Engine
- * - Order Management
- * - Position Management
- * - Risk Management
- * - AI Prediction
- * - Analytics
- * ============================================================================
- */
+
 
 import { Instrument } from "../market/market";
 
@@ -197,11 +183,16 @@ export interface Trade {
 
     id: string;
 
+    // optional market identifier
+    marketId?: string;
+
     accountId: string;
 
     instrument: Instrument;
-
+    profit?: number;
+    tradeType: TradeType;
     timeframe: Timeframe;
+    entry: number;
 
     direction: TradeDirection;
 
@@ -289,31 +280,6 @@ export interface TradeHistoryFilter {
 
 /* -------------------------------------------------------------------------- */
 /*                     POSITION SNAPSHOT                                      */
-/* -------------------------------------------------------------------------- */
-
-export interface PositionSnapshot {
-
-    snapshotId: string;
-
-    tradeId: string;
-
-    timestamp: Date;
-
-    currentPrice: number;
-
-    unrealizedPnL: number;
-
-    realizedPnL: number;
-
-    quantity: number;
-
-    marginUsed: number;
-
-    equity: number;
-}
-
-/* -------------------------------------------------------------------------- */
-/*                         TRADE JOURNAL                                      */
 /* -------------------------------------------------------------------------- */
 
 export interface TradeJournalEntry {
@@ -434,19 +400,6 @@ export interface CopyTrade {
     copiedVolume: number;
 
     copiedAt: Date;
-}
-
-export interface CopyTradingStatistics {
-
-    copiedTrades: number;
-
-    successfulCopies: number;
-
-    failedCopies: number;
-
-    totalProfit: number;
-
-    winRate: number;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -584,6 +537,9 @@ export const DEFAULT_TRADE_RESULT = TradeResult.RUNNING;
 export const DEFAULT_TRADE: Trade = {
 
     id: "",
+    marketId: "",
+
+tradeType: TradeType.MARKET,
 
     accountId: "",
 
@@ -591,9 +547,11 @@ export const DEFAULT_TRADE: Trade = {
 
     timeframe: Timeframe.M1,
 
+    entry: 0,
+
     direction: DEFAULT_TRADE_DIRECTION,
 
-    type: DEFAULT_TRADE_TYPE,
+    type: TradeType.MARKET,
 
     source: DEFAULT_TRADE_SOURCE,
 
@@ -828,7 +786,6 @@ export type TradeAlertMap = Record<string, TradeAlert>;
 
 export type TradeJournalMap = Record<string, TradeJournalEntry>;
 
-export type PositionSnapshotMap = Record<string, PositionSnapshot>;
 
 /* -------------------------------------------------------------------------- */
 /*                     CALLBACK TYPES                                         */

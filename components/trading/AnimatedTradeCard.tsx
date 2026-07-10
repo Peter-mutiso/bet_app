@@ -10,7 +10,7 @@ import {
 
 } from "react";
 
-import { Trade } from "@/store/useTradeStore";
+import type { Trade } from "@/types/trade";
 
 interface Props {
 

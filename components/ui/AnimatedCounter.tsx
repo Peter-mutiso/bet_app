@@ -52,13 +52,13 @@ export default function AnimatedCounter({
 
         useState(value);
 
-    const frameRef = useRef<number>();
+    const frameRef = useRef<number | null>(null);
 
     const previousValue = useRef(value);
 
     useEffect(() => {
 
-        if (frameRef.current) {
+        if (frameRef.current !== null) {
 
             cancelAnimationFrame(
 

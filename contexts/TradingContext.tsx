@@ -4,13 +4,12 @@ import {
     createContext,
     useContext,
     useMemo,
-    useState
+    useState,
 } from "react";
 
 import { useNotificationStore } from "@/store/useNotificationStore";
 
-import type { Trade, ContractType } from "../types/trade";
-import type { UUID } from "../types/common";
+import type { Trade, TradeType } from "../types/trade";
 
 /* =========================================================
    CONTEXT TYPE
@@ -20,28 +19,26 @@ interface TradingContextType {
     trades: Trade[];
 
     openTrade: (
-        trade: Omit<
-            Trade,
-            "id" | "status" | "createdAt" | "updatedAt"
-        >
+        trade: Omit<Trade, "id" | "status">
     ) => void;
 
     executeTrade: (input: {
-        marketId: UUID;
-        contract: ContractType;
-        duration: number;
+        marketId: string;
+        tradeType: TradeType;
+        direction: "BUY" | "SELL";
         stake: number;
-        entryPrice: number;
+        entry: number;
+        duration: number;
     }) => void;
 
     updateMarketPrice: (
-        marketId: UUID,
-        price: number
-    ) => void;
+    marketId: string,
+    price: number
+) => void;
 
     closeTrade: (
-        tradeId: UUID,
-        result: "WON" | "LOST"
+        tradeId: string,
+        result: "WIN" | "LOSS"
     ) => void;
 
     clearTrades: () => void;
@@ -59,57 +56,36 @@ const TradingContext =
 ========================================================= */
 
 export function TradingProvider({
-    children
+    children,
 }: {
     children: React.ReactNode;
 }) {
-
     const [trades, setTrades] = useState<Trade[]>([]);
 
-    const { addNotification } =
-        useNotificationStore();
+    const { addNotification } = useNotificationStore();
 
     /* -----------------------------------------------------
        OPEN TRADE
     ----------------------------------------------------- */
 
     function openTrade(
-        input: Omit<
-            Trade,
-            "id" | "status" | "createdAt" | "updatedAt"
-        >
+        input: Omit<Trade, "id" | "status">
     ) {
-
         const newTrade: Trade = {
-
             ...input,
-
             id: crypto.randomUUID(),
-
             status: "OPEN",
-
-            createdAt: new Date().toISOString(),
-
-            updatedAt: new Date().toISOString()
-
         };
 
-        setTrades(prev => [newTrade, ...prev]);
+        setTrades((prev) => [newTrade, ...prev]);
 
         addNotification({
-
             title: "Trade Opened",
-
-            message: `${newTrade.contract} contract opened.`,
-
+            message: `${newTrade.tradeType} trade opened.`,
             type: "trade",
-
             priority: "medium",
-
-            read: false
-
+            read: false,
         });
-
     }
 
     /* -----------------------------------------------------
@@ -117,142 +93,128 @@ export function TradingProvider({
     ----------------------------------------------------- */
 
     function executeTrade(input: {
-        marketId: UUID;
-        contract: ContractType;
-        duration: number;
+        marketId: string;
+        tradeType: TradeType;
+        direction: "BUY" | "SELL";
         stake: number;
-        entryPrice: number;
+        entry: number;
+        duration: number;
     }) {
+        const now = Date.now();
 
         const newTrade: Trade = {
-
+            marketId: input.marketId,
             id: crypto.randomUUID(),
 
-            marketId: input.marketId,
+            direction: input.direction,
 
-            contract: input.contract,
-
-            duration: input.duration,
+            tradeType: input.tradeType,
 
             stake: input.stake,
 
-            payout: 80,
+            entry: input.entry,
 
-            entryPrice: input.entryPrice,
+            currentPrice: input.entry,
 
-            currentPrice: input.entryPrice,
+            floatingProfit: 0,
 
             status: "OPEN",
 
-            createdAt: new Date().toISOString(),
+            entryTime: now,
 
-            updatedAt: new Date().toISOString()
+            expiryTime: now + input.duration * 1000,
 
+            duration: input.duration,
+
+            remainingSeconds: input.duration,
         };
 
-        setTrades(prev => [newTrade, ...prev]);
+        setTrades((prev) => [newTrade, ...prev]);
 
         addNotification({
-
             title: "Trade Opened",
-
-            message: `${input.contract} contract opened.`,
-
+            message: `${input.tradeType} trade opened.`,
             type: "trade",
-
             priority: "medium",
-
-            read: false
-
+            read: false,
         });
-
     }
 
     /* -----------------------------------------------------
-       MARKET PRICE UPDATE
+       UPDATE PRICE
     ----------------------------------------------------- */
 
     function updateMarketPrice(
-        marketId: UUID,
-        price: number
-    ) {
+    marketId: string,
+    price: number
+) {
+    setTrades(prev =>
+        prev.map(trade => {
+            if (trade.marketId !== marketId) {
+                return trade;
+            }
 
-        setTrades(prev =>
-            prev.map(trade => {
+            const floatingProfit =
+                trade.direction === "BUY"
+                    ? (price - trade.entry) * trade.stake
+                    : (trade.entry - price) * trade.stake;
 
-                if (trade.marketId !== marketId) {
-                    return trade;
-                }
-
-                return {
-
-                    ...trade,
-
-                    currentPrice: price,
-
-                    updatedAt:
-                        new Date().toISOString()
-
-                };
-
-            })
-        );
-
-    }
+            return {
+                ...trade,
+                currentPrice: price,
+                floatingProfit,
+            };
+        })
+    );
+}
 
     /* -----------------------------------------------------
        CLOSE TRADE
     ----------------------------------------------------- */
 
     function closeTrade(
-        tradeId: UUID,
-        result: "WON" | "LOST"
+        tradeId: string,
+        result: "WIN" | "LOSS"
     ) {
+        setTrades((prev) =>
+            prev.map((trade) => {
+                if (trade.id !== tradeId) return trade;
 
-        setTrades(prev =>
-            prev.map(trade =>
-
-                trade.id === tradeId
-
-                    ? {
-
-                          ...trade,
-
-                          status: result,
-
-                          updatedAt:
-                              new Date().toISOString()
-
-                      }
-
-                    : trade
-
-            )
+                return {
+                    ...trade,
+                    status: "CLOSED",
+                    result,
+                    profit:
+                        result === "WIN"
+                            ? trade.floatingProfit
+                            : -Math.abs(trade.floatingProfit),
+                    exit: trade.currentPrice,
+                    exitTime: Date.now(),
+                    remainingSeconds: 0,
+                };
+            })
         );
 
         addNotification({
-
             title:
-                result === "WON"
+                result === "WIN"
                     ? "Trade Won"
                     : "Trade Lost",
 
             message:
-                result === "WON"
+                result === "WIN"
                     ? "Your trade closed in profit."
                     : "Your trade closed at a loss.",
 
             type: "trade",
 
             priority:
-                result === "WON"
+                result === "WIN"
                     ? "low"
                     : "high",
 
-            read: false
-
+            read: false,
         });
-
     }
 
     /* -----------------------------------------------------
@@ -260,9 +222,7 @@ export function TradingProvider({
     ----------------------------------------------------- */
 
     function clearTrades() {
-
         setTrades([]);
-
     }
 
     /* =====================================================
@@ -276,21 +236,16 @@ export function TradingProvider({
             executeTrade,
             updateMarketPrice,
             closeTrade,
-            clearTrades
+            clearTrades,
         }),
         [trades]
     );
 
     return (
-
         <TradingContext.Provider value={value}>
-
             {children}
-
         </TradingContext.Provider>
-
     );
-
 }
 
 /* =========================================================
@@ -298,17 +253,13 @@ export function TradingProvider({
 ========================================================= */
 
 export function useTrading() {
-
     const ctx = useContext(TradingContext);
 
     if (!ctx) {
-
         throw new Error(
             "useTrading must be used inside TradingProvider"
         );
-
     }
 
     return ctx;
-
 }

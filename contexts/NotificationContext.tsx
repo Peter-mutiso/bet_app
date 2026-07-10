@@ -9,7 +9,7 @@ import {
 
 import type {
     Notification,
-    NotificationLevel,
+    NotificationPriority,
     NotificationType
 } from "../types/notification";
 
@@ -23,7 +23,7 @@ interface NotificationContextType {
         title: string;
         message: string;
         type: NotificationType;
-        level: NotificationLevel;
+        level:NotificationPriority;
         actionUrl?: string;
     }): void;
 
@@ -52,11 +52,11 @@ export function NotificationProvider({
         title: string;
         message: string;
         type: NotificationType;
-        level: NotificationLevel;
+        level: NotificationPriority;
         actionUrl?: string;
     }) {
 
-        const notification: Notification = {
+        const notification = {
 
             id: crypto.randomUUID(),
 
@@ -66,7 +66,7 @@ export function NotificationProvider({
 
             type: input.type,
 
-            level: input.level,
+            priority: input.level,
 
             read: false,
 
@@ -75,7 +75,7 @@ export function NotificationProvider({
             createdAt: new Date().toISOString(),
 
             updatedAt: new Date().toISOString()
-        };
+        } as Notification;
 
         setNotifications(prev => [
             notification,

@@ -12,7 +12,7 @@ interface Props {
         value: number;
     }[];
 
-    chartType?: "candles" | "line" | "area";
+    chartType?: "candles" | "ohlc" | "line" | "area";
 
     fullscreen?: boolean;
 }
@@ -587,7 +587,7 @@ const animate = () => {
     draw();
     animationFrame = requestAnimationFrame(animate);
 };
-
+draw();
 resize();
 
 animationFrame = requestAnimationFrame(animate);

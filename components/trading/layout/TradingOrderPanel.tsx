@@ -10,8 +10,11 @@ import {
     BarChart3
 } from "lucide-react";
 import { useState } from "react";
+import type { TradeType } from "@/types/trade";
 
 import { useTradeStore } from "@/store/useTradeStore";
+import { useTradingStore } from "@/store/tradingStore";
+
 
 export default function TradingOrderPanel() {
     const [executing,setExecuting] = useState(false);
@@ -28,14 +31,21 @@ const [message,setMessage] = useState("");
         setStake,
 
         balance,
-
-        currentTradeType,
-
-        setCurrentTradeType,
-
         buy
 
     } = useTradeStore();
+    const currentTradeType = useTradeStore(
+    (state) => state.currentTradeType
+);
+
+const _: TradeType = currentTradeType;
+
+const setCurrentTradeType = useTradeStore(
+    (state) => state.setCurrentTradeType
+);
+    const selectedMarket = useTradingStore(
+    state => state.selectedMarket
+);
 
     const payout = (stake * 1.86).toFixed(2);
 
@@ -50,10 +60,8 @@ const [message,setMessage] = useState("");
             <div className="order-header">
 
                 <h2>
-
-                    Trade Ticket
-
-                </h2>
+    {selectedMarket?.name ?? "Trade Ticket"}
+</h2>
 
                 <span>
 
@@ -70,7 +78,7 @@ const [message,setMessage] = useState("");
                 <button
 
                     className={
-                        currentTradeType === "CALL"
+                        String(currentTradeType) === "CALL"
                             ? "direction-btn active-buy"
                             : "direction-btn"
                     }
@@ -90,10 +98,10 @@ const [message,setMessage] = useState("");
                 <button
 
                     className={
-                        currentTradeType === "PUT"
-                            ? "direction-btn active-sell"
-                            : "direction-btn"
-                    }
+    String(currentTradeType) === "PUT"
+        ? "direction-btn active-sell"
+        : "direction-btn"
+}
 
                     onClick={() =>
                         setCurrentTradeType("PUT")

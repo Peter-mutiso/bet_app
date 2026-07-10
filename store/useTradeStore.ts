@@ -1,14 +1,21 @@
 "use client";
+import type {
+    Trade,
+    TradeType,
+    TradeStatus,
+} from "@/types/trade";
+
+import {
+    TRADE_TYPES,
+} from "@/types/trade";
+
 
 import { create } from "zustand";
 import { settlementManager } from "@/lib/settlementManager";
 
-export const TRADE_TYPES = ["ACCUMULATOR", "CALL", "PUT", "DIGIT_OVER", "DIGIT_UNDER"] as const;
 
-export type TradeType = (typeof TRADE_TYPES)[number];
-export type AccountMode = "DEMO" | "REAL";
+
 export type Currency = "USD" | "KES";
-export type TradeStatus = "OPEN" | "CLOSED";
 
 export type ChartType =
     | "candles"
@@ -55,41 +62,10 @@ export function getAllowedTradeTypesForInstrument(instrument: string): readonly 
   return ["ACCUMULATOR", "CALL", "PUT"];
 }
 
-export interface Trade {
 
-    id: string;
+export type AccountMode = "DEMO" | "REAL";
 
-    direction: "BUY" | "SELL";
 
-    tradeType: TradeType;
-
-    stake: number;
-
-    entry: number;
-
-    currentPrice: number;
-
-    floatingProfit: number;
-
-    exit?: number;
-
-    profit?: number;
-
-    status: "PENDING" | "OPEN" | "SETTLING" | "CLOSED";
-
-    source?: "USER" | "BOT";
-
-    entryTime: number;
-
-    expiryTime: number;
-
-    duration: number;
-
-    remainingSeconds: number;
-
-    exitTime?: number;
-
-}
 
 
 interface DemoAccount {
@@ -99,6 +75,7 @@ interface DemoAccount {
 }
 
 export interface SelectedMarket {
+  id?: string;
 
     symbol: string;
 
@@ -300,7 +277,7 @@ selectedSide: "BUY",
 
 fullscreen: false,
   showInstrumentPicker: false,
-  currentTradeType: "ACCUMULATOR",
+  currentTradeType: "ACCUMULATOR" as TradeType,
   autoMode: false,
   botDelayMs: 1200,
   lastBotRunAt: 0,
@@ -345,6 +322,7 @@ const now = Math.floor(Date.now() / 1000);
     const trade: Trade = {
 
   id: crypto.randomUUID(),
+  marketId: state.selectedMarket?.id ?? "R_10",
 
   direction:
     state.currentTradeType === "PUT"
@@ -494,7 +472,7 @@ tickTrades: (price) => {
 
         let balance = state.balance;
 
-        const trades = state.trades.map((trade) => {
+        const trades: Trade[] = state.trades.map((trade): Trade => {
 
             if (trade.status === "CLOSED") {
                 return trade;
@@ -550,6 +528,7 @@ settlementManager({
                         ...trade,
 
                         status: "CLOSED",
+                        result: result.won ? "WIN" : "LOSS",
 
                         exit: price,
 
@@ -563,7 +542,7 @@ settlementManager({
 
                         exitTime: now
 
-                    };
+                    }satisfies Trade;
 
                 }
 
@@ -589,7 +568,7 @@ settlementManager({
 
                 ...trade,
 
-                status,
+                status: status as TradeStatus,
 
                 currentPrice: price,
 
@@ -597,7 +576,7 @@ settlementManager({
 
                 floatingProfit
 
-            };
+            }satisfies Trade;
 
         });
 
@@ -724,7 +703,8 @@ toggleFullscreen: () => {
   }));
 },
   setShowInstrumentPicker: (showInstrumentPicker) => set({ showInstrumentPicker }),
-  setCurrentTradeType: (currentTradeType) => set({ currentTradeType }),
+  setCurrentTradeType: (currentTradeType: TradeType) =>
+    set({ currentTradeType }),
   setAutoMode: (autoMode) => set({ autoMode }),
   placeBotTrade: () => {
     const state = get();
