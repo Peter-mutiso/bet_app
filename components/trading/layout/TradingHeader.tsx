@@ -8,6 +8,7 @@ import {
     Activity,
 } from "lucide-react";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTradeStore } from "@/store/useTradeStore";
 
@@ -15,7 +16,9 @@ export default function TradingHeader() {
 
     const router = useRouter();
 
-    const balance = useTradeStore((state) => state.balance);
+    const balance = useTradeStore(
+        (state) => state.balance
+    );
 
     const market = useTradeStore(
         (state) => state.selectedMarket
@@ -28,9 +31,13 @@ export default function TradingHeader() {
     const setShowInstrumentPicker = useTradeStore(
         (state) => state.setShowInstrumentPicker
     );
-    const chartType = useTradeStore(
-    (state) => state.chartType
-);
+
+    // ==========================
+    // DEBUG
+    // ==========================
+    useEffect(() => {
+        console.log("HEADER MARKET:", market);
+    }, [market]);
 
     const currentPrice = Number(price ?? 0);
 
@@ -43,9 +50,7 @@ export default function TradingHeader() {
             <div className="header-left">
 
                 <div className="market-logo">
-
                     B
-
                 </div>
 
                 <button
@@ -59,17 +64,13 @@ export default function TradingHeader() {
                     <div className="instrument-info">
 
                         <h2>
-
                             {market?.name ??
                                 "Volatility 100 Index"}
-
                         </h2>
 
                         <span>
-
                             {market?.symbol ??
                                 "R_100"}
-
                         </span>
 
                     </div>
@@ -109,9 +110,7 @@ export default function TradingHeader() {
                 <div className="balance-card">
 
                     <small>
-
                         Demo Balance
-
                     </small>
 
                     <strong>
@@ -119,11 +118,8 @@ export default function TradingHeader() {
                         $
 
                         {balance.toLocaleString(undefined, {
-
                             minimumFractionDigits: 2,
-
                             maximumFractionDigits: 2,
-
                         })}
 
                     </strong>

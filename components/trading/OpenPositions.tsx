@@ -10,6 +10,11 @@ interface Props {
 export default function OpenPositions({
     positions,
 }: Props) {
+    const openPositions = positions.filter(
+    (trade) =>
+        trade.status === "PENDING" ||
+        trade.status === "OPEN"
+);
     return (
         <section className="open-positions space-y-4">
 
@@ -17,7 +22,7 @@ export default function OpenPositions({
                 Open Positions
             </h2>
 
-            {positions.length === 0 ? (
+            {openPositions.length === 0 ? (
 
                 <p className="text-slate-500">
                     No open positions.
@@ -25,7 +30,7 @@ export default function OpenPositions({
 
             ) : (
 
-                positions.map((trade) => {
+                openPositions.map((trade) => {
 
                     const isClosed =
                         trade.status === "CLOSED";
@@ -42,6 +47,8 @@ export default function OpenPositions({
 
                     const pnlPositive =
                         (pnl ?? 0) >= 0;
+
+                    
 
                     return (
 

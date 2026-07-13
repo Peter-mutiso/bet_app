@@ -353,12 +353,27 @@ remainingSeconds: state.duration
 
 };
 
-    set((current) => ({
-      balance: current.balance - current.stake,
-      trades: [...current.trades, trade],
-    }));
+    set((current) => {
+    const nextTrades = [...current.trades, trade];
 
-    return trade;
+    console.log("========== BUY ==========");
+console.log("Before:", get().trades);
+console.log("New Trade:", trade);
+
+    return {
+        balance: current.balance - current.stake,
+        trades: nextTrades,
+        
+    };
+    
+});
+
+console.log(
+    "Store after buy:",
+    useTradeStore.getState().trades
+);
+
+return trade;
   },
   closeTrade: (id) => {
     const state = get();
@@ -624,7 +639,18 @@ settlementManager({
       trades: [],
     });
   },
-  setVolatilityState: (volatilityState) => set({ volatilityState }),
+  setVolatilityState: (volatilityState) => {
+
+    console.log(
+        "VOLATILITY CHANGED:",
+        volatilityState
+    );
+
+    set({
+        volatilityState
+    });
+
+},
   setSelectedInstrument: (selectedInstrument) => {
     const allowed = getAllowedTradeTypesForInstrument(selectedInstrument);
   
@@ -636,7 +662,40 @@ settlementManager({
         : allowed[0],
     }));
   },
-  setSelectedMarket: (selectedMarket) => {
+  
+setSelectedMarket: (selectedMarket) => {
+
+    let volatilityState: 0 | 1 | 2 | 3 | 4 = 2;
+
+    switch (selectedMarket.symbol) {
+
+        case "R_10":
+            volatilityState = 0;
+            break;
+
+        case "R_25":
+            volatilityState = 1;
+            break;
+
+        case "R_50":
+            volatilityState = 2;
+            break;
+
+        case "R_75":
+            volatilityState = 3;
+            break;
+
+        case "R_100":
+            volatilityState = 4;
+            break;
+
+        default:
+            volatilityState = 2;
+    }
+    console.log(
+    "STORE RECEIVED:",
+    selectedMarket.symbol
+);
 
     set((state) => ({
 
@@ -645,6 +704,8 @@ settlementManager({
         selectedInstrument: selectedMarket.name,
 
         price: selectedMarket.price,
+
+        volatilityState,
 
         trend:
             selectedMarket.price > state.price
@@ -656,7 +717,6 @@ settlementManager({
     }));
 
 },
-
 setSelectedSide: (selectedSide) => {
 
     set({
@@ -667,8 +727,12 @@ setSelectedSide: (selectedSide) => {
 
 },
 
-  setTimeframe: (timeframe) => {
-  set({ timeframe });
+ setTimeframe: (timeframe) => {
+    console.log("STORE TIMEFRAME:", timeframe);
+
+    set({
+        timeframe,
+    });
 },
 
 setChartType: (chartType) => {

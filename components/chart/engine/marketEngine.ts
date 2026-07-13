@@ -812,76 +812,55 @@ function updateMomentum(
 UPDATE VOLATILITY
 ===============================================================================
 */
-
 function updateVolatility(
-
     engine: EngineState
-
 ) {
+
+    let regimeMultiplier = 1;
 
     switch (engine.regime) {
 
         case MarketRegime.RANGE:
-
-            engine.volatilityNoise = 0.50;
-
-            break;
-
-        case MarketRegime.BULL:
-
-            engine.volatilityNoise = 0.90;
-
-            break;
-
-        case MarketRegime.BEAR:
-
-            engine.volatilityNoise = 1.00;
-
+            regimeMultiplier = 0.50;
             break;
 
         case MarketRegime.CONSOLIDATION:
-
-            engine.volatilityNoise = 0.30;
-
+            regimeMultiplier = 0.35;
             break;
 
-        case MarketRegime.BREAKOUT:
-
-            engine.volatilityNoise = 2.40;
-
+        case MarketRegime.BULL:
+            regimeMultiplier = 0.90;
             break;
 
-        case MarketRegime.PANIC:
-
-            engine.volatilityNoise = 3.00;
-
-            break;
-
-        case MarketRegime.RECOVERY:
-
-            engine.volatilityNoise = 1.70;
-
+        case MarketRegime.BEAR:
+            regimeMultiplier = 1.00;
             break;
 
         case MarketRegime.REVERSAL:
+            regimeMultiplier = 1.30;
+            break;
 
-            engine.volatilityNoise = 1.40;
+        case MarketRegime.BREAKOUT:
+            regimeMultiplier = 2.20;
+            break;
 
+        case MarketRegime.RECOVERY:
+            regimeMultiplier = 1.60;
+            break;
+
+        case MarketRegime.PANIC:
+            regimeMultiplier = 3.00;
             break;
 
     }
 
+    const target =
+        engine.volatilityTarget *
+        regimeMultiplier;
+
     engine.volatility +=
-
-        (
-
-            engine.volatilityNoise -
-
-            engine.volatility
-
-        )
-
-        * 0.02;
+        (target - engine.volatility)
+        * 0.04;
 
 }
 

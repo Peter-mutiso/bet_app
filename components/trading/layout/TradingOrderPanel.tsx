@@ -267,22 +267,27 @@ const setCurrentTradeType = useTradeStore(
         setMessage("Executing order...");
 
 
-        setTimeout(()=>{
+        setTimeout(() => {
 
+    console.log("========== BUY CLICKED ==========");
 
-            buy();
+    const trade = buy();
+    console.log(
+    "Panel store:",
+    useTradeStore.getState().trades
+);
 
+    console.log("Trade returned:");
+    console.log(trade);
 
-            setMessage(
-                "Trade opened successfully"
-            );
+    console.log("Store after buy:");
+    console.log(useTradeStore.getState().trades);
 
+    setMessage("Trade opened successfully");
 
-            setExecuting(false);
+    setExecuting(false);
 
-
-        },1500);
-
+}, 1500);
 
     }}
 

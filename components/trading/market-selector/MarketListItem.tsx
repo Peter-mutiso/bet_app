@@ -34,7 +34,10 @@ export default function MarketListItem({
             className={`market-selector-item ${
                 selected ? "selected" : ""
             }`}
-            onClick={onSelect}
+            onClick={() => {
+    console.log("CLICKED:", market.symbol);
+    onSelect();
+}}
         >
             {/* LEFT */}
 

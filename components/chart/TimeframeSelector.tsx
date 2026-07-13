@@ -9,11 +9,10 @@ const TIMEFRAMES: Timeframe[] = [
     "15T",
     "1H",
     "4H",
-    "1D"
+    "1D",
 ];
 
 export default function TimeframeSelector() {
-
     const selected = useTradeStore(
         (state) => state.timeframe
     );
@@ -23,15 +22,11 @@ export default function TimeframeSelector() {
     );
 
     return (
-
         <div className="timeframe-selector">
 
             <div className="timeframe-label">
-
                 <Clock3 size={14} />
-
                 <span>Interval</span>
-
             </div>
 
             <div className="timeframe-buttons">
@@ -46,11 +41,12 @@ export default function TimeframeSelector() {
                                 ? "timeframe-btn active"
                                 : "timeframe-btn"
                         }
-                        onClick={() => setTimeframe(frame)}
+                        onClick={() => {
+                            console.log("Clicked timeframe:", frame);
+                            setTimeframe(frame);
+                        }}
                     >
-
                         {frame}
-
                     </button>
 
                 ))}
@@ -58,7 +54,5 @@ export default function TimeframeSelector() {
             </div>
 
         </div>
-
     );
-
 }

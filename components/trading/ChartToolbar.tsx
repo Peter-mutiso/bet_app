@@ -1,9 +1,14 @@
 "use client";
 
-import { useTradeStore } from "@/store/useTradeStore";
+import { useEffect } from "react";
+import { Timeframe, useTradeStore } from "@/store/useTradeStore";
 
 export default function ChartToolbar() {
     const timeframe = useTradeStore((state) => state.timeframe);
+    useEffect(() => {
+        console.log("Timeframe:", timeframe);
+    }, [timeframe]);
+
     const chartType = useTradeStore((state) => state.chartType);
     const fullscreen = useTradeStore((state) => state.fullscreen);
     const indicators = useTradeStore((state) => state.enabledIndicators);
@@ -46,6 +51,10 @@ export default function ChartToolbar() {
             value: "area",
             label: "Area",
         },
+        {
+            value: "ohlc",
+            label: "OHLC Bars",
+        },
     ] as const;
 
     const availableIndicators = [
@@ -61,7 +70,7 @@ export default function ChartToolbar() {
         "VWAP",
     ] as const;
 
-        return (
+    return (
         <div className="flex items-center justify-between gap-4 px-4 py-2 border-b border-slate-700 bg-slate-900">
 
             {/* Left Section */}
@@ -92,26 +101,23 @@ export default function ChartToolbar() {
                     onChange={(e) =>
                         setChartType(
                             e.target.value as
-                                "candles" |
-                                "line" |
-                                "area"| 
-                                "ohlc"
+                                | "candles"
+                                | "line"
+                                | "area"
+                                | "ohlc"
                         )
                     }
                     className="bg-slate-800 border border-slate-700 rounded px-3 py-1 text-sm"
                 >
                     {chartTypes.map((type) => (
-                        <option
-                            key={type.value}
-                            value={type.value}
-                        >
+                        <option key={type.value} value={type.value}>
                             {type.label}
                         </option>
                     ))}
                 </select>
 
             </div>
-                        {/* Right Section */}
+            {/* Right Section */}
             <div className="flex items-center gap-3">
 
                 {/* Indicators */}
@@ -161,6 +167,6 @@ export default function ChartToolbar() {
                 </button>
 
             </div>
-                    </div>
+        </div>
     );
 }

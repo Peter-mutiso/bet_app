@@ -6,7 +6,7 @@ import {
     type MutableRefObject,
 } from "react";
 import { useTradeStore } from "@/store/useTradeStore";
-
+import { chartCoordinates } from "../engine/chartCoordinates";
 import {
     createEngine,
     applyVolatility,
@@ -23,7 +23,7 @@ import {
 import {
     generateHistory,
 } from "../engine/historyEngine";
-
+import { updateTradeMarkers } from "../chart/tradeMarkers";
 import {
     updateSeries,
 } from "../chart/createSeries";
@@ -90,6 +90,13 @@ export function useLiveMarket({
         )
 
     );
+    const tickTrades = useTradeStore(
+    state => state.tickTrades
+);
+
+const updateOpenTrades = useTradeStore(
+    state => state.updateOpenTrades
+);
 
     const frameRef = useRef<number | null>(null);
 
@@ -110,7 +117,22 @@ export function useLiveMarket({
     useEffect(() => {
 
         if (!series) return;
+        console.log(
+    "Generating history with volatility:",
+    volatilityState
+);
+engineRef.current = createEngine(
+    livePriceRef.current || 100
+);
 
+applyVolatility(
+    engineRef.current,
+    volatilityState
+);
+console.log(
+    "Selected market:",
+    useTradeStore.getState().selectedMarket?.symbol
+);
         const history = generateHistory(
 
             livePriceRef.current || 100,
@@ -122,7 +144,19 @@ export function useLiveMarket({
             400
 
         );
+        chartCoordinates.setLayout(
 
+    9,
+
+    80
+
+);
+
+chartCoordinates.rebuild(
+
+    history.map(c => Number(c.time))
+
+);
         candlesRef.current = history;
 
         activeCandleRef.current =
@@ -263,12 +297,11 @@ engineRef.current.meanPrice = last.close;
 
                 livePriceRef.current = tick.price;
 
-                setPrice(
+setPrice(tick.price);
 
-                    tick.price
-
-                );
-
+// Update all active trades
+updateOpenTrades(tick.price);
+tickTrades(tick.price);
                 const currentTime = Number(
 
                     candleTimestamp(
@@ -328,6 +361,15 @@ engineRef.current.meanPrice = last.close;
                         activeCandleRef.current
 
                     );
+                    chartCoordinates.rebuild(
+
+    candlesRef.current.map(
+
+        c => Number(c.time)
+
+    )
+
+);
 
                     activeCandleRef.current =
 
@@ -381,6 +423,12 @@ engineRef.current.meanPrice = last.close;
 
     activeCandleRef.current.time
 
+);
+const currentTrades = useTradeStore.getState().trades;
+
+updateTradeMarkers(
+    series.candles,
+    currentTrades
 );
 
                 /*
@@ -449,6 +497,10 @@ engineRef.current.meanPrice = last.close;
         volatilityState,
 
         setPrice,
+        tickTrades,
+
+    updateOpenTrades,
+
 
     ]);
         

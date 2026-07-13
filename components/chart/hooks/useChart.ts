@@ -94,12 +94,6 @@ export function useChart(
 
 
 
-        console.log(
-            "[useChart] Creating chart..."
-        );
-
-
-
         const createdChart =
             buildChart(
                 containerRef.current
@@ -234,15 +228,6 @@ export function useChart(
 
 
 
-        console.log(
-
-            "[useChart] Switching series:",
-            chartType
-
-        );
-
-
-
 
         /*
         Remove old series
@@ -316,26 +301,23 @@ export function useChart(
 
     return {
 
+    containerRef,
 
-        containerRef,
+    chartRef,
 
+    seriesRef,
 
-        chartRef,
+    chart,
 
+    series,
 
-        seriesRef,
+    initialized,
 
+    width:
+        containerRef.current?.clientWidth ?? 0,
 
-        chart,
+    height:
+        containerRef.current?.clientHeight ?? 0,
 
-
-        series,
-
-
-        initialized,
-
-
-    };
-
-
+};
 }

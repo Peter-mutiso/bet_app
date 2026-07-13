@@ -105,12 +105,13 @@ export function generateHistory(
         Simulate 12 ticks inside every candle
         --------------------------------------------------------
         */
+       const ticksPerCandle = [6, 9, 12, 18, 24][volatilityState];
 
         for (
 
             let t = 0;
 
-            t < 12;
+            t < ticksPerCandle;
 
             t++
 

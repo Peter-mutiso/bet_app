@@ -42,6 +42,13 @@ export default function TradingBottomPanel() {
     const trades =
         useTradeStore(state => state.trades);
 
+    const openTrades = trades.filter(
+    (trade) => trade.status !== "CLOSED"
+);
+
+const closedTrades = trades.filter(
+    (trade) => trade.status === "CLOSED"
+);
     return (
 
         <section className="bottom-panel">
@@ -112,7 +119,7 @@ export default function TradingBottomPanel() {
 
                         <tbody>
 
-                            {trades.length === 0 ? (
+                            {openTrades.length === 0 ? (
 
                                 <tr>
 
@@ -129,7 +136,7 @@ export default function TradingBottomPanel() {
 
                             ) : (
 
-                                trades.map(trade => (
+                                openTrades.map(trade => (
 
                                     <tr key={trade.id}>
 
@@ -152,10 +159,8 @@ export default function TradingBottomPanel() {
                                         </td>
 
                                         <td>
-
-                                            --
-
-                                        </td>
+    {trade.currentPrice?.toFixed(2) ?? "--"}
+</td>
 
                                         <td>
 
@@ -198,19 +203,81 @@ export default function TradingBottomPanel() {
 
                 {activeTab === "history" && (
 
-                    <div className="panel-placeholder">
+<table className="trade-table">
 
-                        <History size={34} />
+    <thead>
 
-                        <p>
+        <tr>
 
-                            Closed trades will appear here.
+            <th>Instrument</th>
+            <th>Type</th>
+            <th>Entry</th>
+            <th>Exit</th>
+            <th>Stake</th>
+            <th>P/L</th>
+            <th>Result</th>
 
-                        </p>
+        </tr>
 
-                    </div>
+    </thead>
 
-                )}
+    <tbody>
+
+        {closedTrades.length === 0 ? (
+
+            <tr>
+
+                <td colSpan={7} className="empty-row">
+
+                    No completed trades
+
+                </td>
+
+            </tr>
+
+        ) : (
+
+            closedTrades.map((trade) => (
+
+                <tr key={trade.id}>
+
+                    <td>Volatility 100</td>
+
+                    <td>{trade.tradeType}</td>
+
+                    <td>{trade.entry.toFixed(2)}</td>
+
+                    <td>{trade.exit?.toFixed(2) ?? "--"}</td>
+
+                    <td>${trade.stake}</td>
+
+                    <td
+                        className={
+                            (trade.profit ?? 0) >= 0
+                                ? "profit"
+                                : "loss"
+                        }
+                    >
+                        {(trade.profit ?? 0).toFixed(2)}
+                    </td>
+
+                    <td>
+                        {(trade.profit ?? 0) >= 0
+                            ? "WIN"
+                            : "LOSS"}
+                    </td>
+
+                </tr>
+
+            ))
+
+        )}
+
+    </tbody>
+
+</table>
+
+)}
 
                 {activeTab === "orders" && (
 

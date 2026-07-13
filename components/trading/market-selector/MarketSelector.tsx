@@ -109,6 +109,9 @@ export default function MarketSelector() {
         state => state.setSelectedMarket
 
     );
+    const setVolatilityState = useTradeStore(
+    state => state.setVolatilityState
+);
 
     const selected = useTradeStore(
 
@@ -229,26 +232,51 @@ export default function MarketSelector() {
                     }
 
                     onSelect={(market) => {
+    console.log("CLICKED:", market);
 
-                        setSelectedMarket({
+    setSelectedMarket({
+        symbol: market.symbol,
+        name: market.name,
+        category: market.category,
+        price: market.price,
+        change: market.change,
+    });
 
-                            symbol: market.symbol,
+    console.log(
+        "STORE AFTER:",
+        useTradeStore.getState().selectedMarket
+    );
 
-                            name: market.name,
+    switch (market.symbol) {
+        case "R_10":
+            setVolatilityState(0);
+            break;
 
-                            category: market.category,
+        case "R_25":
+            setVolatilityState(1);
+            break;
 
-                            price: market.price,
+        case "R_50":
+            setVolatilityState(2);
+            break;
 
-                            change: market.change
+        case "R_75":
+            setVolatilityState(3);
+            break;
 
-                        });
+        case "R_100":
+            setVolatilityState(4);
+            break;
 
-                        setShow(false);
+        default:
+            setVolatilityState(2);
+    }
 
-                    }}
+    setShow(false);
+}}
 
                 />
+
 
             </div>
 
