@@ -97,6 +97,7 @@ export default function MarketSelector() {
         state => state.showInstrumentPicker
 
     );
+    console.log("MARKET SELECTOR SHOW =", show);
 
     const setShow = useTradeStore(
 
@@ -232,7 +233,9 @@ export default function MarketSelector() {
                     }
 
                     onSelect={(market) => {
-    console.log("CLICKED:", market);
+    alert("MarketSelector: " + market.symbol);
+
+    console.log("MarketSelector:", market);
 
     setSelectedMarket({
         symbol: market.symbol,

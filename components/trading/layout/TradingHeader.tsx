@@ -31,13 +31,10 @@ export default function TradingHeader() {
     const setShowInstrumentPicker = useTradeStore(
         (state) => state.setShowInstrumentPicker
     );
+    const show = useTradeStore(
+    state => state.showInstrumentPicker
+);
 
-    // ==========================
-    // DEBUG
-    // ==========================
-    useEffect(() => {
-        console.log("HEADER MARKET:", market);
-    }, [market]);
 
     const currentPrice = Number(price ?? 0);
 

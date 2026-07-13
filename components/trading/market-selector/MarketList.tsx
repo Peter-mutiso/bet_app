@@ -35,11 +35,14 @@ export default function MarketList({
         <div className="market-selector-list">
             {markets.map((market) => (
                 <MarketListItem
-                    key={market.symbol}
-                    market={market}
-                    selected={market.symbol === selectedSymbol}
-                    onSelect={() => onSelect(market)}
-                />
+    key={market.symbol}
+    market={market}
+    selected={market.symbol === selectedSymbol}
+    onSelect={() => {
+        console.log("MARKET LIST CLICK:", market.symbol);
+        onSelect(market);
+    }}
+/>
             ))}
         </div>
     );

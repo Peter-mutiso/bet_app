@@ -35,7 +35,10 @@ export default function MarketListItem({
                 selected ? "selected" : ""
             }`}
             onClick={() => {
+    alert("CLICKED " + market.symbol);
+
     console.log("CLICKED:", market.symbol);
+
     onSelect();
 }}
         >

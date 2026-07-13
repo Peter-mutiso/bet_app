@@ -13,7 +13,7 @@ import ChartTopBar from "./overlays/ChartTopBar";
 import {
     useChart,
 } from "./hooks/useChart";
-
+import { ALL_INSTRUMENTS } from "@/lib/instruments";
 import {
     useLiveMarket,
 } from "./hooks/useLiveMarket";
@@ -28,7 +28,7 @@ interface Props {
 
 export default function TradingChart({
 
-    initialInstrument = "Volatility 100",
+    initialInstrument = "Volatility 100 Index",
 
 }: Props) {
 
@@ -53,10 +53,10 @@ export default function TradingChart({
 const selectedMarket = useTradeStore(
     state => state.selectedMarket
 );
-console.log(
-    "TradingChart selectedMarket:",
-    selectedMarket
+const setSelectedMarket = useTradeStore(
+    state => state.setSelectedMarket
 );
+
 const volatility = useTradeStore(
     state => state.volatilityState
 );
@@ -229,18 +229,6 @@ useEffect(() => {
     */
 
     useEffect(() => {
-
-        console.log(
-            "[TradingChart]",
-            {
-                initialized,
-                chart: !!chart,
-                series: !!series,
-                candles:
-                    candlesRef.current.length,
-            }
-        );
-
     }, [
 
         initialized,
@@ -276,7 +264,15 @@ useEffect(() => {
                     instrument
                 }
 
-                onInstrumentChange={() => {}}
+                onInstrumentChange={(value) => {
+    const market = ALL_INSTRUMENTS.find(
+        m => m.name === value
+    );
+
+    if (market) {
+        setSelectedMarket(market);
+    }
+}}
 
                 candle={
 
