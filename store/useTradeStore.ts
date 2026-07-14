@@ -75,7 +75,7 @@ interface DemoAccount {
 }
 
 export interface SelectedMarket {
-  id?: string;
+    id?: string;
 
     symbol: string;
 
@@ -84,12 +84,34 @@ export interface SelectedMarket {
     category: string;
 
     price: number;
+
     change: number;
 
+    bid?: number;
+
+    ask?: number;
+
+    spread?: number;
+
+    high?: number;
+
+    low?: number;
+
+    volume?: number;
+
+    tickDirection?: "up" | "down" | "flat";
+     favorite?: boolean;
 }
 
 interface TradeState {
   price: number;
+  /*
+=========================================================
+LIVE PRICES FOR EVERY MARKET
+=========================================================
+*/
+marketPrices: Record<string, number>;
+
   stake: number;
   duration:number;
   balance: number;
@@ -117,7 +139,10 @@ interface TradeState {
   autoMode: boolean;
   botDelayMs: number;
   lastBotRunAt: number;
-  setPrice: (price: number) => void;
+  setPrice: (
+    price: number,
+    marketId?: string
+) => void;
   setStake: (stake: number) => void;
   setDuration:(seconds:number)=>void;
   increaseStake: () => void;
@@ -165,8 +190,16 @@ toggleFullscreen: () => void;
   setCurrentTradeType: (type: TradeType) => void;
   setAutoMode: (enabled: boolean) => void;
   placeBotTrade: () => void;
-  updateOpenTrades: (price:number)=>void;
-  tickTrades: (price: number) => void;
+  updateOpenTrades: (
+    marketId: string,
+    price: number
+) => void;
+
+tickTrades: (
+    marketId: string,
+    price: number
+) => void;
+
 }
 const PAYOUT = 0.86;
 
@@ -216,6 +249,14 @@ function settleTrade(
 
 export const useTradeStore = create<TradeState>((set, get) => ({
   price: 702,
+
+marketPrices: {
+    R_10: 1200,
+    R_25: 2400,
+    R_50: 3600,
+    R_75: 4800,
+    R_100: 6000,
+},
   stake: 10,
   duration:30,
   balance: 10000,
@@ -244,7 +285,9 @@ export const useTradeStore = create<TradeState>((set, get) => ({
 
     price: 702,
 
-    change: 1.42
+    
+
+    change: 1.42,
 
 },
 
@@ -282,13 +325,56 @@ fullscreen: false,
   botDelayMs: 1200,
   lastBotRunAt: 0,
 
-  setPrice: (nextPrice) => {
-    const previous = get().price;
+  setPrice: (
+    nextPrice,
+    marketId
+) => {
+
+    const state = get();
+
+    const previous = state.price;
+
+    const currentMarket =
+        marketId ??
+        state.selectedMarket?.symbol;
+
     set({
-      price: nextPrice,
-      trend: nextPrice > previous ? "UP" : nextPrice < previous ? "DOWN" : "FLAT",
+
+        price: nextPrice,
+
+        trend:
+            nextPrice > previous
+                ? "UP"
+                : nextPrice < previous
+                ? "DOWN"
+                : "FLAT",
+
+        marketPrices: currentMarket
+            ? {
+
+                  ...state.marketPrices,
+
+                  [currentMarket]: nextPrice,
+
+              }
+            : state.marketPrices,
+
+        selectedMarket:
+            state.selectedMarket &&
+            currentMarket ===
+                state.selectedMarket.symbol
+                ? {
+
+                      ...state.selectedMarket,
+
+                      price: nextPrice,
+
+                  }
+                : state.selectedMarket,
+
     });
-  },
+
+},
   setStake: (stake) => set({ stake: Math.max(0, Number.isFinite(stake) ? stake : 0) }),
   setDuration: (duration) =>
     set({
@@ -310,9 +396,14 @@ fullscreen: false,
   buy: () => {
     const state = get();
 
-const marketPrice =
-    state.selectedMarket?.price ?? state.price;
+const symbol =
+    state.selectedMarket?.symbol ??
+    "R_100";
 
+
+const marketPrice =
+    state.marketPrices[symbol] ??
+    state.price;
 const now = Math.floor(Date.now() / 1000);
 
     if (state.stake <= 0 || state.stake > state.balance) {
@@ -322,7 +413,7 @@ const now = Math.floor(Date.now() / 1000);
     const trade: Trade = {
 
   id: crypto.randomUUID(),
-  marketId: state.selectedMarket?.id ?? "R_10",
+  marketId: state.selectedMarket?.symbol ?? "R_100",
 
   direction:
     state.currentTradeType === "PUT"
@@ -356,9 +447,7 @@ remainingSeconds: state.duration
     set((current) => {
     const nextTrades = [...current.trades, trade];
 
-    console.log("========== BUY ==========");
-console.log("Before:", get().trades);
-console.log("New Trade:", trade);
+    
 
     return {
         balance: current.balance - current.stake,
@@ -388,7 +477,10 @@ return trade;
 
     trade.entry,
 
-    state.price,
+    state.marketPrices[
+    trade.marketId
+] ??
+state.price,
 
     trade.stake,
 
@@ -426,18 +518,16 @@ return trade;
         }, 0),
     });
   },
-  updateOpenTrades:(price)=>{
+  updateOpenTrades: (marketId, price) => {
 
 set((state)=>({
+trades: state.trades.map((trade) => {
 
-trades:state.trades.map((trade)=>{
-
-
-if(trade.status==="CLOSED"){
-
-return trade;
-
-}
+    if (
+        trade.marketId !== marketId
+    ) {
+        return trade;
+    }
 
 
 let floatingProfit=0;
@@ -479,7 +569,7 @@ floatingProfit
 }));
 
 },
-tickTrades: (price) => {
+tickTrades: (marketId, price) => {
 
     const now = Math.floor(Date.now() / 1000);
 
@@ -489,11 +579,14 @@ tickTrades: (price) => {
 
         const trades: Trade[] = state.trades.map((trade): Trade => {
 
-            if (trade.status === "CLOSED") {
-                return trade;
-            }
+            if (
+    trade.status === "CLOSED" ||
+    trade.marketId !== marketId
+) {
+    return trade;
+}
 
-            let status = trade.status;
+let status = trade.status;
             let remainingSeconds = trade.remainingSeconds;
 
             if (
@@ -557,7 +650,7 @@ settlementManager({
 
                         exitTime: now
 
-                    }satisfies Trade;
+                    } as Trade;
 
                 }
 
@@ -591,7 +684,7 @@ settlementManager({
 
                 floatingProfit
 
-            }satisfies Trade;
+            } as  Trade;
 
         });
 
@@ -692,29 +785,63 @@ setSelectedMarket: (selectedMarket) => {
         default:
             volatilityState = 2;
     }
-    console.log(
-    "STORE RECEIVED:",
-    selectedMarket.symbol
-);
+    
 
     set((state) => ({
 
-        selectedMarket,
+    selectedMarket: {
 
-        selectedInstrument: selectedMarket.name,
+    ...selectedMarket,
 
-        price: selectedMarket.price,
+    price:
+        state.marketPrices[
+            selectedMarket.symbol
+        ] ??
+        selectedMarket.price,
 
-        volatilityState,
+},
 
-        trend:
-            selectedMarket.price > state.price
-                ? "UP"
-                : selectedMarket.price < state.price
-                ? "DOWN"
-                : "FLAT"
+    selectedInstrument:
+        selectedMarket.name,
 
-    }));
+    price:
+    state.marketPrices[
+        selectedMarket.symbol
+    ] ??
+    selectedMarket.price,
+
+    volatilityState,
+
+    trades:
+        state.trades.map(trade =>
+
+            trade.status === "CLOSED"
+
+                ? trade
+
+                : {
+
+                    ...trade,
+
+                    currentPrice:
+                        selectedMarket.price
+
+                }
+
+        ),
+
+    trend:
+        selectedMarket.price > state.price
+
+            ? "UP"
+
+            : selectedMarket.price < state.price
+
+            ? "DOWN"
+
+            : "FLAT"
+
+}));
 
 },
 setSelectedSide: (selectedSide) => {
@@ -782,7 +909,10 @@ toggleFullscreen: () => {
 
     const trade = state.buy();
     const direction = Math.random() > 0.5 ? 1 : -1;
-    const exit = state.price + direction * (Math.random() * 2);
+    const exit =
+marketPrice +
+direction *
+(Math.random()*2);
     const result = settleTrade(
 
     trade.entry,

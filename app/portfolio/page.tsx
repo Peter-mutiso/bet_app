@@ -1,9 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-
-import { useTrading } from "../../contexts/TradingContext";
 import type { Trade } from "../../types/trade";
+import { useTradeStore } from "@/store/useTradeStore";
 
 function format(value: number | undefined) {
     return Number(value ?? 0).toFixed(2);
@@ -13,12 +12,19 @@ function calculateLivePnL(trade: Trade): number {
     if (trade.status !== "OPEN") {
         return trade.profitLoss?.realizedPnL ?? trade.profit ?? 0;
     }
-
-    const entry = trade.pricing?.entryPrice ?? trade.entry;
+    const entry = trade.entry;
+const volume = trade.stake;
+    
     const current =
-    trade.currentPrice ?? trade.entry;
+    useTradeStore
+        .getState()
+        .marketPrices[
+            trade.marketId
+        ] ??
+    trade.currentPrice ??
+    trade.entry;
 
-    const volume = trade.size?.volume ?? trade.stake;
+    
 
     const diff = current - entry;
 
@@ -29,7 +35,7 @@ function calculateLivePnL(trade: Trade): number {
 
 export default function PortfolioPage() {
 
-    const { trades } = useTrading();
+    const trades = useTradeStore((state) => state.trades);
 
     const portfolio = useMemo(() => {
 
@@ -38,9 +44,7 @@ export default function PortfolioPage() {
             const pnl = calculateLivePnL(trade);
 
             const investment =
-    (trade.pricing?.entryPrice ?? trade.entry) *
-    (trade.size?.volume ?? 1);
-
+trade.entry * trade.stake;
             const pnlPercent =
                 investment > 0
                     ? (pnl / investment) * 100
@@ -278,13 +282,7 @@ export default function PortfolioPage() {
 
                             <tr key={trade.id}>
 
-                                <td>
-
-                                    {trade.instrument?.symbol ??
-                                        trade.instrument?.name ??
-                                        "--"}
-
-                                </td>
+                                <td>{trade.marketId}</td>
 
                                 <td
                                     className={
@@ -305,29 +303,11 @@ export default function PortfolioPage() {
 
                                 </td>
 
-                                <td>
+                                <td>{format(trade.stake)}</td>
 
-                                    {format(
-                                        trade.size?.volume ?? trade.stake
-                                    )}
+                                <td>{format(trade.entry)}</td>
 
-                                </td>
-
-                                <td>
-
-                                    {format(
-                                        trade.pricing?.entryPrice ?? trade.entry
-                                    )}
-
-                                </td>
-
-                                <td>
-
-                                    {format(
-                                        trade.pricing?.currentPrice ?? trade.currentPrice
-                                    )}
-
-                                </td>
+                                <td>{format(trade.currentPrice)}</td>
 
                                 <td>
 

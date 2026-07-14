@@ -1,4 +1,4 @@
-export { default as TradingChart } from "./TradingChart";
+
 export { default as PriceDisplay } from "./PriceDisplay";
 export { default as MarketSelector } from "./MarketSelector";
 export { default as ContractSelector } from "./ContractSelector";

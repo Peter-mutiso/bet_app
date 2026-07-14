@@ -20,9 +20,7 @@ import {
     useRouter
 } from "next/navigation";
 
-import {
-    useAuth
-} from "../../hooks/useAuth";
+import { useAuthStore } from "@/store/useAuthStore";
 
 import {
     ROUTES
@@ -32,19 +30,16 @@ export default function LoginPage() {
 
     const router = useRouter();
 
-    const {
+    
+const {
+    login,
+    loginDemo,
+    isAuthenticated,
+    isLoading,
+} = useAuthStore();
 
-        login,
-
-        loading,
-
-        error,
-
-        clearError,
-
-        isLoggedIn
-
-    } = useAuth();
+const loading = isLoading;
+const error = null;
 
     const [
 
@@ -206,7 +201,6 @@ export default function LoginPage() {
 
             event.preventDefault();
 
-            clearError();
 
             if (
 
@@ -220,15 +214,12 @@ export default function LoginPage() {
 
             try {
 
-                await login({
-
-                    email,
-
-                    password,
-
-                    remember
-
-                });
+                login({
+    id: crypto.randomUUID(),
+    name: email.split("@")[0],
+    email,
+    accountType: "Demo",
+});
 
                 router.replace(
 
@@ -261,8 +252,6 @@ export default function LoginPage() {
             login,
 
             validate,
-
-            clearError,
 
             router
 
@@ -314,7 +303,7 @@ export default function LoginPage() {
 
             if (
 
-                isLoggedIn
+                isAuthenticated
 
             ) {
 
@@ -330,41 +319,13 @@ export default function LoginPage() {
 
         [
 
-            isLoggedIn,
+            isAuthenticated,
 
             router
 
         ]
 
     );
-
-    /* ---------------------------------------------------------------------- */
-    /* CLEANUP                                                                */
-    /* ---------------------------------------------------------------------- */
-
-    useEffect(
-
-        () => {
-
-            return () => {
-
-                clearError();
-
-            };
-
-        },
-
-        [
-
-            clearError
-
-        ]
-
-    );
-
-    /* ---------------------------------------------------------------------- */
-    /* RENDER                                                                 */
-    /* ---------------------------------------------------------------------- */
 
    return (
 
@@ -382,14 +343,11 @@ export default function LoginPage() {
 
         </div>
 
-        {(validationError || error) && (
+        {validationError && (
 
             <div className="login-error">
 
-                {
-                    validationError ??
-                    "Incorrect email or password."
-                }
+                {validationError}
 
             </div>
 
@@ -522,6 +480,16 @@ export default function LoginPage() {
                 }
 
             </button>
+            <button
+    type="button"
+    className="login-button demo-button"
+    onClick={() => {
+        loginDemo();
+        router.replace(ROUTES.DASHBOARD);
+    }}
+>
+    Continue with Demo Account
+</button>
 
             <br />
             <br />  

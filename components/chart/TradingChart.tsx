@@ -24,11 +24,13 @@ import {
 
 interface Props {
     initialInstrument?: string;
+    showToolbar?: boolean;
 }
 
 export default function TradingChart({
 
     initialInstrument = "Volatility 100 Index",
+    showToolbar = true,
 
 }: Props) {
 
@@ -61,20 +63,11 @@ const volatility = useTradeStore(
     state => state.volatilityState
 );
 
-useEffect(() => {
-    console.log(
-        "Selected Market:",
-        selectedMarket?.symbol
-    );
 
-    console.log(
-        "Calculated Volatility:",
-        volatility
-    );
-}, [selectedMarket, volatility]);
 
-    const [price, setPrice] =
-        useState(100);
+    const [price, setPrice] = useState(
+    selectedMarket?.price ?? 100
+);
     
     const trades = useTradeStore(state => state.trades);
 
@@ -258,49 +251,40 @@ useEffect(() => {
             }}
         >
 
-            <ChartTopBar
+           {showToolbar && (
 
-                selectedInstrument={
-                    instrument
+    <ChartTopBar
+
+        selectedInstrument={instrument}
+
+        onInstrumentChange={(value) => {
+
+            const market = ALL_INSTRUMENTS.find(
+                m => m.name === value
+            );
+
+            if (market) {
+                setSelectedMarket(market);
+            }
+
+        }}
+
+        candle={
+            activeCandleRef.current
+                ? {
+                    open: activeCandleRef.current.open,
+                    high: activeCandleRef.current.high,
+                    low: activeCandleRef.current.low,
+                    close: activeCandleRef.current.close,
                 }
+                : null
+        }
 
-                onInstrumentChange={(value) => {
-    const market = ALL_INSTRUMENTS.find(
-        m => m.name === value
-    );
+        onLive={handleLive}
 
-    if (market) {
-        setSelectedMarket(market);
-    }
-}}
+    />
 
-                candle={
-
-                    activeCandleRef.current
-                        ? {
-
-                            open:
-                                activeCandleRef.current.open,
-
-                            high:
-                                activeCandleRef.current.high,
-
-                            low:
-                                activeCandleRef.current.low,
-
-                            close:
-                                activeCandleRef.current.close,
-
-                        }
-                        : null
-
-                }
-
-                onLive={
-                    handleLive
-                }
-
-            />
+)}
 
             <div
 

@@ -11,12 +11,10 @@ import {
     ReactNode
 
 } from "react";
-
+import type { SelectedMarket } from "@/store/useTradeStore";
 import {
 
     Wallet,
-
-    Market,
 
     Bet,
 
@@ -30,7 +28,7 @@ interface DashboardContextType {
 
     wallet: Wallet | null;
 
-    markets: Market[];
+    markets: SelectedMarket[];
 
     activeBets: Bet[];
 
@@ -42,7 +40,7 @@ interface DashboardContextType {
 
     setWallet(wallet: Wallet): void;
 
-    setMarkets(markets: Market[]): void;
+    setMarkets(markets: SelectedMarket[]): void;
 
     setActiveBets(bets: Bet[]): void;
 
@@ -96,7 +94,7 @@ export function DashboardProvider({
 
     ] =
 
-        useState<Market[]>([]);
+        useState<SelectedMarket[]>([]);
 
     const [
 

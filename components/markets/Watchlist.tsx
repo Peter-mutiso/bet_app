@@ -1,9 +1,9 @@
 "use client";
 
-import type { Market } from "../../types/market";
-
+import type { SelectedMarket } from "@/store/useTradeStore";
+import { useTradeStore } from "@/store/useTradeStore";
 type Props = {
-    markets: Market[];
+    markets: SelectedMarket[];
 };
 
 function format(n?: number) {
@@ -12,8 +12,11 @@ function format(n?: number) {
 }
 
 export default function Watchlist({ markets }: Props) {
-    const favorites = markets.filter(m => m.favorite);
+    const watchlist = useTradeStore(state => state.watchlist);
 
+const favorites = markets.filter(m =>
+    watchlist.includes(m.symbol)
+);
     return (
         <div className="watchlist">
             <div className="watchlist-header">

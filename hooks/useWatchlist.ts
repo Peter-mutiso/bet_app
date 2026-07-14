@@ -9,12 +9,8 @@ import {
     useState
 
 } from "react";
+import type { SelectedMarket } from "@/store/useTradeStore";
 
-import {
-
-    Market
-
-} from "../types";
 
 import watchlistService from "../services/watchlist";
 
@@ -22,7 +18,7 @@ const STORAGE_KEY = "watchlist";
 
 export function useWatchlist(
 
-    markets: Market[]
+    markets: SelectedMarket[]
 
 ) {
 
@@ -270,7 +266,7 @@ export function useWatchlist(
 
                         ids.includes(
 
-                            market.id
+                            market.symbol
 
                         )
 

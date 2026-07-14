@@ -4,6 +4,7 @@ export interface Instrument {
     category: string;
     price: number;
     change: number;
+     volume?: number;
 }
 
 export const ALL_INSTRUMENTS: Instrument[] = [

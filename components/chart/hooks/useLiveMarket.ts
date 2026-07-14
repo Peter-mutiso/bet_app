@@ -56,6 +56,9 @@ interface UseLiveMarketProps {
     setPrice: (price: number) => void;
 
 }
+const selectedMarket = useTradeStore(
+    state => state.selectedMarket
+);
 
 export function useLiveMarket({
 
@@ -94,9 +97,7 @@ export function useLiveMarket({
     state => state.tickTrades
 );
 
-const updateOpenTrades = useTradeStore(
-    state => state.updateOpenTrades
-);
+
 
     const frameRef = useRef<number | null>(null);
 
@@ -121,29 +122,30 @@ const updateOpenTrades = useTradeStore(
     "Generating history with volatility:",
     volatilityState
 );
-engineRef.current = createEngine(
-    livePriceRef.current || 100
-);
+const startPrice =
+    selectedMarket?.price ??
+    livePriceRef.current ??
+    100;
+
+engineRef.current =
+    createEngine(startPrice);
 
 applyVolatility(
     engineRef.current,
     volatilityState
 );
-console.log(
-    "Selected market:",
-    useTradeStore.getState().selectedMarket?.symbol
-);
+
         const history = generateHistory(
 
-            livePriceRef.current || 100,
+    startPrice,
 
-            candleDuration,
+    candleDuration,
 
-            volatilityState,
+    volatilityState,
 
-            400
+    400
 
-        );
+);
         chartCoordinates.setLayout(
 
     9,
@@ -216,6 +218,7 @@ engineRef.current.meanPrice = last.close;
             last.close;
 
         setPrice(last.close);
+        useTradeStore.getState().setPrice(last.close);
 
         applyVolatility(
 
@@ -297,11 +300,30 @@ engineRef.current.meanPrice = last.close;
 
                 livePriceRef.current = tick.price;
 
+const store = useTradeStore.getState();
 setPrice(tick.price);
 
-// Update all active trades
-updateOpenTrades(tick.price);
-tickTrades(tick.price);
+useTradeStore.getState().setPrice(
+    tick.price,
+    useTradeStore.getState().selectedMarket?.symbol
+);
+
+tickTrades(
+    useTradeStore
+        .getState()
+        .selectedMarket
+        ?.symbol ?? "",
+    tick.price
+);
+
+const current = store.selectedMarket;
+
+if (current) {
+    store.setSelectedMarket({
+        ...current,
+        price: tick.price,
+    });
+}
                 const currentTime = Number(
 
                     candleTimestamp(
@@ -495,11 +517,10 @@ updateTradeMarkers(
         candleDuration,
 
         volatilityState,
+        selectedMarket?.symbol,
 
         setPrice,
         tickTrades,
-
-    updateOpenTrades,
 
 
     ]);

@@ -3,10 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import ThemeApplier from "@/components/ThemeApplier";
-
+import ProtectedLayout from "@/components/auth/ProtectedLayout";
 import { AppProvider } from "@/contexts/AppContext";
-import { TradingProvider } from "@/contexts/TradingContext";
-import { WatchlistProvider } from "@/contexts/WatchlistContext";
 import { TransactionProvider } from "@/contexts/TransactionContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import UIEffectsProvider from "@/components/providers/UIEffectsProvider";
@@ -38,18 +36,17 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <AppProvider>
-          <TradingProvider>
-            <WatchlistProvider>
                 <TransactionProvider>
                   <NotificationProvider>
                     <UIEffectsProvider>
                         <ThemeApplier />
-                        {children}
+                          <ProtectedLayout>
+                            {children}
+                          </ProtectedLayout>
                     </UIEffectsProvider>
                   </NotificationProvider>
                 </TransactionProvider>
-            </WatchlistProvider>
-          </TradingProvider>
+          
         </AppProvider>
       </body>
     </html>

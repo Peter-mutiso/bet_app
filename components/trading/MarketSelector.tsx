@@ -1,8 +1,8 @@
-import { Market } from "../../types";
+import type { SelectedMarket } from "@/store/useTradeStore";
 
 interface Props {
 
-    markets: Market[];
+    markets: SelectedMarket[];
 
     value: string;
 

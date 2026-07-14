@@ -10,9 +10,9 @@ import { useEffect, useState } from "react";
 
 import { useAuth } from "../../hooks/useAuth";
 import { useWallet } from "../../hooks/useWallet";
-import { useMarkets } from "../../hooks/useMarkets";
-import { useBets } from "../../hooks/useBets";
-
+import type { SelectedMarket } from "@/store/useTradeStore";
+import { useTradeStore } from "@/store/useTradeStore";
+import { ALL_INSTRUMENTS } from "@/lib/instruments";
 import {
     Sidebar,
     DashboardHeader,
@@ -24,17 +24,6 @@ import {
     TransactionList
 } from "../../components/dashboard";
 
-interface SelectedMarket {
-    id: string;
-    name: string;
-    price: number;
-    change: number;
-    category?: string;
-}
-
-/* -------------------------------------------------------------------------- */
-/* COMPONENT                                                                  */
-/* -------------------------------------------------------------------------- */
 
 export default function DashboardPage() {
 
@@ -42,14 +31,27 @@ export default function DashboardPage() {
 
     const { wallet } = useWallet();
 
-    const { markets } = useMarkets();
+    const trades = useTradeStore(
+        state => state.trades
+    );
 
-    const { current } = useBets();
+    const marketPrices = useTradeStore(
+        state => state.marketPrices
+    );
 
     const [mounted, setMounted] = useState(false);
 
+    const markets: SelectedMarket[] = ALL_INSTRUMENTS.map((m): SelectedMarket => ({
+    id: m.symbol,
+    symbol: m.symbol,
+    name: m.name,
+    category: m.category,
+    price: m.price,
+    change: m.change,
+    tickDirection: "flat",
+}));
     const [selectedMarket, setSelectedMarket] =
-        useState<SelectedMarket | null>(null);
+    useState<SelectedMarket | null>(null);
 
     useEffect(() => {
 
@@ -57,17 +59,9 @@ export default function DashboardPage() {
 
     }, []);
 
-    /*
-     * Automatically select the first market
-     * after markets load.
-     */
-
     useEffect(() => {
 
-        if (
-            !selectedMarket &&
-            markets.length > 0
-        ) {
+        if (!selectedMarket && markets.length > 0) {
 
             setSelectedMarket(markets[0]);
 
@@ -89,65 +83,57 @@ export default function DashboardPage() {
 
     }
 
-    const activeBets = current().map(
+    const activeBets = trades
+        .filter(trade => trade.status !== "CLOSED")
+        .map(trade => ({
 
-        bet => ({
+            id: trade.id,
 
-            id: bet.id,
+            market: trade.marketId,
 
-            market:
+            stake: trade.stake,
 
-                markets.find(
+            potentialPayout:
+                trade.stake * 1.86,
 
-                    m => m.id === bet.marketId
+            status: trade.status
 
-                )?.name ?? bet.marketId,
-
-            stake: bet.stake,
-
-            potentialPayout: bet.potentialPayout,
-
-            status: bet.status
-
-        })
-
-    );
+        }));
 
     return (
 
         <div className="dashboard-layout">
 
-            {/* SIDEBAR */}
-
             <Sidebar />
-
-            {/* MAIN */}
 
             <main className="dashboard-main">
 
                 <DashboardHeader
-                    firstName={user?.firstName ?? "Trader"}
+                    firstName={
+    user?.firstName ?? "Trader"
+}
                 />
-
-                {/* SUMMARY */}
 
                 <section className="dashboard-top">
 
                     <WalletSummary
 
-                        balance={wallet?.balance ?? 0}
+                        balance={
+                            wallet?.balance ??
+                            0
+                        }
 
                         bonus={0}
 
-                        openBets={activeBets.length}
+                        openBets={
+                            activeBets.length
+                        }
 
                         dailyProfit={0}
 
                     />
 
                 </section>
-
-                {/* MARKET TERMINAL */}
 
                 <section className="market-terminal">
 
@@ -157,9 +143,13 @@ export default function DashboardPage() {
 
                             markets={markets}
 
-                            selectedMarket={selectedMarket}
+                            selectedMarket={
+                                selectedMarket
+                            }
 
-                            onSelectMarket={setSelectedMarket}
+                            onSelectMarket={
+                                setSelectedMarket
+                            }
 
                         />
 
@@ -169,7 +159,9 @@ export default function DashboardPage() {
 
                         <TradingPanel
 
-                            market={selectedMarket}
+                            market={
+                                selectedMarket
+                            }
 
                         />
 
@@ -177,14 +169,14 @@ export default function DashboardPage() {
 
                 </section>
 
-                {/* LOWER GRID */}
-
                 <section className="dashboard-grid">
 
                     <div className="dashboard-card">
 
                         <ActiveBets
+
                             bets={activeBets}
+
                         />
 
                     </div>
@@ -192,7 +184,9 @@ export default function DashboardPage() {
                     <div className="dashboard-card">
 
                         <TransactionList
+
                             transactions={[]}
+
                         />
 
                     </div>
@@ -200,7 +194,9 @@ export default function DashboardPage() {
                     <div className="dashboard-card">
 
                         <RecentActivity
+
                             activities={[]}
+
                         />
 
                     </div>

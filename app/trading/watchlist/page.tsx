@@ -1,24 +1,39 @@
 "use client";
 
 import Link from "next/link";
-
-import { useMarkets } from "@/hooks/useMarkets";
-import { useWatchlist } from "@/contexts/WatchlistContext";
+import { useTradeStore } from "@/store/useTradeStore";
 
 export default function WatchlistPage() {
-    const { markets, loading } = useMarkets();
 
-    const {
-        isFavorite,
-        toggleFavorite
-    } = useWatchlist();
+    const watchlist = useTradeStore(
+        state => state.watchlist
+    );
 
-    const favorites = markets.filter(m => isFavorite(m.id));
+    const marketPrices = useTradeStore(
+        state => state.marketPrices
+    );
+
+    const removeFromWatchlist = useTradeStore(
+        state => state.removeFromWatchlist
+    );
+
+    const favorites = watchlist.map(symbol => ({
+        id: symbol,
+        symbol,
+        name: symbol,
+        price: marketPrices[symbol] ?? 0,
+        change: 0,
+        bid: (marketPrices[symbol] ?? 0) - 0.25,
+        ask: (marketPrices[symbol] ?? 0) + 0.25,
+        high: (marketPrices[symbol] ?? 0) + 2,
+        low: (marketPrices[symbol] ?? 0) - 2,
+    }));
 
     return (
         <div className="watchlist-page">
 
             <div className="page-header">
+
                 <div>
                     <h1>Watchlist</h1>
                     <p>Your favorite trading instruments.</p>
@@ -28,15 +43,10 @@ export default function WatchlistPage() {
                     {favorites.length} Market
                     {favorites.length !== 1 ? "s" : ""}
                 </div>
+
             </div>
 
-            {loading ? (
-
-                <div className="watchlist-loading">
-                    Loading markets...
-                </div>
-
-            ) : favorites.length === 0 ? (
+            {favorites.length === 0 ? (
 
                 <div className="watchlist-empty">
 
@@ -47,9 +57,7 @@ export default function WatchlistPage() {
                     <h2>No markets in your watchlist</h2>
 
                     <p>
-                        Visit the Markets page and click the
-                        star icon to add your favourite
-                        instruments.
+                        Visit the Markets page and add your favourite instruments.
                     </p>
 
                     <Link
@@ -65,7 +73,7 @@ export default function WatchlistPage() {
 
                 <div className="watchlist-grid">
 
-                    {favorites.map(m => (
+                    {favorites.map((m) => (
 
                         <div
                             key={m.id}
@@ -85,7 +93,7 @@ export default function WatchlistPage() {
                                 <button
                                     className="favorite-btn active"
                                     onClick={() =>
-                                        toggleFavorite(m.id)
+                                        removeFromWatchlist(m.id)
                                     }
                                 >
                                     ★
@@ -94,9 +102,7 @@ export default function WatchlistPage() {
                             </div>
 
                             <div className="watch-price">
-
                                 {m.price.toFixed(2)}
-
                             </div>
 
                             <div
@@ -114,30 +120,22 @@ export default function WatchlistPage() {
 
                                 <div>
                                     <span>Bid</span>
-                                    <strong>
-                                        {m.bid?.toFixed(2)}
-                                    </strong>
+                                    <strong>{m.bid.toFixed(2)}</strong>
                                 </div>
 
                                 <div>
                                     <span>Ask</span>
-                                    <strong>
-                                        {m.ask?.toFixed(2)}
-                                    </strong>
+                                    <strong>{m.ask.toFixed(2)}</strong>
                                 </div>
 
                                 <div>
                                     <span>High</span>
-                                    <strong>
-                                        {m.high?.toFixed(2)}
-                                    </strong>
+                                    <strong>{m.high.toFixed(2)}</strong>
                                 </div>
 
                                 <div>
                                     <span>Low</span>
-                                    <strong>
-                                        {m.low?.toFixed(2)}
-                                    </strong>
+                                    <strong>{m.low.toFixed(2)}</strong>
                                 </div>
 
                             </div>

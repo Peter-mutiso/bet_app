@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useLivePrice } from "./useLivePrice";
+import { useTradeStore } from "@/store/useTradeStore";
 
 export function usePriceHistory(
     symbol: string,
     maxPoints = 60
 ) {
-    const livePrice = useLivePrice(symbol);
+    const livePrice = useTradeStore(
+        state => state.marketPrices[symbol]
+    );
 
     const [history, setHistory] = useState<number[]>([]);
 
     useEffect(() => {
 
-        if (!livePrice) return;
+        if (livePrice === undefined) return;
 
         setHistory(previous => {
 

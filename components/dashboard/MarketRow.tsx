@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
     TrendingUp,
@@ -9,18 +9,11 @@ import {
 } from "lucide-react";
 
 import { useTradeStore } from "@/store/useTradeStore";
-import { useLivePrice } from "../../hooks/useLivePrice";
+import type { SelectedMarket } from "@/store/useTradeStore";
 
-interface Market {
-    id: string;
-    name: string;
-    price: number;
-    change: number;
-    category?: string;
-}
 
 interface Props {
-    market: Market;
+    market: SelectedMarket;
     selected?: boolean;
     onClick?: () => void;
 }
@@ -34,53 +27,42 @@ export default function MarketRow({
     const router = useRouter();
 
     const setSelectedMarket = useTradeStore(
-        (state) => state.setSelectedMarket
+        state => state.setSelectedMarket
     );
 
     const setSelectedSide = useTradeStore(
-        (state) => state.setSelectedSide
+        state => state.setSelectedSide
     );
 
-    const livePrice = useLivePrice(market.id);
+    const displayPrice = useTradeStore(
+        state => state.marketPrices[market.symbol]
+    ) ?? market.price;
 
-    const previousPrice = useRef(market.price);
+    const previousPrice = useRef(displayPrice);
 
-    const direction = useMemo(() => {
+    const direction =
+        displayPrice > previousPrice.current
+            ? "up"
+            : displayPrice < previousPrice.current
+            ? "down"
+            : "";
 
-        if (!livePrice) return "";
-
-        if (livePrice > previousPrice.current) return "up";
-
-        if (livePrice < previousPrice.current) return "down";
-
-        return "";
-
-    }, [livePrice]);
-
-    previousPrice.current = livePrice || previousPrice.current;
-
-    const displayPrice = livePrice || market.price;
+    previousPrice.current = displayPrice;
 
     function openTrade(side: "BUY" | "SELL") {
 
         setSelectedMarket({
-
-            symbol: market.id,
-
-            name: market.name,
-
-            category: market.category ?? "Synthetic",
-
-            price: displayPrice,
-
-            change: market.change,
-
-        });
+    id: market.id,
+    symbol: market.symbol,
+    name: market.name,
+    category: market.category ?? "Synthetic",
+    price: displayPrice,
+    change: market.change,
+});
 
         setSelectedSide(side);
 
         router.push("/trading");
-
     }
 
     return (
@@ -106,7 +88,7 @@ export default function MarketRow({
 
                     <h4>{market.name}</h4>
 
-                    <span>{market.id}</span>
+                    <span>{market.symbol}</span>
 
                 </div>
 
@@ -119,11 +101,8 @@ export default function MarketRow({
             >
 
                 {displayPrice.toLocaleString(undefined, {
-
                     minimumFractionDigits: 2,
-
                     maximumFractionDigits: 2,
-
                 })}
 
             </div>
@@ -139,13 +118,9 @@ export default function MarketRow({
             >
 
                 {market.change >= 0 ? (
-
                     <TrendingUp size={16} />
-
                 ) : (
-
                     <TrendingDown size={16} />
-
                 )}
 
                 <span>

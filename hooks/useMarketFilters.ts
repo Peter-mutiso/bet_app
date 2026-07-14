@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { Market } from "../types";
+import type { SelectedMarket } from "@/store/useTradeStore";
 
 export interface MarketFilterState {
 
@@ -12,7 +12,7 @@ export interface MarketFilterState {
 
 }
 
-export function useMarketFilters(markets: Market[]) {
+export function useMarketFilters(markets: SelectedMarket[]) {
 
     const [
 

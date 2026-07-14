@@ -1,141 +1,57 @@
-import {
+"use client";
 
-    useState,
-
-    useCallback
-
-} from "react";
-
-import {
-
-    TradeType
-
-} from "../types";
+import { useTradeStore } from "@/store/useTradeStore";
 
 export function useTrading() {
-
-    const [
-
-        selectedMarket,
-
-        setSelectedMarket
-
-    ] =
-
-        useState("");
-
-    const [
-
-        contract,
-
-        setContract
-
-    ] =
-
-        useState<TradeType>(
-
-            "CALL"
-
-        );
-
-    const [
-
-        duration,
-
-        setDuration
-
-    ] =
-
-        useState(5);
-
-    const [
-
-        stake,
-
-        setStake
-
-    ] =
-
-        useState(1);
-
-    const placeTrade =
-
-    useCallback(
-
-        async () => {
-
-            if (
-
-                !selectedMarket
-
-            ) {
-
-                throw new Error(
-
-                    "Please select a market."
-
-                );
-
-            }
-
-            const request = {
-
-                marketId: selectedMarket,
-
-                contract,
-
-                duration,
-
-                stake
-
-            };
-
-            console.log(
-
-                "Submitting trade:",
-
-                request
-
-            );
-
-            // Next step:
-            // await tradingService.placeTrade(request);
-
-        },
-
-        [
-
-            selectedMarket,
-
-            contract,
-
-            duration,
-
-            stake
-
-        ]
-
+    const selectedMarket = useTradeStore(
+        (state) => state.selectedMarket
     );
-    return {
 
-        selectedMarket,
+    const setSelectedMarket = useTradeStore(
+        (state) => state.setSelectedMarket
+    );
 
-        setSelectedMarket,
+    const contract = useTradeStore(
+        (state) => state.currentTradeType
+    );
 
-        contract,
+    const setContract = useTradeStore(
+        (state) => state.setCurrentTradeType
+    );
 
-        setContract,
+    const duration = useTradeStore(
+        (state) => state.duration
+    );
 
-        duration,
+    const setDuration = useTradeStore(
+        (state) => state.setDuration
+    );
 
-        setDuration,
+    const stake = useTradeStore(
+        (state) => state.stake
+    );
 
-        stake,
+    const setStake = useTradeStore(
+        (state) => state.setStake
+    );
 
-        setStake,
+    const buy = useTradeStore(
+        (state) => state.buy
+    );
 
-        placeTrade
-
+    const placeTrade = async () => {
+        buy();
     };
 
+    return {
+        selectedMarket,
+        setSelectedMarket,
+        contract,
+        setContract,
+        duration,
+        setDuration,
+        stake,
+        setStake,
+        placeTrade,
+    };
 }

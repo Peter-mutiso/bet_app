@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-import type { Market } from "../../types/market";
+import type { SelectedMarket } from "@/store/useTradeStore";
 
 type Props = {
-    markets: Market[];
+    markets: SelectedMarket[];
 };
 
 function formatPrice(p?: number) {

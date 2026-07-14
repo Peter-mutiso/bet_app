@@ -1536,7 +1536,10 @@ const limitedMove =
 
 const store = useTradeStore.getState();
 
-store.updateOpenTrades(nextPrice);
+store.updateOpenTrades(
+    store.selectedMarket?.symbol ?? "R_100",
+    nextPrice
+);
 
 return {
 

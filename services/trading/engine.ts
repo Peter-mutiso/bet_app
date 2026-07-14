@@ -12,7 +12,7 @@
  * ============================================================================
  */
 
-import { useTradeStore } from "@/store/useTradeStore";
+import { useTradeStore } from "../../store/useTradeStore";
 
 import { RiskManager } from "./risk-manager";
 import { PortfolioManager } from "./portfolio-manager";

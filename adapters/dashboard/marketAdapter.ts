@@ -1,29 +1,12 @@
-import { Market } from "../../types";
+import type { SelectedMarket } from "@/store/useTradeStore";
 
-export function mapMarket(raw: any): Market {
-
+export function mapMarket(raw: any): SelectedMarket {
     return {
-
         id: raw.id,
-
-        name: raw.name,
-
         symbol: raw.symbol,
-
-        price: raw.price,
-
-        change: raw.change,
-
-        isOpen: raw.isOpen,
-
+        name: raw.name,
         category: raw.category ?? "Forex",
-
-        favorite: raw.favorite ?? false,
-
-        createdAt: raw.createdAt,
-
-        updatedAt: raw.updatedAt
-
+        price: raw.price,
+        change: raw.change ?? 0,
     };
-
 }

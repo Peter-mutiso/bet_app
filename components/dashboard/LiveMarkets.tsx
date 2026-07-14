@@ -5,21 +5,13 @@ import { Radio } from "lucide-react";
 
 import MarketToolbar from "./MarketToolbar";
 import MarketRow from "./MarketRow";
-
-interface Market {
-    id: string;
-    name: string;
-    price: number;
-    change: number;
-    category?: string;
-}
-
+import type { SelectedMarket } from "@/store/useTradeStore";
 interface LiveMarketsProps {
-    markets: Market[];
+    markets: SelectedMarket[];
 
-    selectedMarket: Market | null;
+    selectedMarket: SelectedMarket | null;
 
-    onSelectMarket: (market: Market) => void;
+    onSelectMarket: (market: SelectedMarket) => void;
 }
 
 export default function LiveMarkets({
@@ -41,7 +33,7 @@ export default function LiveMarkets({
                     .toLowerCase()
                     .includes(search.toLowerCase()) ||
 
-                market.id
+                market.symbol
                     .toLowerCase()
                     .includes(search.toLowerCase());
 
@@ -127,10 +119,10 @@ export default function LiveMarkets({
                     filteredMarkets.map((market) => (
 
                         <MarketRow
-                            key={market.id}
+                            key={market.symbol}
                             market={market}
                             selected={
-    selectedMarket?.id === market.id
+    selectedMarket?.id === market.symbol
 }
 
 onClick={() =>

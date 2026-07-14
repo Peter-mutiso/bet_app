@@ -1,6 +1,9 @@
 "use client";
-
-import { useState } from "react";
+import { SelectedMarket, useTradeStore } from "@/store/useTradeStore";
+import {
+    useEffect,
+    useState,
+} from "react";
 import {
     TrendingUp,
     TrendingDown,
@@ -8,38 +11,77 @@ import {
     Clock3,
     DollarSign
 } from "lucide-react";
+import TradingChart from "@/components/chart/TradingChart";
 
-import { useLivePrice } from "../../hooks/useLivePrice";
 
-interface Market {
-    id: string;
-    name: string;
-    price: number;
-    change: number;
-}
-
-interface Props {
-    market: Market | null;
+interface TradingPanelProps {
+    market: SelectedMarket | null;
 }
 
 export default function TradingPanel({
-    market
-}: Props) {
-
+    market,
+}: TradingPanelProps) {
     // ----------------------------------------------------
     // ALL HOOKS MUST BE CALLED FIRST
     // ----------------------------------------------------
 
     const marketId = market?.id ?? "";
 
-    const livePrice = useLivePrice(marketId);
+    const stake = useTradeStore(state => state.stake);
+const setStake = useTradeStore(state => state.setStake);
 
-    const [stake, setStake] = useState(10);
+const duration = useTradeStore(state => state.duration);
+const setDuration = useTradeStore(state => state.setDuration);
 
-    const [duration, setDuration] = useState("5 Ticks");
+const currentTradeType = useTradeStore(
+    state => state.currentTradeType
+);
 
-    const [contract, setContract] = useState("Rise/Fall");
+const setCurrentTradeType = useTradeStore(
+    state => state.setCurrentTradeType
+);
 
+const buy = useTradeStore(
+    state => state.buy
+);
+
+const setSelectedMarket = useTradeStore(
+    state => state.setSelectedMarket
+);
+
+const setSelectedSide = useTradeStore(
+    state => state.setSelectedSide
+);
+const livePrice = useTradeStore(state => state.price);
+useEffect(() => {
+
+    if (market) {
+
+        setSelectedMarket({
+
+            symbol: market.symbol,
+
+            name: market.name,
+
+            category: market.category ?? "Synthetic",
+
+            price: livePrice,
+
+            change: market.change
+
+        });
+
+    }
+
+}, [
+
+    market,
+
+    livePrice,
+
+    setSelectedMarket
+
+]);
     // ----------------------------------------------------
     // SAFE EARLY RETURN
     // ----------------------------------------------------
@@ -70,7 +112,7 @@ export default function TradingPanel({
 
     }
 
-    const payout = (stake * 1.92).toFixed(2);
+    const payout = (stake * 1.86).toFixed(2);
 
     return (
 
@@ -128,11 +170,13 @@ export default function TradingPanel({
 
             </div>
 
-            <div className="chart-placeholder">
+            <div className="dashboard-live-chart">
 
-                Live Chart
+    <TradingChart
+        
+    />
 
-            </div>
+</div>
 
             <div className="trade-controls">
 
@@ -150,9 +194,14 @@ export default function TradingPanel({
 
                     value={stake}
 
-                    onChange={(e) =>
-                        setStake(Number(e.target.value))
-                    }
+                    onChange={(e)=>
+
+setStake(
+
+Number(e.target.value)
+
+)
+}
 
                 />
 
@@ -169,35 +218,16 @@ export default function TradingPanel({
                     value={duration}
 
                     onChange={(e) =>
-                        setDuration(e.target.value)
-                    }
+    setDuration(Number(e.target.value))
+}
 
                 >
 
-                    <option>
-
-                        5 Ticks
-
-                    </option>
-
-                    <option>
-
-                        10 Ticks
-
-                    </option>
-
-                    <option>
-
-                        1 Minute
-
-                    </option>
-
-                    <option>
-
-                        5 Minutes
-
-                    </option>
-
+                    <option value={5}>5 Seconds</option>
+<option value={10}>10 Seconds</option>
+<option value={30}>30 Seconds</option>
+<option value={60}>1 Minute</option>
+<option value={300}>5 Minutes</option>
                 </select>
 
                 <label>
@@ -208,32 +238,23 @@ export default function TradingPanel({
 
                 <select
 
-                    value={contract}
+                    value={currentTradeType}
 
-                    onChange={(e) =>
-                        setContract(e.target.value)
-                    }
+onChange={(e) =>
+    setCurrentTradeType(e.target.value as any)
+}
 
                 >
 
-                    <option>
+                    <option value="CALL">Rise</option>
 
-                        Rise/Fall
+<option value="PUT">Fall</option>
 
-                    </option>
+<option value="ACCUMULATOR">Accumulator</option>
 
-                    <option>
+<option value="DIGIT_OVER">Digit Over</option>
 
-                        Higher/Lower
-
-                    </option>
-
-                    <option>
-
-                        Touch/No Touch
-
-                    </option>
-
+<option value="DIGIT_UNDER">Digit Under</option>
                 </select>
 
             </div>
@@ -252,17 +273,39 @@ export default function TradingPanel({
 
             <div className="trade-buttons">
 
-                <button className="buy-btn">
+                <button
+    className="buy-btn"
+    onClick={() => {
 
-                    BUY
+        setSelectedSide("BUY");
 
-                </button>
+        setCurrentTradeType("CALL");
 
-                <button className="sell-btn">
+        buy();
 
-                    SELL
+    }}
+>
 
-                </button>
+    BUY
+
+</button>
+
+                <button
+    className="sell-btn"
+    onClick={() => {
+
+        setSelectedSide("SELL");
+
+        setCurrentTradeType("PUT");
+
+        buy();
+
+    }}
+>
+
+    SELL
+
+</button>
 
             </div>
 
@@ -271,3 +314,5 @@ export default function TradingPanel({
     );
 
 }
+
+

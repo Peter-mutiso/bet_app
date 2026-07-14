@@ -8,17 +8,11 @@ import { persist } from "zustand/middleware";
 ========================================================= */
 
 export interface AuthUser {
-
     id: string;
-
     name: string;
-
     email: string;
-
     accountType: "Demo" | "Real";
-
     avatar?: string;
-
 }
 
 /* =========================================================
@@ -26,33 +20,32 @@ export interface AuthUser {
 ========================================================= */
 
 interface AuthStore {
-
     isAuthenticated: boolean;
+
+    isLoading: boolean;
 
     user: AuthUser | null;
 
     login: (user: AuthUser) => void;
 
+    loginDemo: () => void;
+
     logout: () => void;
 
     updateUser: (user: Partial<AuthUser>) => void;
 
+    finishLoading: () => void;
 }
 
 /* =========================================================
-   DEFAULT USER
+   DEFAULT DEMO USER
 ========================================================= */
 
 const demoUser: AuthUser = {
-
     id: "demo-user",
-
     name: "Demo Account",
-
     email: "demo@betpro.com",
-
-    accountType: "Demo"
-
+    accountType: "Demo",
 };
 
 /* =========================================================
@@ -60,62 +53,63 @@ const demoUser: AuthUser = {
 ========================================================= */
 
 export const useAuthStore = create<AuthStore>()(
-
     persist(
-
         (set) => ({
+            isAuthenticated: false,
 
-            isAuthenticated: true,
+            isLoading: true,
 
-            user: demoUser,
+            user: null,
 
             login(user) {
-
                 set({
-
                     isAuthenticated: true,
-
-                    user
-
+                    user,
                 });
+            },
 
+            loginDemo() {
+                set({
+                    isAuthenticated: true,
+                    user: demoUser,
+                });
             },
 
             logout() {
-
                 set({
-
                     isAuthenticated: false,
-
-                    user: null
-
+                    user: null,
                 });
-
             },
 
             updateUser(user) {
-
-                set(state => ({
-
+                set((state) => ({
                     user: state.user
                         ? {
                               ...state.user,
-                              ...user
+                              ...user,
                           }
-                        : null
-
+                        : null,
                 }));
+            },
 
-            }
-
+            finishLoading() {
+                set({
+                    isLoading: false,
+                });
+            },
         }),
-
         {
+            name: "betpro-auth",
 
-            name: "betpro-auth"
+            partialize: (state) => ({
+                isAuthenticated: state.isAuthenticated,
+                user: state.user,
+            }),
 
+            onRehydrateStorage: () => (state) => {
+                state?.finishLoading();
+            },
         }
-
     )
-
 );

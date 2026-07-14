@@ -1,9 +1,8 @@
 "use client";
 
-import type { Market } from "../../types/market";
-
+import type { SelectedMarket } from "@/store/useTradeStore";
 type Props = {
-    market: Market | null;
+     market: SelectedMarket | null;
 };
 
 function format(n?: number) {

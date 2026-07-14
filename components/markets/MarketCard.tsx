@@ -1,19 +1,13 @@
-import {
-
-    Market
-
-} from "../../types";
+import type { SelectedMarket } from "@/store/useTradeStore";
 
 interface Props {
 
-    market: Market;
+    market: SelectedMarket;
 
     favorite: boolean;
 
     onToggleFavorite(
-
         id: string
-
     ): void;
 
 }
@@ -58,7 +52,7 @@ export default function MarketCard({
 
                             onToggleFavorite(
 
-                                market.id
+                                market.symbol
 
                             )
 

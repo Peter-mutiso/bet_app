@@ -1,19 +1,23 @@
 "use client";
 
 import { useMemo } from "react";
-import { useBets } from "./useBets";
+import { useTradeStore } from "@/store/useTradeStore";
 
 export function useBet(betId?: string) {
 
-    const bets = useBets();
+    const trades = useTradeStore(
+        state => state.trades
+    );
 
     return useMemo(
         () => ({
-            ...bets,
+            bets: trades,
             bet: betId
-                ? bets.find(betId)
-                : undefined
+                ? trades.find(
+                      trade => trade.id === betId
+                  )
+                : undefined,
         }),
-        [bets, betId]
+        [trades, betId]
     );
 }
