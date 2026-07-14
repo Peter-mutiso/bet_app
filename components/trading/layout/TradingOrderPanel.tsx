@@ -9,7 +9,7 @@ import {
     Clock,
     BarChart3
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { TradeType } from "@/types/trade";
 
 import { useTradeStore } from "@/store/useTradeStore";
@@ -35,6 +35,23 @@ const [message,setMessage] = useState("");
 
     } = useTradeStore();
     const [warning, setWarning] = useState("");
+    const autoMode = useTradeStore(
+    state => state.autoMode
+);
+
+const setAutoMode = useTradeStore(
+    state => state.setAutoMode
+);
+
+const placeBotTrade = useTradeStore(
+    state => state.placeBotTrade
+);
+
+const botDelayMs = useTradeStore(
+    state => state.botDelayMs
+);
+
+const botTimer = useRef<NodeJS.Timeout | null>(null);
     const currentTradeType = useTradeStore(
     (state) => state.currentTradeType
 );
@@ -51,7 +68,57 @@ const setCurrentTradeType = useTradeStore(
     const payout = (stake * 1.86).toFixed(2);
 
     const profit = (stake * 0.86).toFixed(2);
+    useEffect(() => {
 
+    if (!autoMode) {
+
+        if (botTimer.current) {
+
+            clearInterval(botTimer.current);
+
+            botTimer.current = null;
+
+        }
+
+        return;
+
+    }
+
+    botTimer.current = setInterval(() => {
+
+        const store = useTradeStore.getState();
+
+if (
+    store.autoMode &&
+    store.balance >= store.stake
+) {
+
+    store.placeBotTrade();
+
+}
+else{
+
+    store.setAutoMode(false);
+
+}
+
+    }, botDelayMs);
+
+    return () => {
+
+        if (botTimer.current) {
+
+            clearInterval(botTimer.current);
+
+        }
+
+    };
+
+}, [
+    autoMode,
+    botDelayMs,
+    placeBotTrade
+]);
     return (
 
         <aside className="order-panel">
@@ -257,6 +324,43 @@ const setCurrentTradeType = useTradeStore(
         {warning}
     </div>
 )}
+<div className="bot-card">
+
+    <div className="bot-header">
+
+        <h3>Trading Bot</h3>
+
+        <span className={
+            autoMode
+                ? "bot-running"
+                : "bot-stopped"
+        }>
+            {autoMode ? "Running" : "Stopped"}
+        </span>
+
+    </div>
+
+    <div className="bot-buttons">
+
+        <button
+            className="bot-start"
+            disabled={autoMode}
+            onClick={() => setAutoMode(true)}
+        >
+            ▶ Start Bot
+        </button>
+
+        <button
+            className="bot-stop"
+            disabled={!autoMode}
+            onClick={() => setAutoMode(false)}
+        >
+            ■ Stop Bot
+        </button>
+
+    </div>
+
+</div>
 
             {/* EXECUTE */}
 

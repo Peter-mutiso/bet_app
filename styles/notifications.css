@@ -1,0 +1,357 @@
+/* ============================================================
+   NOTIFICATIONS PAGE
+============================================================ */
+
+.notifications-page{
+    min-height:100%;
+    padding:28px;
+    background:#0b1220;
+    color:#f8fafc;
+}
+
+/* ============================================================
+   HEADER
+============================================================ */
+
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:20px;
+    margin-bottom:28px;
+}
+
+.page-header h1{
+    margin:0;
+    font-size:32px;
+    font-weight:700;
+    color:#fff;
+}
+
+.page-header p{
+    margin-top:8px;
+    color:#94a3b8;
+    font-size:14px;
+}
+
+.header-actions{
+    display:flex;
+    gap:12px;
+}
+
+.secondary-btn,
+.danger-btn{
+    border:none;
+    cursor:pointer;
+    padding:10px 18px;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:600;
+    transition:.25s;
+}
+
+.secondary-btn{
+    background:#1e293b;
+    color:white;
+}
+
+.secondary-btn:hover{
+    background:#334155;
+}
+
+.danger-btn{
+    background:#dc2626;
+    color:white;
+}
+
+.danger-btn:hover{
+    background:#ef4444;
+}
+
+/* ============================================================
+   STATS
+============================================================ */
+
+.notification-stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+    margin-bottom:28px;
+}
+
+.stat-card{
+    background:#111827;
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:16px;
+    padding:22px;
+    transition:.25s;
+}
+
+.stat-card:hover{
+    transform:translateY(-3px);
+    border-color:#2563eb;
+}
+
+.stat-card span{
+    display:block;
+    font-size:13px;
+    color:#94a3b8;
+    margin-bottom:8px;
+}
+
+.stat-card h2{
+    margin:0;
+    font-size:32px;
+    font-weight:700;
+    color:white;
+}
+
+/* ============================================================
+   FILTERS
+============================================================ */
+
+.notification-filters{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom:24px;
+}
+
+.filter{
+    border:none;
+    background:#111827;
+    color:#94a3b8;
+    border-radius:999px;
+    padding:10px 18px;
+    cursor:pointer;
+    transition:.25s;
+    font-size:13px;
+    font-weight:600;
+}
+
+.filter:hover{
+    background:#1e293b;
+    color:white;
+}
+
+.filter.active{
+    background:#2563eb;
+    color:white;
+}
+
+/* ============================================================
+   LIST
+============================================================ */
+
+.notification-list{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+/* ============================================================
+   CARD
+============================================================ */
+
+.notification-card{
+    display:flex;
+    align-items:flex-start;
+    gap:18px;
+    background:#111827;
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:16px;
+    padding:20px;
+    transition:.25s;
+}
+
+.notification-card:hover{
+    border-color:#2563eb;
+    transform:translateY(-2px);
+}
+
+.notification-card.unread{
+    border-left:5px solid #2563eb;
+    background:#0f172a;
+}
+
+/* ============================================================
+   ICON
+============================================================ */
+
+.notification-icon{
+    width:52px;
+    height:52px;
+    flex-shrink:0;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#1d4ed8;
+    color:white;
+}
+
+/* ============================================================
+   BODY
+============================================================ */
+
+.notification-body{
+    flex:1;
+}
+
+.notification-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+    gap:16px;
+}
+
+.notification-title h3{
+    margin:0;
+    color:white;
+    font-size:18px;
+    font-weight:600;
+}
+
+.notification-body p{
+    margin:0;
+    color:#cbd5e1;
+    line-height:1.6;
+    font-size:14px;
+}
+
+.notification-body small{
+    display:block;
+    margin-top:12px;
+    color:#64748b;
+    font-size:12px;
+}
+
+/* ============================================================
+   PRIORITIES
+============================================================ */
+
+.notification-title span{
+    padding:5px 12px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+}
+
+.low{
+    background:#065f46;
+    color:#6ee7b7;
+}
+
+.medium{
+    background:#78350f;
+    color:#fde68a;
+}
+
+.high{
+    background:#7f1d1d;
+    color:#fca5a5;
+}
+
+/* ============================================================
+   BUTTON
+============================================================ */
+
+.read-btn{
+    border:none;
+    background:#2563eb;
+    color:white;
+    padding:10px 16px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:.25s;
+    font-weight:600;
+    white-space:nowrap;
+}
+
+.read-btn:hover{
+    background:#1d4ed8;
+}
+
+/* ============================================================
+   EMPTY
+============================================================ */
+
+.empty{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:80px 20px;
+    background:#111827;
+    border-radius:20px;
+    border:1px dashed rgba(255,255,255,.08);
+}
+
+.empty svg{
+    color:#64748b;
+    margin-bottom:18px;
+}
+
+.empty h3{
+    margin:0;
+    color:white;
+    font-size:24px;
+}
+
+.empty p{
+    margin-top:10px;
+    color:#94a3b8;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width:1100px){
+
+    .notification-stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+@media (max-width:768px){
+
+    .notifications-page{
+        padding:18px;
+    }
+
+    .page-header{
+        flex-direction:column;
+    }
+
+    .header-actions{
+        width:100%;
+        flex-wrap:wrap;
+    }
+
+    .secondary-btn,
+    .danger-btn{
+        flex:1;
+    }
+
+    .notification-card{
+        flex-direction:column;
+    }
+
+    .notification-title{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .read-btn{
+        width:100%;
+    }
+
+    .notification-stats{
+        grid-template-columns:1fr;
+    }
+
+}

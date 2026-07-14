@@ -69,3 +69,59 @@ export function tickAllMarkets(
 
     return ticks;
 }
+/*
+==========================================================
+SMART MARKET SCANNER
+==========================================================
+*/
+
+export function scanBestMarket(
+    marketPrices: Record<string, number>
+) {
+
+    let bestSymbol = "R_100";
+    let bestScore = -Infinity;
+
+    for (const symbol in marketEngines) {
+
+        const engine = marketEngines[symbol];
+
+        const current =
+            marketPrices[symbol] ??
+            engine.price;
+
+        const tick = nextTick(
+            engine,
+            current
+        );
+
+        /*
+        Bigger movement = better opportunity.
+        Small randomness prevents ties.
+        */
+
+        const score =
+            Math.abs(
+                tick.price - current
+            ) +
+            Math.random();
+
+        if (score > bestScore) {
+
+            bestScore = score;
+
+            bestSymbol = symbol;
+
+        }
+
+    }
+
+    return {
+
+        symbol: bestSymbol,
+
+        score: bestScore,
+
+    };
+
+}
