@@ -34,6 +34,7 @@ const [message,setMessage] = useState("");
         buy
 
     } = useTradeStore();
+    const [warning, setWarning] = useState("");
     const currentTradeType = useTradeStore(
     (state) => state.currentTradeType
 );
@@ -251,6 +252,12 @@ const setCurrentTradeType = useTradeStore(
 
             </div>
 
+            {warning && (
+    <div className="trade-warning">
+        {warning}
+    </div>
+)}
+
             {/* EXECUTE */}
 
             <button
@@ -258,6 +265,7 @@ const setCurrentTradeType = useTradeStore(
     className="trade-button"
 
     disabled={executing}
+    
 
     onClick={() => {
 
@@ -269,26 +277,36 @@ const setCurrentTradeType = useTradeStore(
 
         setTimeout(() => {
 
-    console.log("========== BUY CLICKED ==========");
+    const {
+        buy,
+        balance,
+        stake,
+        accountMode,
+    } = useTradeStore.getState();
 
-    const trade = buy();
-    console.log(
-    "Panel store:",
-    useTradeStore.getState().trades
-);
+    if (stake > balance) {
 
-    console.log("Trade returned:");
-    console.log(trade);
+        setWarning(
+            accountMode === "REAL"
+                ? "Insufficient Real balance. Deposit funds to continue."
+                : "Insufficient Demo balance."
+        );
 
-    console.log("Store after buy:");
-    console.log(useTradeStore.getState().trades);
+        setExecuting(false);
+        setMessage("");
 
-    setMessage("Trade opened successfully");
+        return;
+    }
+
+    setWarning("");
+
+    buy();
+
+    setMessage("Trade executed successfully.");
 
     setExecuting(false);
 
 }, 1500);
-
     }}
 
 >

@@ -35,21 +35,58 @@ export default function DashboardPage() {
         state => state.trades
     );
 
-    const marketPrices = useTradeStore(
-        state => state.marketPrices
-    );
+    
 
     const [mounted, setMounted] = useState(false);
+    const marketPrices = useTradeStore(
+    state => state.marketPrices
+);
+    const marketOpenPrices = useTradeStore(
+    state => state.marketOpenPrices
+);
 
-    const markets: SelectedMarket[] = ALL_INSTRUMENTS.map((m): SelectedMarket => ({
-    id: m.symbol,
-    symbol: m.symbol,
-    name: m.name,
-    category: m.category,
-    price: m.price,
-    change: m.change,
-    tickDirection: "flat",
-}));
+const markets: SelectedMarket[] = ALL_INSTRUMENTS.map(
+    (m): SelectedMarket => {
+
+        const livePrice =
+            marketPrices[m.symbol] ?? m.price;
+
+        const openPrice =
+            marketOpenPrices[m.symbol] ?? m.price;
+
+        const change =
+            Number(
+                (
+                    ((livePrice - openPrice) / openPrice) *
+                    100
+                ).toFixed(2)
+            );
+
+        return {
+
+            id: m.symbol,
+
+            symbol: m.symbol,
+
+            name: m.name,
+
+            category: m.category,
+
+            price: livePrice,
+
+            change,
+
+            tickDirection:
+                livePrice > openPrice
+                    ? "up"
+                    : livePrice < openPrice
+                    ? "down"
+                    : "flat",
+
+        };
+
+    }
+);
     const [selectedMarket, setSelectedMarket] =
     useState<SelectedMarket | null>(null);
 

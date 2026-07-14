@@ -71,7 +71,8 @@ export type AccountMode = "DEMO" | "REAL";
 interface DemoAccount {
   id: string;
   name: string;
-  balance: number;
+  
+balance: number; // currently active balance
 }
 
 export interface SelectedMarket {
@@ -105,16 +106,16 @@ export interface SelectedMarket {
 
 interface TradeState {
   price: number;
-  /*
-=========================================================
-LIVE PRICES FOR EVERY MARKET
-=========================================================
-*/
+  
+
 marketPrices: Record<string, number>;
+  marketOpenPrices: Record<string, number>;
 
   stake: number;
   duration:number;
-  balance: number;
+  demoBalance: number;
+    realBalance: number;
+    balance: number;
   currency: Currency;
   exchangeRate: number;
   theme: "dark" | "light";
@@ -149,7 +150,7 @@ marketPrices: Record<string, number>;
   decreaseStake: () => void;
   deposit: (amount: number) => void;
   withdraw: (amount: number) => boolean;
-  buy: () => Trade;
+  buy: () => Trade | null;
   closeTrade: (id: string) => void;
   setCurrency: (currency: Currency) => void;
   setTheme: (theme: "dark" | "light") => void;
@@ -257,9 +258,18 @@ marketPrices: {
     R_75: 4800,
     R_100: 6000,
 },
+marketOpenPrices: {
+    R_10: 1200,
+    R_25: 2400,
+    R_50: 3600,
+    R_75: 4800,
+    R_100: 6000,
+},
   stake: 10,
   duration:30,
-  balance: 10000,
+  demoBalance: 10000,
+realBalance: 0,
+balance: 10000,
   currency: "USD",
   exchangeRate: 129,
   theme: "dark",
@@ -337,6 +347,20 @@ fullscreen: false,
     const currentMarket =
         marketId ??
         state.selectedMarket?.symbol;
+        const openPrice =
+    currentMarket
+        ? state.marketOpenPrices[currentMarket]
+        : nextPrice;
+
+const change =
+    openPrice
+        ? Number(
+              (
+                  ((nextPrice - openPrice) / openPrice) *
+                  100
+              ).toFixed(2)
+          )
+        : 0;
 
     set({
 
@@ -360,17 +384,19 @@ fullscreen: false,
             : state.marketPrices,
 
         selectedMarket:
-            state.selectedMarket &&
-            currentMarket ===
-                state.selectedMarket.symbol
-                ? {
+    state.selectedMarket &&
+    currentMarket ===
+        state.selectedMarket.symbol
+        ? {
 
-                      ...state.selectedMarket,
+              ...state.selectedMarket,
 
-                      price: nextPrice,
+              price: nextPrice,
 
-                  }
-                : state.selectedMarket,
+              change,
+
+          }
+        : state.selectedMarket,
 
     });
 
@@ -382,17 +408,81 @@ fullscreen: false,
     }),
   increaseStake: () => set((state) => ({ stake: state.stake + 1 })),
   decreaseStake: () => set((state) => ({ stake: Math.max(1, state.stake - 1) })),
-  deposit: (amount) => set((state) => ({ balance: state.balance + Math.max(0, amount) })),
-  withdraw: (amount) => {
-    const cleanAmount = Math.max(0, amount);
+  deposit: (amount) => {
 
-    if (!cleanAmount || cleanAmount > get().balance) {
-      return false;
+    set((state) => {
+
+        if (state.accountMode === "DEMO") {
+
+            const demoBalance =
+                state.demoBalance + amount;
+
+            return {
+
+                demoBalance,
+
+                balance: demoBalance,
+
+            };
+
+        }
+
+        const realBalance =
+            state.realBalance + amount;
+
+        return {
+
+            realBalance,
+
+            balance: realBalance,
+
+        };
+
+    });
+
+},
+        
+  withdraw: (amount) => {
+
+    const state = get();
+
+    if (state.accountMode === "DEMO") {
+
+        if (amount > state.demoBalance)
+            return false;
+
+        const demoBalance =
+            state.demoBalance - amount;
+
+        set({
+
+            demoBalance,
+
+            balance: demoBalance,
+
+        });
+
+        return true;
+
     }
 
-    set((state) => ({ balance: state.balance - cleanAmount }));
+    if (amount > state.realBalance)
+        return false;
+
+    const realBalance =
+        state.realBalance - amount;
+
+    set({
+
+        realBalance,
+
+        balance: realBalance,
+
+    });
+
     return true;
-  },
+
+},
   buy: () => {
     const state = get();
 
@@ -406,9 +496,13 @@ const marketPrice =
     state.price;
 const now = Math.floor(Date.now() / 1000);
 
-    if (state.stake <= 0 || state.stake > state.balance) {
-      throw new Error("Insufficient balance or invalid stake.");
-    }
+    if (state.stake <= 0) {
+    return null;
+}
+
+if (state.stake > state.balance) {
+    return null;
+}
 
     const trade: Trade = {
 
@@ -449,18 +543,35 @@ remainingSeconds: state.duration
 
     
 
+    if (current.accountMode === "DEMO") {
+
     return {
-        balance: current.balance - current.stake,
+
+        demoBalance:
+            current.demoBalance - current.stake,
+
+        balance:
+            current.demoBalance - current.stake,
+
         trades: nextTrades,
-        
+
     };
+
+}
+
+return {
+
+    realBalance:
+        current.realBalance - current.stake,
+
+    balance:
+        current.realBalance - current.stake,
+
+    trades: nextTrades,
+
+};
     
 });
-
-console.log(
-    "Store after buy:",
-    useTradeStore.getState().trades
-);
 
 return trade;
   },
@@ -690,11 +801,21 @@ settlementManager({
 
         return {
 
-            balance,
+    balance,
 
-            trades
+    demoBalance:
+        state.accountMode === "DEMO"
+            ? balance
+            : state.demoBalance,
 
-        };
+    realBalance:
+        state.accountMode === "REAL"
+            ? balance
+            : state.realBalance,
+
+    trades,
+
+};
 
     });
 
@@ -708,12 +829,24 @@ settlementManager({
     set({ theme });
   },
   setAccountMode: (accountMode) => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("accountMode", accountMode);
-    }
 
-    set({ accountMode });
-  },
+    const state = get();
+
+    const balance =
+        accountMode === "DEMO"
+            ? state.demoBalance
+            : state.realBalance;
+
+    set({
+
+        accountMode,
+
+        balance,
+
+    });
+
+},
+    
   loadDemoAccount: (id) => {
     const account = get().demoAccounts.find((demo) => demo.id === id);
 
@@ -908,12 +1041,19 @@ toggleFullscreen: () => {
     }
 
     const trade = state.buy();
-    const direction = Math.random() > 0.5 ? 1 : -1;
-    const exit =
-marketPrice +
-direction *
-(Math.random()*2);
-    const result = settleTrade(
+
+if (!trade) {
+    return;
+}
+
+const direction = Math.random() > 0.5 ? 1 : -1;
+
+const exit =
+    marketPrice +
+    direction *
+    (Math.random() * 2);
+
+const result = settleTrade(
 
     trade.entry,
 
@@ -925,23 +1065,40 @@ direction *
 
 );
 
-    set((current) => ({
-      lastBotRunAt: Date.now(),
-      trades: current.trades.map((item) =>
+set((current) => ({
+
+    lastBotRunAt: Date.now(),
+
+    trades: current.trades.map((item) =>
+
         item.id === trade.id
-          ? {
-              ...item,
-              source: "BOT",
-              status: "CLOSED",
-              exit,
-              profit: result.profit,
-              exitTime: Math.floor(Date.now() / 1000),
-            }
-          : item
-      ),
-      balance:
-current.balance +
-result.payout,
-    }));
-  },
+
+            ? {
+
+                  ...item,
+
+                  source: "BOT",
+
+                  status: "CLOSED",
+
+                  exit,
+
+                  profit: result.profit,
+
+                  exitTime: Math.floor(Date.now() / 1000),
+
+              }
+
+            : item
+
+    ),
+
+    balance:
+
+        current.balance +
+
+        result.payout,
+
+})); 
+}, 
 }));

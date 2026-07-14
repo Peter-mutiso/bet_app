@@ -8,11 +8,9 @@ import {
 import { useTradeStore } from "@/store/useTradeStore";
 import { chartCoordinates } from "../engine/chartCoordinates";
 import {
-    createEngine,
-    applyVolatility,
-    nextTick,
-} from "../engine/marketEngine";
-
+    marketEngines,
+    tickAllMarkets,
+} from "../engine/multiMarketEngine";
 import {
     createCandle,
     updateCandle,
@@ -56,9 +54,7 @@ interface UseLiveMarketProps {
     setPrice: (price: number) => void;
 
 }
-const selectedMarket = useTradeStore(
-    state => state.selectedMarket
-);
+
 
 export function useLiveMarket({
 
@@ -85,18 +81,14 @@ export function useLiveMarket({
 }: UseLiveMarketProps) {
 
     const engineRef = useRef(
-
-        createEngine(
-
-            livePriceRef.current || 100
-
-        )
-
-    );
+    marketEngines["R_100"]
+);
     const tickTrades = useTradeStore(
     state => state.tickTrades
 );
-
+const selectedMarket = useTradeStore(
+    state => state.selectedMarket
+);
 
 
     const frameRef = useRef<number | null>(null);
@@ -128,12 +120,10 @@ const startPrice =
     100;
 
 engineRef.current =
-    createEngine(startPrice);
+    marketEngines[
+        selectedMarket?.symbol ?? "R_100"
+    ];
 
-applyVolatility(
-    engineRef.current,
-    volatilityState
-);
 
         const history = generateHistory(
 
@@ -143,7 +133,7 @@ applyVolatility(
 
     volatilityState,
 
-    400
+    100
 
 );
         chartCoordinates.setLayout(
@@ -217,16 +207,8 @@ engineRef.current.meanPrice = last.close;
 
             last.close;
 
-        setPrice(last.close);
-        useTradeStore.getState().setPrice(last.close);
-
-        applyVolatility(
-
-            engineRef.current,
-
-            volatilityState
-
-        );
+       
+        
 
     }, [
 
@@ -234,36 +216,9 @@ engineRef.current.meanPrice = last.close;
 
         candleDuration,
         volatilityState,
+        selectedMarket?.symbol,
 
     ]);
-
-    /*
-    ===========================================================
-    UPDATE VOLATILITY
-    ===========================================================
-    */
-
-    useEffect(() => {
-
-        applyVolatility(
-
-            engineRef.current,
-
-            volatilityState
-
-        );
-
-    }, [
-
-        volatilityState,
-
-    ]);
-
-    /*
-    ===========================================================
-    LIVE LOOP
-    ===========================================================
-    */
 
     useEffect(() => {
 
@@ -289,41 +244,47 @@ engineRef.current.meanPrice = last.close;
             ) {
 
                 lastFrameRef.current = now;
+                const store = useTradeStore.getState();
 
-                            const tick = nextTick(
-
-                    engineRef.current,
-
-                    livePriceRef.current
-
-                );
-
-                livePriceRef.current = tick.price;
-
-const store = useTradeStore.getState();
-setPrice(tick.price);
-
-useTradeStore.getState().setPrice(
-    tick.price,
-    useTradeStore.getState().selectedMarket?.symbol
+const currentTrades = store.trades;
+                const ticks = tickAllMarkets(
+    store.marketPrices
 );
 
-tickTrades(
-    useTradeStore
-        .getState()
-        .selectedMarket
-        ?.symbol ?? "",
-    tick.price
+Object.entries(ticks).forEach(
+    ([symbol, tick]) => {
+
+        store.setPrice(
+            tick.price,
+            symbol
+        );
+    }
 );
 
-const current = store.selectedMarket;
+const symbol =
+    store.selectedMarket?.symbol ??
+    "R_100";
 
-if (current) {
-    store.setSelectedMarket({
-        ...current,
-        price: tick.price,
-    });
-}
+const tick = ticks[symbol];
+
+const tickPrice = tick.price;
+const tickMove = tick.move;
+
+livePriceRef.current =
+    tickPrice;
+setPrice(tickPrice);
+                
+
+
+
+
+store.tickTrades(
+    symbol,
+    tickPrice
+);
+
+
+
                 const currentTime = Number(
 
                     candleTimestamp(
@@ -352,7 +313,7 @@ if (current) {
 
                             currentTime as any,
 
-                            tick.price
+                            tickPrice
 
                         );
 
@@ -392,7 +353,7 @@ if (current) {
     )
 
 );
-
+chart.timeScale().scrollToRealTime();
                     activeCandleRef.current =
 
                         createCandle(
@@ -417,17 +378,13 @@ if (current) {
                 =======================================================
                 */
 
+                const currentEngine = engineRef.current;
                 updateCandle(
-
-                    activeCandleRef.current,
-
-                    tick.price,
-
-                    tick.move,
-
-                    engineRef.current.volatility
-
-                );
+    activeCandleRef.current,
+    tickPrice,
+    tickMove,
+    currentEngine.volatility
+);
 
                 /*
                 =======================================================
@@ -441,12 +398,11 @@ if (current) {
 
     activeCandleRef.current,
 
-    tick.price,
+    tickPrice,
 
     activeCandleRef.current.time
 
 );
-const currentTrades = useTradeStore.getState().trades;
 
 updateTradeMarkers(
     series.candles,

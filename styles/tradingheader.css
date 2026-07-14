@@ -248,6 +248,7 @@
 ========================================================== */
 
 .balance-card{
+    position:relative;
 
     display:flex;
 
@@ -271,6 +272,70 @@
 
 }
 
+
+
+
+.account-menu{
+
+    position:absolute;
+
+    top:110%;
+    right:0;
+
+    width:220px;
+
+    background:#0f172a;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:14px;
+
+    overflow:hidden;
+
+    z-index:100;
+
+    box-shadow:0 20px 45px rgba(0,0,0,.45);
+
+}
+.account-menu button div{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+    gap:4px;
+
+}
+.account-menu button{
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:14px 18px;
+
+    background:none;
+
+    border:none;
+
+    color:white;
+
+    cursor:pointer;
+    transition:.2s;
+}
+
+.account-menu button:hover{
+
+    background:#1e293b;
+
+}
+
 .balance-card small{
 
     font-size:11px;
@@ -278,7 +343,50 @@
     color:#94a3b8;
 
 }
+.account-menu small{
 
+    color:#94a3b8;
+
+    font-size:12px;
+
+}
+.account-top{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+.account-badge{
+
+    padding:3px 10px;
+
+    border-radius:999px;
+
+    font-size:11px;
+
+    font-weight:700;
+
+    letter-spacing:.08em;
+
+}
+.account-badge.demo{
+
+    background:#065f46;
+
+    color:#6ee7b7;
+
+}
+
+.account-badge.real{
+
+    background:#7f1d1d;
+
+    color:#fca5a5;
+
+}
 .balance-card strong{
 
     margin-top:2px;
@@ -476,4 +584,35 @@
 
 }
 
+}
+.account-switcher{
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+
+.account-btn{
+    background:#1b2434;
+    border:1px solid rgba(255,255,255,.08);
+    color:#fff;
+    padding:8px 14px;
+    border-radius:10px;
+    cursor:pointer;
+
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+
+    transition:.25s;
+}
+
+.account-btn span{
+    font-size:12px;
+    opacity:.8;
+}
+
+.account-btn.active{
+    background:#5017f0;
+    color:#fff;
+    border-color:#9c9a9a;
 }

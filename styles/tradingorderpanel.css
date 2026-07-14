@@ -383,3 +383,12 @@
     cursor:not-allowed;
 
 }
+.trade-warning {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(255, 87, 87, 0.15);
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 87, 87, 0.35);
+    font-size: 13px;
+}

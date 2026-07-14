@@ -122,7 +122,7 @@ export default function LiveMarkets({
                             key={market.symbol}
                             market={market}
                             selected={
-    selectedMarket?.id === market.symbol
+    selectedMarket?.symbol === market.symbol
 }
 
 onClick={() =>

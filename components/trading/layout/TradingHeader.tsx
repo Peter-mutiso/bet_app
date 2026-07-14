@@ -8,7 +8,7 @@ import {
     Activity,
 } from "lucide-react";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTradeStore } from "@/store/useTradeStore";
 
@@ -19,6 +19,24 @@ export default function TradingHeader() {
     const balance = useTradeStore(
         (state) => state.balance
     );
+    const accountMode = useTradeStore(
+    state => state.accountMode
+);
+
+const demoBalance = useTradeStore(
+    state => state.demoBalance
+);
+
+const realBalance = useTradeStore(
+    state => state.realBalance
+);
+
+const setAccountMode = useTradeStore(
+    state => state.setAccountMode
+);
+
+const [showAccounts, setShowAccounts] =
+    useState(false);
 
     const market = useTradeStore(
         (state) => state.selectedMarket
@@ -104,24 +122,49 @@ export default function TradingHeader() {
 
             <div className="header-right">
 
-                <div className="balance-card">
+                <div className="account-switcher">
 
-                    <small>
-                        Demo Balance
-                    </small>
+    <button
+        className={
+            accountMode === "DEMO"
+                ? "account-btn active"
+                : "account-btn"
+        }
+        onClick={() => setAccountMode("DEMO")}
+    >
+        Demo
 
-                    <strong>
+        <span>
+            $
+            {demoBalance.toLocaleString(undefined,{
+                minimumFractionDigits:2,
+                maximumFractionDigits:2,
+            })}
+        </span>
 
-                        $
+    </button>
 
-                        {balance.toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                        })}
+    <button
+        className={
+            accountMode === "REAL"
+                ? "account-btn active"
+                : "account-btn"
+        }
+        onClick={() => setAccountMode("REAL")}
+    >
+        Real
 
-                    </strong>
+        <span>
+            $
+            {realBalance.toLocaleString(undefined,{
+                minimumFractionDigits:2,
+                maximumFractionDigits:2,
+            })}
+        </span>
 
-                </div>
+    </button>
+
+</div>
 
                 <button
                     className="icon-btn"

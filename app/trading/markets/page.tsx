@@ -42,8 +42,17 @@ export default function MarketsPage() {
                 marketPrices[market.symbol] ??
                 market.price,
 
-            change:
-                market.change ?? 0,
+            change: Number(
+    (
+        (
+            (
+                (marketPrices[market.symbol] ?? market.price) -
+                useTradeStore.getState().marketOpenPrices[market.symbol]
+            ) /
+            useTradeStore.getState().marketOpenPrices[market.symbol]
+        ) * 100
+    ).toFixed(2)
+),
 
             bid:
                 (marketPrices[market.symbol] ??
