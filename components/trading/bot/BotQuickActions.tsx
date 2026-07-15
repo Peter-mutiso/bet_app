@@ -9,17 +9,26 @@ import {
 } from "lucide-react";
 
 import { useTradeStore } from "@/store/useTradeStore";
-
+import BotTradeResult from "./BotTradeResult";
 import { scanBestMarket } from "@/components/chart/engine/marketScanner";
 type BotStatus =
     | "READY"
     | "SCANNING"
-    | "TRADING";
+    | "TRADING"
+    | "WAITING";
 
 export default function BotQuickActions() {
 
     const [status, setStatus] =
         useState<BotStatus>("READY");
+    const [showResult, setShowResult] =
+    useState(false);
+
+const [tradeWon, setTradeWon] =
+    useState(false);
+
+const [tradeProfit, setTradeProfit] =
+    useState(0);
 
     const [confidence, setConfidence] =
         useState<number | null>(null);
@@ -105,15 +114,71 @@ const interval = setInterval(() => {
     );
 
     //--------------------------------------------------
-    // Execute ONE trade
-    //--------------------------------------------------
+// Execute ONE trade
+//--------------------------------------------------
 
-    store.buy();
+let trade;
 
-}, 2500);
+try {
 
-    };
+    trade = store.buy();
 
+} catch {
+
+    setStatus("READY");
+
+    setProgress(0);
+
+    return;
+
+}
+
+setStatus("WAITING");
+
+// Wait until the trade closes
+const watchTrade = setInterval(() => {
+
+    const latestTrade =
+        useTradeStore
+            .getState()
+            .trades.find(t => t.id === trade.id);
+
+    if (
+        latestTrade &&
+        latestTrade.status === "CLOSED"
+    ) {
+
+        clearInterval(watchTrade);
+
+        setTradeWon(
+            latestTrade.result === "WIN"
+        );
+
+        setTradeProfit(
+            latestTrade.profit ?? 0
+        );
+
+        setShowResult(true);
+
+setTimeout(() => {
+
+    setShowResult(false);
+
+}, 4000);
+
+setStatus("READY");
+
+setProgress(0);
+
+setConfidence(null);
+
+setMarket("--");
+
+setDirection("--");
+
+    }
+}, 300);
+    }, 2500);
     return (
 
         <section className="smart-bot-card">
@@ -197,8 +262,8 @@ const interval = setInterval(() => {
     {status === "SCANNING" &&
         `Scanning markets... ${progress}%`}
 
-    {status === "TRADING" &&
-        "Best opportunity found"}
+    {status === "WAITING" &&
+    "Trade running... waiting for settlement"}
 
 </p>
 <div className="smart-bot-analysis">
@@ -247,7 +312,10 @@ const interval = setInterval(() => {
 
                 className="smart-bot-button"
 
-                disabled={status !== "READY"}
+                disabled={
+    status === "SCANNING" ||
+    status === "WAITING"
+}
 
                 onClick={runSmartBot}
 
@@ -270,17 +338,35 @@ const interval = setInterval(() => {
                     </>
                 )}
 
-                {status === "TRADING" && (
-                    <>
-                        <CheckCircle2 size={18} />
-                        Trade Executed
-                    </>
-                )}
-
+                {status === "WAITING" && (
+    <>
+        <Loader2
+            size={18}
+            className="spin"
+        />
+        Waiting for Result...
+    </>
+)}
+{status === "TRADING" && (
+    <>
+        <CheckCircle2 size={18}/>
+        Trade Executed
+    </>
+)}
             </button>
+            {showResult && (
+
+    <BotTradeResult
+        won={tradeWon}
+        profit={tradeProfit}
+        onClose={() => setShowResult(false)}
+    />
+
+)}
 
         </section>
 
     );
 
+}
 }
